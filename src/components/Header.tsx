@@ -192,7 +192,13 @@ export default function Header() {
         </div>
 
         <div className="hidden sm:block">
-          <Button href="#" variant="lime" leftIcon={<TelegramIcon />}>
+          <Button
+            href="https://t.me/CriptocardBot"
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="lime"
+            leftIcon={<TelegramIcon />}
+          >
             Get Your Criptocard
           </Button>
         </div>
@@ -227,7 +233,9 @@ export default function Header() {
             Empresa <span className="text-muted">(Próximamente)</span>
           </div>
           <Button
-            href="#"
+            href="https://t.me/CriptocardBot"
+            target="_blank"
+            rel="noopener noreferrer"
             variant="lime"
             leftIcon={<TelegramIcon />}
             className="w-full"

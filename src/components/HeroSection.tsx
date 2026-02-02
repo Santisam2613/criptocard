@@ -34,7 +34,12 @@ export default function HeroSection() {
             Spend Anywhere!
           </p>
           <div className="mt-10">
-            <Button href="#" leftIcon={<TelegramIcon />}>
+            <Button
+              href="https://t.me/CriptocardBot"
+              target="_blank"
+              rel="noopener noreferrer"
+              leftIcon={<TelegramIcon />}
+            >
               Get card with Telegram
             </Button>
           </div>
