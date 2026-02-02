@@ -1,13 +1,29 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #f4f4f5;
+  --surface-2: #ffffff;
+  --border: rgba(0, 0, 0, 0.10);
+  --muted: rgba(24, 24, 27, 0.55);
+  --muted-2: rgba(24, 24, 27, 0.35);
+  --brand: #c8ff00;
+  --brand-hover: #b8f000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,11 +32,58 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --surface: #161616;
+    --surface-2: #0b0b0b;
+    --border: rgba(255, 255, 255, 0.12);
+    --muted: rgba(255, 255, 255, 0.65);
+    --muted-2: rgba(255, 255, 255, 0.40);
   }
+}
+
+html.light {
+  --background: #ffffff;
+  --foreground: #171717;
+  --surface: #f4f4f5;
+  --surface-2: #ffffff;
+  --border: rgba(0, 0, 0, 0.10);
+  --muted: rgba(24, 24, 27, 0.55);
+  --muted-2: rgba(24, 24, 27, 0.35);
+  color-scheme: light;
+}
+
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --surface: #161616;
+  --surface-2: #0b0b0b;
+  --border: rgba(255, 255, 255, 0.12);
+  --muted: rgba(255, 255, 255, 0.65);
+  --muted-2: rgba(255, 255, 255, 0.40);
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes ccOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ccSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

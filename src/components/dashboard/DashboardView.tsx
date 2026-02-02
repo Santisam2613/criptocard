@@ -1,0 +1,321 @@
+"use client";
+
+import { useState } from "react";
+
+import BottomSheet from "@/components/dashboard/BottomSheet";
+import SettingsSheetContent from "@/components/dashboard/SettingsSheetContent";
+import SendSheetContent from "@/components/dashboard/SendSheetContent";
+import TopUpSheetContent from "@/components/dashboard/TopUpSheetContent";
+import VirtualAccountsSheetContent from "@/components/dashboard/VirtualAccountsSheetContent";
+import VisaCardSheetContent from "@/components/dashboard/VisaCardSheetContent";
+
+type Sheet =
+  | "settings"
+  | "topup"
+  | "send"
+  | "accounts"
+  | "virtual"
+  | "physical"
+  | null;
+
+export default function DashboardView() {
+  const [sheet, setSheet] = useState<Sheet>(null);
+
+  return (
+    <main className="min-h-screen bg-background px-4 py-10 text-foreground">
+      <div className="mx-auto w-full max-w-[420px]">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface"
+            onClick={() => setSheet("settings")}
+            aria-label="Settings"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+                className="h-5 w-5 text-zinc-950 dark:text-brand"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+              <path d="M19.4 15a8.7 8.7 0 0 0 .1-2l2-1.3-2-3.4-2.3.8a8.7 8.7 0 0 0-1.7-1L15.3 4h-4l-.2 2.4a8.7 8.7 0 0 0-1.7 1L7.1 6.6l-2 3.4 2 1.3a8.7 8.7 0 0 0 0 2l-2 1.3 2 3.4 2.3-.8a8.7 8.7 0 0 0 1.7 1L11.3 20h4l.2-2.4a8.7 8.7 0 0 0 1.7-1l2.3.8 2-3.4-2.1-1.3z" />
+            </svg>
+          </button>
+
+          <div className="text-center">
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
+              CRIPTOCARD BALANCE (USDT)
+            </div>
+            <div className="mt-2 text-5xl font-extrabold tracking-tight">
+              $0.00
+            </div>
+          </div>
+
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 2V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+              <path d="M8 9h8" />
+              <path d="M8 13h6" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="mt-7 grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+            onClick={() => setSheet("topup")}
+          >
+            <span className="text-lg leading-none">+</span>
+            <span>Top up</span>
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+            onClick={() => setSheet("send")}
+          >
+            <span className="text-lg leading-none">↑</span>
+            <span>Send</span>
+          </button>
+        </div>
+
+        <div className="mt-5 rounded-3xl bg-brand p-5 text-black shadow-[0_26px_60px_rgba(200,255,0,0.22)]">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.10)]">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 3c4 0 7 3 7 7 0 3.8-2.8 7.5-7 11-4.2-3.5-7-7.2-7-11 0-4 3-7 7-7z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+
+              <div>
+                <div className="text-[11px] font-semibold tracking-[0.22em] text-black/60">
+                  GET YOUR CRYPTO CARD
+                </div>
+                <div className="mt-1 text-lg font-extrabold">
+                  Verify Your Identity
+                </div>
+                <div className="mt-1 text-sm font-medium text-black/70">
+                  Unlock full power of Criptocard
+                </div>
+              </div>
+            </div>
+
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.10)]">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10 8l6 4-6 4V8z" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <div className="h-2 w-full rounded-full bg-black/15">
+              <div className="h-2 w-0 rounded-full bg-black" />
+            </div>
+            <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-black/60">
+              0 of 3 STEPS DONE
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            className="rounded-3xl bg-black/5 p-4 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+            onClick={() => setSheet("virtual")}
+          >
+            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-brand shadow-[0_12px_30px_rgba(200,255,0,0.14)]">
+              <div className="absolute inset-0 opacity-55 [background-image:repeating-linear-gradient(135deg,rgba(0,0,0,0.20)_0,rgba(0,0,0,0.20)_1px,transparent_1px,transparent_6px)]" />
+              <div className="absolute left-2 top-2 h-3.5 w-5 rounded-md bg-black/20 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
+              <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-black/20" />
+            </div>
+            <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
+              Visa Virtual
+            </div>
+          </button>
+          <button
+            type="button"
+            className="rounded-3xl bg-black/5 p-4 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+            onClick={() => setSheet("physical")}
+          >
+            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+              <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.25),transparent_55%)]" />
+              <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(135deg,rgba(0,0,0,0.30)_0,rgba(0,0,0,0.30)_1px,transparent_1px,transparent_7px)] dark:opacity-40" />
+              <div className="absolute left-2 top-2 h-3.5 w-5 rounded-md bg-white/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]" />
+              <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-white/15" />
+            </div>
+            <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
+              Visa Physical
+            </div>
+          </button>
+        </div>
+
+        <button
+          type="button"
+          className="mt-4 w-full rounded-3xl bg-black/5 p-5 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+          onClick={() => setSheet("accounts")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-black">
+              <span className="text-lg font-extrabold">$</span>
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
+                Virtual accounts
+              </div>
+              <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                Not Opened
+              </div>
+            </div>
+          </div>
+        </button>
+
+        <div className="mt-4 rounded-3xl bg-black/5 p-5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-black">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 3h12l4 6-10 13L2 9l4-6z" />
+                  <path d="M2 9h20" />
+                  <path d="M12 3l3 6-3 13-3-13 3-6z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
+                  Karat
+                </div>
+                <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                  Invite Friends to Earn
+                </div>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <div className="text-sm font-semibold text-zinc-950 dark:text-brand">
+                0.00
+              </div>
+              <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                0.00 USDT
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="text-xl font-extrabold tracking-tight">
+            Transactions
+          </div>
+          <div className="mt-4 overflow-hidden rounded-3xl bg-black/5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+            <div className="flex h-44 flex-col items-center justify-center gap-5 bg-[radial-gradient(100%_90%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] dark:bg-[radial-gradient(100%_90%_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]">
+              <div className="text-5xl">🧐</div>
+              <div className="text-base font-semibold text-zinc-950 dark:text-white/90">
+                No History Yet
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <BottomSheet
+        open={sheet === "settings"}
+        label="Settings"
+        onClose={() => setSheet(null)}
+      >
+        <SettingsSheetContent />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "topup"}
+        label="Instant Top up"
+        onClose={() => setSheet(null)}
+      >
+        <TopUpSheetContent />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "send"}
+        label="Send Money"
+        onClose={() => setSheet(null)}
+      >
+        <SendSheetContent />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "accounts"}
+        label="Virtual Accounts"
+        onClose={() => setSheet(null)}
+      >
+        <VirtualAccountsSheetContent />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "virtual"}
+        label="Visa Signature® Virtual Card"
+        onClose={() => setSheet(null)}
+      >
+        <VisaCardSheetContent
+          header="Visa Signature® Virtual Card"
+          title="Visa Signature® Card"
+          description="Premium virtual card with exclusive benefits. Enjoy travel privileges with airport lounge access, life insurance, extended warranties, and premium offers worldwide."
+          tags={["0% Top Up", "Apple & Google Pay", "No Spending Limits", "10+ Visa Benefits"]}
+          actionLabel="Verify Account"
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "physical"}
+        label="Visa Physical (Metal)"
+        onClose={() => setSheet(null)}
+      >
+        <VisaCardSheetContent
+          header="Visa Physical (Metal)"
+          title="Visa Physical (Metal)"
+          description="Premium virtual card with exclusive benefits. Enjoy travel privileges with airport lounge access, life insurance, extended warranties, and premium offers worldwide."
+          tags={["0% Top Up", "Apple & Google Pay", "No Spending Limits", "10+ Visa Benefits"]}
+          actionLabel="Verify Account"
+        />
+      </BottomSheet>
+    </main>
+  );
+}
