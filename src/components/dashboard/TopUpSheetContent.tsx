@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { useI18n } from "@/i18n/i18n";
+
 function ChevronDown() {
   return (
     <svg
@@ -104,6 +106,7 @@ function SelectRow({
 }
 
 export default function TopUpSheetContent() {
+  const { t } = useI18n();
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
       <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
@@ -118,7 +121,7 @@ export default function TopUpSheetContent() {
 
           <div className="relative mt-6 grid grid-cols-2 gap-6">
             <div className="col-span-2 sm:col-span-1">
-              <SelectRow label="Token" value="USDT" leftIcon={<TetherIcon />} />
+              <SelectRow label={t("sheets.token")} value="USDT" leftIcon={<TetherIcon />} />
             </div>
 
             <div className="hidden sm:block" />
@@ -130,7 +133,11 @@ export default function TopUpSheetContent() {
             </div>
 
             <div className="col-span-2 sm:col-span-1">
-              <SelectRow label="Bank" value="Revolut" leftIcon={<RevolutIcon />} />
+              <SelectRow
+                label={t("sheets.bank")}
+                value="Revolut"
+                leftIcon={<RevolutIcon />}
+              />
             </div>
           </div>
 
@@ -148,11 +155,10 @@ export default function TopUpSheetContent() {
         <div className="px-6 pb-7 pt-6">
           <div className="text-center">
             <div className="text-3xl font-extrabold tracking-tight">
-              Instant Top up
+              {t("sheets.instantTopUpTitle")}
             </div>
             <div className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-white/70">
-              Instantly top up your Criptocard balance – add funds straight from
-              your virtual account or crypto wallet in just a few taps!
+              {t("sheets.instantTopUpBody")}
             </div>
           </div>
 
@@ -161,7 +167,7 @@ export default function TopUpSheetContent() {
               type="button"
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
-              Verify Account
+              {t("sheets.verifyAccount")}
             </button>
           </div>
         </div>

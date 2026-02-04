@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import type { ThemeMode } from "@/components/theme/theme";
 import { readStoredThemeMode, setThemeMode } from "@/components/theme/theme";
+import { useI18n } from "@/i18n/i18n";
 
 function SettingsIcon({
   type,
@@ -165,7 +167,7 @@ function Row({
 }: {
   icon: "user" | "globe" | "palette" | "limits" | "question" | "privacy";
   label: string;
-  value?: string;
+  value?: ReactNode;
   onClick?: () => void;
 }) {
   const Root = onClick ? "button" : "div";
@@ -186,11 +188,7 @@ function Row({
       </div>
 
       <div className="flex items-center gap-3">
-        {value ? (
-          <div className="text-sm font-semibold text-muted-2">
-            {value}
-          </div>
-        ) : null}
+        {value ? <div className="text-sm font-semibold text-muted-2">{value}</div> : null}
         <div className="text-muted-2">
           <Chevron />
         </div>
@@ -200,13 +198,14 @@ function Row({
 }
 
 export default function SettingsSheetContent() {
+  const { locale, setLocale, t } = useI18n();
   const [mode, setMode] = useState<ThemeMode>(() => readStoredThemeMode());
 
   const appearanceValue = useMemo(() => {
-    if (mode === "dark") return "Dark";
-    if (mode === "light") return "Light";
-    return "System";
-  }, [mode]);
+    if (mode === "dark") return t("nav.dark");
+    if (mode === "light") return t("nav.light");
+    return t("nav.system");
+  }, [mode, t]);
 
   function cycleAppearance() {
     const next: ThemeMode =
@@ -215,41 +214,58 @@ export default function SettingsSheetContent() {
     setThemeMode(next);
   }
 
+  const languageValue = useMemo(() => {
+    return locale === "es" ? t("nav.spanish") : t("nav.english");
+  }, [locale, t]);
+
+  function toggleLanguage() {
+    setLocale(locale === "es" ? "en" : "es");
+  }
+
   return (
     <div className="px-6 pb-8 pt-6 text-foreground">
       <div className="flex flex-col items-center">
         <LogoBadge />
         <div className="mt-5 text-2xl font-extrabold tracking-tight">
-          None None
+          {t("settings.placeholderName")}
         </div>
       </div>
 
       <div className="mt-8 space-y-4">
         <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
-          <Row icon="user" label="Personal Details" value="Not verified" />
+          <Row
+            icon="user"
+            label={t("settings.personalDetails")}
+            value={t("settings.notVerified")}
+          />
         </div>
 
         <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
           <div className="border-b border-glass-border">
-            <Row icon="globe" label="Language" value="English" />
+            <Row
+              icon="globe"
+              label={t("settings.language")}
+              value={languageValue}
+              onClick={toggleLanguage}
+            />
           </div>
           <Row
             icon="palette"
-            label="Appearance"
+            label={t("settings.appearance")}
             value={appearanceValue}
             onClick={cycleAppearance}
           />
         </div>
 
         <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
-          <Row icon="limits" label="Limits and Fees" />
+          <Row icon="limits" label={t("settings.limitsFees")} />
         </div>
 
         <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
           <div className="border-b border-glass-border">
-            <Row icon="question" label="Ask question" />
+            <Row icon="question" label={t("settings.askQuestion")} />
           </div>
-          <Row icon="privacy" label="Privacy Policy" />
+          <Row icon="privacy" label={t("settings.privacy")} />
         </div>
       </div>
     </div>

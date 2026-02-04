@@ -1,6 +1,10 @@
+"use client";
+
 import Button from "@/components/Button";
 import Header from "@/components/Header";
 import Image from "next/image";
+
+import { useI18n } from "@/i18n/i18n";
 
 function TelegramIcon() {
   return (
@@ -16,6 +20,7 @@ function TelegramIcon() {
 }
 
 export default function HeroSection() {
+  const { t } = useI18n();
   return (
     <section className="relative overflow-hidden bg-transparent text-foreground">
       <Header />
@@ -23,19 +28,19 @@ export default function HeroSection() {
         <div className="cc-glass cc-neon-outline rounded-3xl px-7 py-7 sm:px-9 sm:py-9">
           <div className="inline-flex items-center gap-2 rounded-full border border-glass-border bg-glass px-4 py-2 text-xs font-semibold text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-neon)] shadow-[0_0_22px_var(--shadow-neon-strong)]" />
-            Next-gen crypto card UI
+            {t("hero.badge")}
           </div>
           <h1 className="mt-6 max-w-xl bg-[linear-gradient(135deg,var(--color-foreground),var(--color-brand),var(--color-neon))] bg-clip-text text-5xl font-extrabold leading-[0.95] tracking-tight text-transparent sm:text-6xl lg:text-7xl">
-            VIRTUAL CARD
+            {t("hero.title.0")}
             <br />
-            INSIDE YOUR
+            {t("hero.title.1")}
             <br />
-            TELEGRAM
+            {t("hero.title.2")}
           </h1>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-muted sm:text-xl">
-            Top Up with Crypto.
+            {t("hero.subtitle.0")}
             <br />
-            Spend Anywhere!
+            {t("hero.subtitle.1")}
           </p>
           <div className="mt-10">
             <Button
@@ -45,7 +50,7 @@ export default function HeroSection() {
               leftIcon={<TelegramIcon />}
               variant="lime"
             >
-              Get card with Telegram
+              {t("hero.ctaTelegram")}
             </Button>
           </div>
         </div>
@@ -55,7 +60,7 @@ export default function HeroSection() {
           <div className="relative h-[380px] w-full max-w-[520px] sm:h-[520px]">
             <Image
               src="/assets/imagen1-homee.png"
-              alt="Criptocard app preview"
+              alt={t("hero.imageAlt")}
               fill
               priority
               sizes="(min-width: 1024px) 520px, (min-width: 640px) 520px, 100vw"

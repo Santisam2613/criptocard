@@ -6,6 +6,7 @@ import { useEffect, useId, useState } from "react";
 
 import type { ThemeMode } from "@/components/theme/theme";
 import { readStoredThemeMode, setThemeMode } from "@/components/theme/theme";
+import { useI18n } from "@/i18n/i18n";
 
 function TelegramIcon() {
   return (
@@ -48,6 +49,7 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 function ThemeModeButtons() {
+  const { t } = useI18n();
   const [mode, setMode] = useState<ThemeMode>("system");
 
   useEffect(() => {
@@ -131,7 +133,7 @@ function ThemeModeButtons() {
     <div
       className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1"
       role="group"
-      aria-label="Theme"
+      aria-label={t("nav.theme")}
     >
       {(["system", "light", "dark"] as const).map((value) => {
         const selected = mode === value;
@@ -151,7 +153,13 @@ function ThemeModeButtons() {
                 : "border-transparent text-muted hover:bg-surface-2",
             ].join(" ")}
           >
-            <span className="sr-only">{value}</span>
+            <span className="sr-only">
+              {value === "system"
+                ? t("nav.system")
+                : value === "light"
+                  ? t("nav.light")
+                  : t("nav.dark")}
+            </span>
             {renderIcon(value)}
           </button>
         );
@@ -160,7 +168,47 @@ function ThemeModeButtons() {
   );
 }
 
+function LocaleButtons() {
+  const { locale, setLocale, t } = useI18n();
+  return (
+    <div
+      className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1"
+      role="group"
+      aria-label={t("nav.language")}
+    >
+      {(
+        [
+          { value: "es", label: "ES" },
+          { value: "en", label: "EN" },
+        ] as const
+      ).map(({ value, label }) => {
+        const selected = locale === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={selected}
+            onClick={() => setLocale(value)}
+            className={[
+              "inline-flex h-8 items-center justify-center rounded-full border px-2 text-xs font-semibold tracking-wide transition-colors",
+              selected
+                ? "border-border bg-surface-2 text-foreground"
+                : "border-transparent text-muted hover:bg-surface-2",
+            ].join(" ")}
+          >
+            <span className="sr-only">
+              {value === "es" ? t("nav.spanish") : t("nav.english")}
+            </span>
+            <span aria-hidden="true">{label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Header() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const menuId = useId();
 
@@ -189,12 +237,16 @@ export default function Header() {
 
         <div className="hidden items-center gap-3 sm:flex">
           <div className="inline-flex items-center gap-3">
-            <div className="text-sm font-medium text-foreground">Personal</div>
+            <div className="text-sm font-medium text-foreground">
+              {t("nav.personal")}
+            </div>
             <div className="text-sm font-medium text-muted-2">
-              Empresa <span className="text-muted">(Próximamente)</span>
+              {t("nav.company")}{" "}
+              <span className="text-muted">{t("nav.comingSoon")}</span>
             </div>
           </div>
           <ThemeModeButtons />
+          <LocaleButtons />
         </div>
 
         <div className="hidden sm:block">
@@ -205,14 +257,14 @@ export default function Header() {
             variant="lime"
             leftIcon={<TelegramIcon />}
           >
-            Get Your Criptocard
+            {t("nav.getYourCard")}
           </Button>
         </div>
 
         <button
           type="button"
           className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
-          aria-label={open ? "Close menu" : "Open menu"}
+          aria-label={open ? t("nav.menuClose") : t("nav.menuOpen")}
           aria-expanded={open}
           aria-controls={menuId}
           onClick={() => setOpen((v) => !v)}
@@ -234,11 +286,17 @@ export default function Header() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 pb-6 lg:px-10">
           <div className="cc-glass cc-neon-outline rounded-3xl px-5 pb-5 pt-4">
             <div className="flex items-center justify-between pt-2">
-              <div className="text-sm font-medium text-foreground">Personal</div>
+              <div className="text-sm font-medium text-foreground">
+                {t("nav.personal")}
+              </div>
               <ThemeModeButtons />
             </div>
             <div className="text-sm font-medium text-muted-2">
-              Empresa <span className="text-muted">(Próximamente)</span>
+              {t("nav.company")}{" "}
+              <span className="text-muted">{t("nav.comingSoon")}</span>
+            </div>
+            <div className="pt-3">
+              <LocaleButtons />
             </div>
             <Button
               href="https://t.me/CriptocardBot"
@@ -249,7 +307,7 @@ export default function Header() {
               className="w-full"
               onClick={() => setOpen(false)}
             >
-              Get Your Criptocard
+              {t("nav.getYourCard")}
             </Button>
           </div>
         </div>

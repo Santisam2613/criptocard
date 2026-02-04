@@ -8,6 +8,7 @@ import SendSheetContent from "@/components/dashboard/SendSheetContent";
 import TopUpSheetContent from "@/components/dashboard/TopUpSheetContent";
 import VirtualAccountsSheetContent from "@/components/dashboard/VirtualAccountsSheetContent";
 import VisaCardSheetContent from "@/components/dashboard/VisaCardSheetContent";
+import { useI18n } from "@/i18n/i18n";
 
 type Sheet =
   | "settings"
@@ -20,6 +21,7 @@ type Sheet =
 
 export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
+  const { t } = useI18n();
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground">
@@ -48,7 +50,7 @@ export default function DashboardView() {
 
           <div className="text-center">
             <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
-              CRIPTOCARD BALANCE (USDT)
+              {t("dashboard.balanceLabel")}
             </div>
             <div className="mt-2 text-5xl font-extrabold tracking-tight">
               $0.00
@@ -80,7 +82,7 @@ export default function DashboardView() {
             onClick={() => setSheet("topup")}
           >
             <span className="text-lg leading-none">+</span>
-            <span>Top up</span>
+            <span>{t("dashboard.topUp")}</span>
           </button>
           <button
             type="button"
@@ -88,7 +90,7 @@ export default function DashboardView() {
             onClick={() => setSheet("send")}
           >
             <span className="text-lg leading-none">↑</span>
-            <span>Send</span>
+            <span>{t("dashboard.send")}</span>
           </button>
         </div>
 
@@ -113,13 +115,13 @@ export default function DashboardView() {
 
               <div>
                 <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
-                  GET YOUR CRYPTO CARD
+                  {t("dashboard.getCryptoCard")}
                 </div>
                 <div className="mt-1 text-lg font-extrabold text-foreground">
-                  Verify Your Identity
+                  {t("dashboard.verifyTitle")}
                 </div>
                 <div className="mt-1 text-sm font-medium text-muted">
-                  Unlock full power of Criptocard
+                  {t("dashboard.verifySubtitle")}
                 </div>
               </div>
             </div>
@@ -145,7 +147,7 @@ export default function DashboardView() {
               <div className="h-2 w-0 rounded-full bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand),var(--color-neon))]" />
             </div>
             <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-muted">
-              0 of 3 STEPS DONE
+              {t("dashboard.stepsDone")}
             </div>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function DashboardView() {
               <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-black/20" />
             </div>
             <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
-              Visa Virtual
+              {t("dashboard.visaVirtual")}
             </div>
           </button>
           <button
@@ -177,7 +179,7 @@ export default function DashboardView() {
               <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-white/15" />
             </div>
             <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
-              Visa Physical
+              {t("dashboard.visaPhysical")}
             </div>
           </button>
         </div>
@@ -193,10 +195,10 @@ export default function DashboardView() {
             </div>
             <div>
               <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
-                Virtual accounts
+                {t("dashboard.virtualAccounts")}
               </div>
               <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                Not Opened
+                {t("dashboard.notOpened")}
               </div>
             </div>
           </div>
@@ -223,10 +225,10 @@ export default function DashboardView() {
               </div>
               <div>
                 <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
-                  Karat
+                  {t("dashboard.karat")}
                 </div>
                 <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                  Invite Friends to Earn
+                  {t("dashboard.inviteFriends")}
                 </div>
               </div>
             </div>
@@ -244,13 +246,13 @@ export default function DashboardView() {
 
         <div className="mt-10">
           <div className="text-xl font-extrabold tracking-tight">
-            Transactions
+            {t("dashboard.transactions")}
           </div>
           <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl">
             <div className="flex h-44 flex-col items-center justify-center gap-5 bg-[radial-gradient(100%_90%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] dark:bg-[radial-gradient(100%_90%_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]">
               <div className="text-5xl">🧐</div>
               <div className="text-base font-semibold text-zinc-950 dark:text-white/90">
-                No History Yet
+                {t("dashboard.noHistory")}
               </div>
             </div>
           </div>
@@ -259,7 +261,7 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "settings"}
-        label="Settings"
+        label={t("dashboard.settings")}
         onClose={() => setSheet(null)}
       >
         <SettingsSheetContent />
@@ -267,7 +269,7 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "topup"}
-        label="Instant Top up"
+        label={t("dashboard.instantTopUp")}
         onClose={() => setSheet(null)}
       >
         <TopUpSheetContent />
@@ -275,7 +277,7 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "send"}
-        label="Send Money"
+        label={t("dashboard.sendMoney")}
         onClose={() => setSheet(null)}
       >
         <SendSheetContent />
@@ -283,7 +285,7 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "accounts"}
-        label="Virtual Accounts"
+        label={t("dashboard.virtualAccountsSheet")}
         onClose={() => setSheet(null)}
       >
         <VirtualAccountsSheetContent />
@@ -291,29 +293,39 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "virtual"}
-        label="Visa Signature® Virtual Card"
+        label={t("dashboard.visaVirtualSheet")}
         onClose={() => setSheet(null)}
       >
         <VisaCardSheetContent
-          header="Visa Signature® Virtual Card"
-          title="Visa Signature® Card"
-          description="Premium virtual card with exclusive benefits. Enjoy travel privileges with airport lounge access, life insurance, extended warranties, and premium offers worldwide."
-          tags={["0% Top Up", "Apple & Google Pay", "No Spending Limits", "10+ Visa Benefits"]}
-          actionLabel="Verify Account"
+          header={t("dashboard.visaVirtualSheet")}
+          title={t("visaCard.titleSignature")}
+          description={t("visaCard.description")}
+          tags={[
+            t("visaCard.tagTopUp"),
+            t("visaCard.tagAppleGoogle"),
+            t("visaCard.tagNoLimits"),
+            t("visaCard.tagVisaBenefits"),
+          ]}
+          actionLabel={t("sheets.verifyAccount")}
         />
       </BottomSheet>
 
       <BottomSheet
         open={sheet === "physical"}
-        label="Visa Physical (Metal)"
+        label={t("dashboard.visaPhysicalSheet")}
         onClose={() => setSheet(null)}
       >
         <VisaCardSheetContent
-          header="Visa Physical (Metal)"
-          title="Visa Physical (Metal)"
-          description="Premium virtual card with exclusive benefits. Enjoy travel privileges with airport lounge access, life insurance, extended warranties, and premium offers worldwide."
-          tags={["0% Top Up", "Apple & Google Pay", "No Spending Limits", "10+ Visa Benefits"]}
-          actionLabel="Verify Account"
+          header={t("dashboard.visaPhysicalSheet")}
+          title={t("visaCard.titlePhysical")}
+          description={t("visaCard.description")}
+          tags={[
+            t("visaCard.tagTopUp"),
+            t("visaCard.tagAppleGoogle"),
+            t("visaCard.tagNoLimits"),
+            t("visaCard.tagVisaBenefits"),
+          ]}
+          actionLabel={t("sheets.verifyAccount")}
         />
       </BottomSheet>
     </main>

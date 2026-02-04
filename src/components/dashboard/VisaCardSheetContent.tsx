@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 
+import { useI18n } from "@/i18n/i18n";
+
 type VisaCardSheetContentProps = {
   header: string;
   title: string;
@@ -18,6 +20,7 @@ export default function VisaCardSheetContent({
   actionLabel,
   rightBadge,
 }: VisaCardSheetContentProps) {
+  const { t } = useI18n();
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
       <div className="relative overflow-hidden rounded-3xl bg-brand p-6 shadow-[0_28px_70px_var(--shadow-brand)]">
@@ -43,7 +46,7 @@ export default function VisaCardSheetContent({
                 VISA
               </div>
               <div className="-mt-1 text-sm font-semibold text-black/70">
-                Signature
+                {t("visaCard.signatureLabel")}
               </div>
             </div>
           </div>

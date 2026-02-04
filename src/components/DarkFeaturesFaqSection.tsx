@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { useI18n } from "@/i18n/i18n";
+
 function PlusIcon({ open }: { open: boolean }) {
   return (
     <span
@@ -20,18 +22,27 @@ function PlusIcon({ open }: { open: boolean }) {
 }
 
 export default function DarkFeaturesFaqSection() {
+  const { t } = useI18n();
   const items = useMemo(
     () => [
       {
-        q: "What is Criptocard?",
-        a: "Criptocard is a Visa card experience inside Telegram, designed for fast top-ups and everyday spending.",
+        q: t("faq.q1"),
+        a: t("faq.a1"),
       },
       {
-        q: "Are there any fees for registration or getting the card?",
-        a: "Any applicable fees are shown before you confirm your card and can vary by region and card type.",
+        q: t("faq.q2"),
+        a: t("faq.a2"),
+      },
+      {
+        q: t("faq.q3"),
+        a: t("faq.a3"),
+      },
+      {
+        q: t("faq.q4"),
+        a: t("faq.a4"),
       },
     ],
-    [],
+    [t],
   );
 
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -44,16 +55,18 @@ export default function DarkFeaturesFaqSection() {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_20%_0%,rgba(255,255,255,0.10),transparent_55%)]" />
             <div className="relative">
               <p className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
-                Use your card in over 150 countries.
-                <br />
-                Easy KYC.
+                {t("features.cardCountriesTitle")
+                  .split("\n")
+                  .map((line, idx) =>
+                    idx === 0 ? line : [<br key={`cc1-${idx}`} />, line],
+                  )}
               </p>
               <p className="mt-5 max-w-md text-sm leading-relaxed text-muted sm:text-base">
-                Verify your identity in minutes with our quick
-                <br />
-                KYC process, available in most major
-                <br />
-                regions.
+                {t("features.cardCountriesBody")
+                  .split("\n")
+                  .map((line, idx) =>
+                    idx === 0 ? line : [<br key={`cc2-${idx}`} />, line],
+                  )}
               </p>
             </div>
           </div>
@@ -62,18 +75,14 @@ export default function DarkFeaturesFaqSection() {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_20%_0%,rgba(255,255,255,0.10),transparent_55%)]" />
             <div className="relative">
               <p className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
-                Visa Signature® benefits
+                {t("features.visaBenefitsTitle")}
               </p>
               <p className="mt-5 max-w-md text-sm leading-relaxed text-muted sm:text-base">
-                As a Visa partner, Criptocard provides only Visa
-                <br />
-                Signature® cards. Enjoy premium benefits
-                <br />
-                like airport lounge access, travel accident
-                <br />
-                insurance, and emergency medical &amp; dental
-                <br />
-                coverage.
+                {t("features.visaBenefitsBody")
+                  .split("\n")
+                  .map((line, idx) =>
+                    idx === 0 ? line : [<br key={`vb-${idx}`} />, line],
+                  )}
               </p>
             </div>
           </div>
@@ -81,13 +90,13 @@ export default function DarkFeaturesFaqSection() {
 
         <div className="cc-glass mt-6 rounded-full px-4 py-4 text-center sm:px-6">
           <p className="text-base font-semibold tracking-tight sm:text-lg">
-            All features are available directly in your Telegram
+            {t("features.allInTelegram")}
           </p>
         </div>
 
         <div className="mt-16 sm:mt-20">
           <h2 className="text-center text-4xl font-extrabold tracking-tight text-zinc-950 dark:text-brand sm:text-5xl">
-            F.A.Q.
+            {t("faq.title")}
           </h2>
           <div className="mx-auto mt-10 max-w-3xl">
             {items.map((item, index) => {

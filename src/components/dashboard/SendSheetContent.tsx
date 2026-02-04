@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { useI18n } from "@/i18n/i18n";
+
 function TelegramIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="currentColor">
@@ -86,6 +88,7 @@ function CardRow({
 }
 
 export default function SendSheetContent() {
+  const { t } = useI18n();
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
       <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
@@ -104,21 +107,21 @@ export default function SendSheetContent() {
 
             <div className="w-full space-y-3">
               <CardRow
-                title="To Crypto Wallet"
-                subtitle="Send Money"
+                title={t("sheets.toCryptoWallet")}
+                subtitle={t("sheets.sendMoney")}
                 amount="$47"
                 leftIcon={<div className="text-sm font-black">T</div>}
               />
               <CardRow
-                title="To Bank Account"
-                subtitle="Send Money"
+                title={t("sheets.toBankAccount")}
+                subtitle={t("sheets.sendMoney")}
                 amount="$135"
                 leftIcon={<div className="text-sm font-black">U</div>}
                 emphasis
               />
               <CardRow
-                title="To Telegram Contact"
-                subtitle="Send Money"
+                title={t("sheets.toTelegramContact")}
+                subtitle={t("sheets.sendMoney")}
                 amount="$70"
                 leftIcon={
                   <div className="h-7 w-7 rounded-full bg-white/25 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]" />
@@ -140,12 +143,10 @@ export default function SendSheetContent() {
         <div className="px-6 pb-7 pt-6">
           <div className="text-center">
             <div className="text-3xl font-extrabold tracking-tight">
-              Send Money
+              {t("sheets.sendTitle")}
             </div>
             <div className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-white/70">
-              Send money your way: with crypto, a bank transfer, or directly
-              through a Telegram chat - just pick a contact, enter the amount,
-              and you’re done!
+              {t("sheets.sendBody")}
             </div>
           </div>
 
@@ -154,7 +155,7 @@ export default function SendSheetContent() {
               type="button"
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
-              Verify Account
+              {t("sheets.verifyAccount")}
             </button>
           </div>
         </div>
