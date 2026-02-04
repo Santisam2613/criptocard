@@ -170,12 +170,8 @@ function Row({
   value?: ReactNode;
   onClick?: () => void;
 }) {
-  const Root = onClick ? "button" : "div";
-  return (
-    <Root
-      {...(onClick ? { type: "button", onClick } : {})}
-      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-    >
+  const content = (
+    <>
       <div className="flex items-center gap-3">
         <div className="text-muted">
           <SettingsIcon type={icon} />
@@ -184,12 +180,33 @@ function Row({
       </div>
 
       <div className="flex items-center gap-3">
-        {value ? <div className="text-sm font-semibold text-muted-2">{value}</div> : null}
+        {value ? (
+          <div className="text-sm font-semibold text-muted-2">{value}</div>
+        ) : null}
         <div className="text-muted-2">
           <Chevron />
         </div>
       </div>
-    </Root>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        onPointerDown={(e) => e.stopPropagation()}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
+      {content}
+    </div>
   );
 }
 
