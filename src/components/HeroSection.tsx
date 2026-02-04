@@ -54,7 +54,7 @@ export default function HeroSection() {
           <div className="cc-holo absolute right-1/2 top-8 h-[320px] w-[320px] translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_55%),radial-gradient(circle_at_70%_20%,var(--color-brand),transparent_55%),radial-gradient(circle_at_50%_80%,var(--color-neon-2),transparent_60%)] opacity-30 blur-2xl sm:right-8 sm:top-10 sm:translate-x-0 sm:h-[420px] sm:w-[420px] lg:right-12 lg:top-12" />
           <div className="relative h-[380px] w-full max-w-[520px] sm:h-[520px]">
             <Image
-              src="/assets/imagen1-home.png"
+              src="/assets/imagen1-homee.png"
               alt="Criptocard app preview"
               fill
               priority

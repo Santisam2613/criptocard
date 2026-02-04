@@ -7,7 +7,7 @@ export default function GetYourCardTodaySection() {
         <div className="order-2 flex justify-center lg:order-1 lg:justify-start">
           <div className="relative h-[340px] w-full max-w-[520px] sm:h-[440px]">
             <Image
-              src="/assets/imagen-2-home.png"
+              src="/assets/imagen-2-homee.png"
               alt="Criptocard preview"
               fill
               priority

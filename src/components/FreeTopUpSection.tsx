@@ -18,7 +18,7 @@ export default function FreeTopUpSection() {
         <div className="flex justify-center lg:justify-end">
           <div className="relative h-[360px] w-full max-w-[520px] sm:h-[480px]">
             <Image
-              src="/assets/imagen-3-home.png"
+              src="/assets/imagen-3-homee.png"
               alt="Criptocard preview"
               fill
               priority
