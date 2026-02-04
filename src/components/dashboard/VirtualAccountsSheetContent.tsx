@@ -45,7 +45,7 @@ function Field({
 export default function VirtualAccountsSheetContent() {
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
-      <div className="overflow-hidden rounded-3xl bg-black/5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+      <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
         <div className="relative h-72 overflow-hidden rounded-3xl bg-[radial-gradient(100%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] px-6 pt-7 dark:bg-[radial-gradient(100%_80%_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]">
           <div className="absolute inset-0 bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.10),transparent_60%)] dark:bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.28),transparent_60%)]" />
 
@@ -72,7 +72,7 @@ export default function VirtualAccountsSheetContent() {
           <div className="mt-7">
             <button
               type="button"
-              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-brand text-base font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+              className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
               Verify Account
             </button>

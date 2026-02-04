@@ -37,10 +37,10 @@ export default function DarkFeaturesFaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="bg-background text-foreground">
+    <section className="bg-transparent text-foreground">
       <div className="mx-auto max-w-6xl px-6 py-12 sm:py-24 lg:px-10">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-6 sm:p-8">
+          <div className="cc-glass cc-neon-outline relative overflow-hidden rounded-3xl p-6 sm:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_20%_0%,rgba(255,255,255,0.10),transparent_55%)]" />
             <div className="relative">
               <p className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
@@ -58,7 +58,7 @@ export default function DarkFeaturesFaqSection() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-surface p-6 sm:p-8">
+          <div className="cc-glass cc-neon-outline relative overflow-hidden rounded-3xl p-6 sm:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_80%_at_20%_0%,rgba(255,255,255,0.10),transparent_55%)]" />
             <div className="relative">
               <p className="text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
@@ -79,7 +79,7 @@ export default function DarkFeaturesFaqSection() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-full border border-border bg-surface px-4 py-4 text-center sm:px-6">
+        <div className="cc-glass mt-6 rounded-full px-4 py-4 text-center sm:px-6">
           <p className="text-base font-semibold tracking-tight sm:text-lg">
             All features are available directly in your Telegram
           </p>

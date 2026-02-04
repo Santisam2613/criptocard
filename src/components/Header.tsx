@@ -1,6 +1,7 @@
  "use client";
 
 import Button from "@/components/Button";
+import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
 import type { ThemeMode } from "@/components/theme/theme";
@@ -15,20 +16,6 @@ function TelegramIcon() {
       fill="currentColor"
     >
       <path d="M21.9 4.6c.3-1.3-1-2.4-2.2-1.9L2.8 9.2c-1.4.5-1.4 2.5 0 3l4.3 1.5 1.6 5.2c.4 1.2 1.9 1.6 2.9.8l2.8-2.3 4.3 3.2c1 .7 2.4.2 2.7-1l2.7-15zM8.1 12.7l9.8-6.1c.2-.1.4.2.2.4l-8 7.3c-.3.3-.5.7-.5 1.1l-.3 3.1c0 .3-.4.4-.5.1l-1.1-3.7c-.2-.6.1-1.4.7-1.7z" />
-    </svg>
-  );
-}
-
-function LogoMark() {
-  return (
-    <svg
-      viewBox="0 0 36 16"
-      aria-hidden="true"
-      className="h-4 w-auto"
-      fill="currentColor"
-    >
-      <path d="M11.8 8 1 3.6v8.8L11.8 8Z" />
-      <path d="M14.5 8c3.7 0 6-3.1 7.5-5.2 1.1-1.6 2-2.8 3.4-2.8 1.9 0 3.6 2.2 4.9 4.1.9 1.3 1.6 2.2 2.2 2.2.6 0 1.3-.9 2.2-2.2 1.3-1.9 3-4.1 4.9-4.1v2c-1 0-2.3 1.8-3.3 3.2-1.2 1.7-2.3 3.2-3.8 3.2s-2.6-1.5-3.8-3.2C28.8 3.8 27.5 2 26.5 2c-.4 0-1.2 1-1.9 2.1C22.9 6.5 20.2 10 14.5 10V8Z" />
     </svg>
   );
 }
@@ -61,9 +48,10 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 function ThemeModeButtons() {
-  const [mode, setMode] = useState<ThemeMode>(() => readStoredThemeMode());
+  const [mode, setMode] = useState<ThemeMode>("system");
 
   useEffect(() => {
+    const t = window.setTimeout(() => setMode(readStoredThemeMode()), 0);
     const onTheme = (e: Event) => {
       const next = (e as CustomEvent).detail as ThemeMode | undefined;
       if (next === "light" || next === "dark" || next === "system") {
@@ -71,7 +59,10 @@ function ThemeModeButtons() {
       }
     };
     window.addEventListener("cc-theme-mode", onTheme);
-    return () => window.removeEventListener("cc-theme-mode", onTheme);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("cc-theme-mode", onTheme);
+    };
   }, []);
 
   function renderIcon(kind: ThemeMode) {
@@ -174,12 +165,27 @@ export default function Header() {
   const menuId = useId();
 
   return (
-    <header className="relative bg-background text-foreground">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 lg:px-10">
-        <div className="flex items-center gap-2">
-          <LogoMark />
-          <span className="text-base font-bold tracking-tight">Criptocard</span>
-        </div>
+    <header className="sticky top-0 z-40 bg-transparent text-foreground">
+      <div className="mx-auto max-w-6xl px-6 py-4 lg:px-10">
+        <div className="cc-glass-strong cc-neon-outline flex items-center justify-between rounded-full px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/assets/logo-header.png"
+              alt="Criptocard"
+              width={260}
+              height={60}
+              priority
+              className="h-9 w-auto dark:hidden"
+            />
+            <Image
+              src="/assets/logo-header-blanco.png"
+              alt="Criptocard"
+              width={220}
+              height={44}
+              priority
+              className="hidden h-9 w-auto dark:block"
+            />
+          </div>
 
         <div className="hidden items-center gap-3 sm:flex">
           <div className="inline-flex items-center gap-3">
@@ -213,36 +219,39 @@ export default function Header() {
         >
           <MenuIcon open={open} />
         </button>
+        </div>
       </div>
 
       <div
         id={menuId}
         className={[
           "sm:hidden",
-          "absolute left-0 right-0 top-full z-20 origin-top bg-background text-foreground shadow-[0_24px_50px_rgba(0,0,0,0.12)]",
+          "absolute left-0 right-0 top-full z-20 origin-top bg-transparent",
           "transition-[transform,opacity] duration-200 ease-out",
           open ? "scale-y-100 opacity-100" : "pointer-events-none scale-y-95 opacity-0",
         ].join(" ")}
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 pb-6 lg:px-10">
-          <div className="flex items-center justify-between pt-2">
-            <div className="text-sm font-medium text-foreground">Personal</div>
-            <ThemeModeButtons />
+          <div className="cc-glass cc-neon-outline rounded-3xl px-5 pb-5 pt-4">
+            <div className="flex items-center justify-between pt-2">
+              <div className="text-sm font-medium text-foreground">Personal</div>
+              <ThemeModeButtons />
+            </div>
+            <div className="text-sm font-medium text-muted-2">
+              Empresa <span className="text-muted">(Próximamente)</span>
+            </div>
+            <Button
+              href="https://t.me/CriptocardBot"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="lime"
+              leftIcon={<TelegramIcon />}
+              className="w-full"
+              onClick={() => setOpen(false)}
+            >
+              Get Your Criptocard
+            </Button>
           </div>
-          <div className="text-sm font-medium text-muted-2">
-            Empresa <span className="text-muted">(Próximamente)</span>
-          </div>
-          <Button
-            href="https://t.me/CriptocardBot"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="lime"
-            leftIcon={<TelegramIcon />}
-            className="w-full"
-            onClick={() => setOpen(false)}
-          >
-            Get Your Criptocard
-          </Button>
         </div>
       </div>
     </header>

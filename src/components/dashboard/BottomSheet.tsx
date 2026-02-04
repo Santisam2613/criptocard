@@ -74,7 +74,7 @@ export default function BottomSheet({
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/35 dark:bg-black/70 animate-[ccOverlayIn_220ms_ease-out]"
+        className="absolute inset-0 bg-black/30 backdrop-blur-[2px] dark:bg-black/70 animate-[ccOverlayIn_220ms_ease-out]"
         onClick={onClose}
       />
 
@@ -89,7 +89,7 @@ export default function BottomSheet({
       >
         <div
           className={[
-            "rounded-[28px] bg-white shadow-[0_-24px_70px_rgba(0,0,0,0.18)] dark:bg-[#0B0B0B] dark:shadow-[0_-24px_70px_rgba(0,0,0,0.55)]",
+            "cc-glass-strong cc-neon-outline rounded-[28px]",
             dragging ? "" : "transition-transform duration-200 ease-out",
           ].join(" ")}
           style={{ transform: `translateY(${dragY}px)` }}
@@ -101,7 +101,7 @@ export default function BottomSheet({
             onPointerUp={finishDrag}
             onPointerCancel={finishDrag}
           >
-            <div className="h-1.5 w-12 rounded-full bg-black/15 dark:bg-white/15" />
+            <div className="h-1.5 w-12 rounded-full bg-black/15 dark:bg-white/15 shadow-[0_0_22px_var(--shadow-neon)]" />
           </div>
 
           <div id={labelId} className="sr-only">

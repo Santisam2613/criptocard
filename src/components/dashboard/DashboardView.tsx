@@ -27,14 +27,14 @@ export default function DashboardView() {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface"
+            className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => setSheet("settings")}
             aria-label="Settings"
           >
             <svg
               viewBox="0 0 24 24"
               aria-hidden="true"
-                className="h-5 w-5 text-zinc-950 dark:text-brand"
+              className="h-5 w-5 text-brand drop-shadow-[0_0_22px_var(--shadow-brand)]"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
@@ -55,7 +55,7 @@ export default function DashboardView() {
             </div>
           </div>
 
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface">
+          <div className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full">
             <svg
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -76,7 +76,7 @@ export default function DashboardView() {
         <div className="mt-7 grid grid-cols-2 gap-4">
           <button
             type="button"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+            className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             onClick={() => setSheet("topup")}
           >
             <span className="text-lg leading-none">+</span>
@@ -84,7 +84,7 @@ export default function DashboardView() {
           </button>
           <button
             type="button"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+            className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             onClick={() => setSheet("send")}
           >
             <span className="text-lg leading-none">↑</span>
@@ -92,10 +92,10 @@ export default function DashboardView() {
           </button>
         </div>
 
-        <div className="mt-5 rounded-3xl bg-brand p-5 text-black shadow-[0_26px_60px_rgba(200,255,0,0.22)]">
+        <div className="cc-glass-strong cc-neon-outline cc-holo mt-5 rounded-3xl p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.10)]">
+              <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,var(--color-brand),transparent_60%)] ring-1 ring-black/10">
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -112,19 +112,19 @@ export default function DashboardView() {
               </div>
 
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.22em] text-black/60">
+                <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
                   GET YOUR CRYPTO CARD
                 </div>
-                <div className="mt-1 text-lg font-extrabold">
+                <div className="mt-1 text-lg font-extrabold text-foreground">
                   Verify Your Identity
                 </div>
-                <div className="mt-1 text-sm font-medium text-black/70">
+                <div className="mt-1 text-sm font-medium text-muted">
                   Unlock full power of Criptocard
                 </div>
               </div>
             </div>
 
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.10)]">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-surface ring-1 ring-border">
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -141,10 +141,10 @@ export default function DashboardView() {
           </div>
 
           <div className="mt-5">
-            <div className="h-2 w-full rounded-full bg-black/15">
-              <div className="h-2 w-0 rounded-full bg-black" />
+            <div className="h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
+              <div className="h-2 w-0 rounded-full bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand),var(--color-neon))]" />
             </div>
-            <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-black/60">
+            <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-muted">
               0 of 3 STEPS DONE
             </div>
           </div>
@@ -153,10 +153,10 @@ export default function DashboardView() {
         <div className="mt-6 grid grid-cols-2 gap-4">
           <button
             type="button"
-            className="rounded-3xl bg-black/5 p-4 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => setSheet("virtual")}
           >
-            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-brand shadow-[0_12px_30px_rgba(200,255,0,0.14)]">
+            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-brand shadow-[0_12px_30px_var(--shadow-brand)] ring-1 ring-black/10">
               <div className="absolute inset-0 opacity-55 [background-image:repeating-linear-gradient(135deg,rgba(0,0,0,0.20)_0,rgba(0,0,0,0.20)_1px,transparent_1px,transparent_6px)]" />
               <div className="absolute left-2 top-2 h-3.5 w-5 rounded-md bg-black/20 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
               <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-black/20" />
@@ -167,7 +167,7 @@ export default function DashboardView() {
           </button>
           <button
             type="button"
-            className="rounded-3xl bg-black/5 p-4 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => setSheet("physical")}
           >
             <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
@@ -184,11 +184,11 @@ export default function DashboardView() {
 
         <button
           type="button"
-          className="mt-4 w-full rounded-3xl bg-black/5 p-5 text-left shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]"
+          className="cc-glass cc-neon-outline mt-4 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
           onClick={() => setSheet("accounts")}
         >
           <div className="flex items-center gap-4">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-black">
+            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-foreground ring-1 ring-border">
               <span className="text-lg font-extrabold">$</span>
             </div>
             <div>
@@ -202,10 +202,10 @@ export default function DashboardView() {
           </div>
         </button>
 
-        <div className="mt-4 rounded-3xl bg-black/5 p-5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+        <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand text-black">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_60%)] text-foreground ring-1 ring-border">
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -232,7 +232,7 @@ export default function DashboardView() {
             </div>
 
             <div className="text-right">
-              <div className="text-sm font-semibold text-zinc-950 dark:text-brand">
+              <div className="text-sm font-semibold text-foreground">
                 0.00
               </div>
               <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
@@ -246,7 +246,7 @@ export default function DashboardView() {
           <div className="text-xl font-extrabold tracking-tight">
             Transactions
           </div>
-          <div className="mt-4 overflow-hidden rounded-3xl bg-black/5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl">
             <div className="flex h-44 flex-col items-center justify-center gap-5 bg-[radial-gradient(100%_90%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] dark:bg-[radial-gradient(100%_90%_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]">
               <div className="text-5xl">🧐</div>
               <div className="text-base font-semibold text-zinc-950 dark:text-white/90">

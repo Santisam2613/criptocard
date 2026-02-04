@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import type { ThemeMode } from "@/components/theme/theme";
@@ -137,19 +138,21 @@ function Chevron() {
 
 function LogoBadge() {
   return (
-    <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]">
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className="h-9 w-9 text-zinc-950 dark:text-brand"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 3l8 18H4L12 3z" />
-      </svg>
+    <div className="cc-glass inline-flex h-20 w-20 items-center justify-center rounded-full">
+      <Image
+        src="/assets/logo-header.png"
+        alt="Criptocard"
+        width={120}
+        height={24}
+        className="h-8 w-auto dark:hidden"
+      />
+      <Image
+        src="/assets/logo-header-blanco.png"
+        alt="Criptocard"
+        width={120}
+        height={24}
+        className="hidden h-8 w-auto dark:block"
+      />
     </div>
   );
 }
@@ -222,12 +225,12 @@ export default function SettingsSheetContent() {
       </div>
 
       <div className="mt-8 space-y-4">
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
           <Row icon="user" label="Personal Details" value="Not verified" />
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-          <div className="border-b border-border">
+        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
+          <div className="border-b border-glass-border">
             <Row icon="globe" label="Language" value="English" />
           </div>
           <Row
@@ -238,12 +241,12 @@ export default function SettingsSheetContent() {
           />
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
           <Row icon="limits" label="Limits and Fees" />
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-          <div className="border-b border-border">
+        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
+          <div className="border-b border-glass-border">
             <Row icon="question" label="Ask question" />
           </div>
           <Row icon="privacy" label="Privacy Policy" />

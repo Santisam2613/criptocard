@@ -6,7 +6,7 @@ import DarkFeaturesFaqSection from "@/components/DarkFeaturesFaqSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-white">
+    <main className="min-h-screen overflow-x-hidden bg-transparent">
       <HeroSection />
       <GetYourCardTodaySection />
       <FreeTopUpSection />

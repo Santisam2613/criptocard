@@ -106,7 +106,7 @@ function SelectRow({
 export default function TopUpSheetContent() {
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
-      <div className="overflow-hidden rounded-3xl bg-black/5 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-white/8 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
+      <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
         <div className="relative h-72 overflow-hidden rounded-3xl bg-[radial-gradient(100%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] px-6 pt-7 dark:bg-[radial-gradient(100%_80%_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]">
           <div className="absolute inset-0 bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.10),transparent_60%)] dark:bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.28),transparent_60%)]" />
 
@@ -124,7 +124,7 @@ export default function TopUpSheetContent() {
             <div className="hidden sm:block" />
 
             <div className="hidden sm:flex items-center justify-center">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#E5FF00] text-black shadow-[0_22px_60px_rgba(229,255,0,0.18)]">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-brand),var(--color-brand-hover))] text-black shadow-[0_22px_60px_var(--shadow-brand)] ring-1 ring-black/10">
                 <ToolsIcon />
               </div>
             </div>
@@ -135,11 +135,11 @@ export default function TopUpSheetContent() {
           </div>
 
           <div className="relative mt-8 flex items-center justify-between">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#8FEA5B] text-black shadow-[0_22px_60px_rgba(143,234,91,0.18)]">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[linear-gradient(135deg,#f3df9a,var(--color-brand))] text-black shadow-[0_22px_60px_var(--shadow-brand)] ring-1 ring-black/10">
               <WiseIcon />
             </div>
 
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#2BD97F] text-black shadow-[0_22px_60px_rgba(43,217,127,0.18)]">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[linear-gradient(135deg,#b8860b,var(--color-brand))] text-black shadow-[0_22px_60px_var(--shadow-brand)] ring-1 ring-black/10">
               <div className="text-xl font-black">T</div>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function TopUpSheetContent() {
           <div className="mt-7">
             <button
               type="button"
-              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-brand text-base font-semibold text-black shadow-[0_18px_40px_rgba(200,255,0,0.18)] hover:bg-brand-hover"
+              className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
               Verify Account
             </button>
