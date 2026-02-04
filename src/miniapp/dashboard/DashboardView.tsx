@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import BottomSheet from "@/components/dashboard/BottomSheet";
-import SettingsSheetContent from "@/components/dashboard/SettingsSheetContent";
-import SendSheetContent from "@/components/dashboard/SendSheetContent";
-import TopUpSheetContent from "@/components/dashboard/TopUpSheetContent";
-import VirtualAccountsSheetContent from "@/components/dashboard/VirtualAccountsSheetContent";
-import VisaCardSheetContent from "@/components/dashboard/VisaCardSheetContent";
+import BottomSheet from "@/components/ui/BottomSheet";
+import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
+import SendSheetContent from "@/miniapp/dashboard/SendSheetContent";
+import TopUpSheetContent from "@/miniapp/dashboard/TopUpSheetContent";
+import VirtualAccountsSheetContent from "@/miniapp/dashboard/VirtualAccountsSheetContent";
+import VisaCardSheetContent from "@/miniapp/dashboard/VisaCardSheetContent";
 import { useI18n } from "@/i18n/i18n";
 
 type Sheet =
@@ -234,9 +234,7 @@ export default function DashboardView() {
             </div>
 
             <div className="text-right">
-              <div className="text-sm font-semibold text-foreground">
-                0.00
-              </div>
+              <div className="text-sm font-semibold text-foreground">0.00</div>
               <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
                 0.00 USDT
               </div>

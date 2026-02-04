@@ -91,9 +91,7 @@ export default function VisaCardSheetContent({
             {title}
           </div>
         </div>
-        {rightBadge ? (
-          <div className="shrink-0">{rightBadge}</div>
-        ) : null}
+        {rightBadge ? <div className="shrink-0">{rightBadge}</div> : null}
       </div>
 
       <div className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-white/70">

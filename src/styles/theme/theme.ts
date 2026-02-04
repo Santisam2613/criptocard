@@ -33,9 +33,7 @@ export function applyThemeMode(mode: ThemeMode) {
 
 export function setThemeMode(mode: ThemeMode) {
   setStoredThemeMode(mode);
-  window.dispatchEvent(
-    new CustomEvent("cc-theme-mode", { detail: mode }),
-  );
+  window.dispatchEvent(new CustomEvent("cc-theme-mode", { detail: mode }));
   const setter = (window as unknown as { __setThemeMode?: (m: ThemeMode) => void })
     .__setThemeMode;
   if (setter) {

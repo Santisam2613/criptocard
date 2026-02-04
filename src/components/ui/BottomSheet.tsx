@@ -139,9 +139,7 @@ export default function BottomSheet({
           onPointerUp={finishDrag}
           onPointerCancel={finishDrag}
         >
-          <div
-            className="flex justify-center pt-3"
-          >
+          <div className="flex justify-center pt-3">
             <div className="h-1.5 w-12 rounded-full bg-black/15 dark:bg-white/15 shadow-[0_0_22px_var(--shadow-neon)]" />
           </div>
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import { TelegramProviderBase } from "@/components/telegram/TelegramContext";
-import type { TelegramState } from "@/components/telegram/TelegramContext";
-import type { TelegramWebAppUser } from "@/components/telegram/telegram";
+import { TelegramProviderBase } from "@/telegram/TelegramContext";
+import type { TelegramState } from "@/telegram/TelegramContext";
+import type { TelegramWebAppUser } from "@/telegram/telegram";
 
 function setAppViewportHeightVar() {
   const vv = window.visualViewport;

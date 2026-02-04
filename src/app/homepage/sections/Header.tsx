@@ -1,11 +1,11 @@
- "use client";
+"use client";
 
-import Button from "@/components/Button";
+import Button from "@/components/ui/Button";
 import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 
-import type { ThemeMode } from "@/components/theme/theme";
-import { readStoredThemeMode, setThemeMode } from "@/components/theme/theme";
+import type { ThemeMode } from "@/styles/theme/theme";
+import { readStoredThemeMode, setThemeMode } from "@/styles/theme/theme";
 import { useI18n } from "@/i18n/i18n";
 
 function TelegramIcon() {
@@ -235,42 +235,42 @@ export default function Header() {
             />
           </div>
 
-        <div className="hidden items-center gap-3 sm:flex">
-          <div className="inline-flex items-center gap-3">
-            <div className="text-sm font-medium text-foreground">
-              {t("nav.personal")}
+          <div className="hidden items-center gap-3 sm:flex">
+            <div className="inline-flex items-center gap-3">
+              <div className="text-sm font-medium text-foreground">
+                {t("nav.personal")}
+              </div>
+              <div className="text-sm font-medium text-muted-2">
+                {t("nav.company")}{" "}
+                <span className="text-muted">{t("nav.comingSoon")}</span>
+              </div>
             </div>
-            <div className="text-sm font-medium text-muted-2">
-              {t("nav.company")}{" "}
-              <span className="text-muted">{t("nav.comingSoon")}</span>
-            </div>
+            <ThemeModeButtons />
+            <LocaleButtons />
           </div>
-          <ThemeModeButtons />
-          <LocaleButtons />
-        </div>
 
-        <div className="hidden sm:block">
-          <Button
-            href="https://t.me/CriptocardBot"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="lime"
-            leftIcon={<TelegramIcon />}
+          <div className="hidden sm:block">
+            <Button
+              href="https://t.me/CriptocardBot"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="lime"
+              leftIcon={<TelegramIcon />}
+            >
+              {t("nav.getYourCard")}
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
+            aria-label={open ? t("nav.menuClose") : t("nav.menuOpen")}
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => setOpen((v) => !v)}
           >
-            {t("nav.getYourCard")}
-          </Button>
-        </div>
-
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:hidden"
-          aria-label={open ? t("nav.menuClose") : t("nav.menuOpen")}
-          aria-expanded={open}
-          aria-controls={menuId}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <MenuIcon open={open} />
-        </button>
+            <MenuIcon open={open} />
+          </button>
         </div>
       </div>
 
@@ -280,7 +280,9 @@ export default function Header() {
           "sm:hidden",
           "absolute left-0 right-0 top-full z-20 origin-top bg-transparent",
           "transition-[transform,opacity] duration-200 ease-out",
-          open ? "scale-y-100 opacity-100" : "pointer-events-none scale-y-95 opacity-0",
+          open
+            ? "scale-y-100 opacity-100"
+            : "pointer-events-none scale-y-95 opacity-0",
         ].join(" ")}
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 pb-6 lg:px-10">

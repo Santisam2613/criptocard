@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import Script from "next/script";
 
-import TelegramGate from "@/components/telegram/TelegramGate";
-import TelegramProvider from "@/components/telegram/TelegramProvider";
+import TelegramGate from "@/telegram/TelegramGate";
+import TelegramProvider from "@/telegram/TelegramProvider";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default function MiniappLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Script

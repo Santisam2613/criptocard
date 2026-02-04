@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-import type { TelegramWebAppUser } from "@/components/telegram/telegram";
+import type { TelegramWebAppUser } from "@/telegram/telegram";
 
 export type TelegramState =
   | { status: "loading" }
@@ -35,4 +35,3 @@ export function TelegramProviderBase({
 export function useTelegram() {
   return useContext(TelegramContext);
 }
-

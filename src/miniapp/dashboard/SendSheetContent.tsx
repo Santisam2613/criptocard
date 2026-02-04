@@ -57,7 +57,9 @@ function CardRow({
         <div
           className={[
             "inline-flex h-10 w-10 items-center justify-center rounded-full",
-            emphasis ? "bg-black/5 text-black" : "bg-black/5 text-black dark:bg-black/20 dark:text-white",
+            emphasis
+              ? "bg-black/5 text-black"
+              : "bg-black/5 text-black dark:bg-black/20 dark:text-white",
           ].join(" ")}
         >
           {leftIcon}

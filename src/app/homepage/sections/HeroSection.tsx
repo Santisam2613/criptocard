@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/components/Button";
-import Header from "@/components/Header";
+import Button from "@/components/ui/Button";
+import Header from "./Header";
 import Image from "next/image";
 
 import { useI18n } from "@/i18n/i18n";

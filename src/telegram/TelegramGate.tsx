@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { useTelegram } from "@/components/telegram/TelegramContext";
+import { useTelegram } from "@/telegram/TelegramContext";
 import { useI18n } from "@/i18n/i18n";
 
 export default function TelegramGate({
@@ -42,4 +42,3 @@ export default function TelegramGate({
 
   return <>{children}</>;
 }
-

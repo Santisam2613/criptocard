@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ThemeScript from "@/components/theme/ThemeScript";
+import ThemeScript from "@/styles/theme/ThemeScript";
 import GravityStarsBackground from "@/components/background/GravityStarsBackground";
 import { I18nProvider } from "@/i18n/i18n";
 

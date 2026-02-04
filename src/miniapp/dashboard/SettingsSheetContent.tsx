@@ -4,8 +4,8 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
-import type { ThemeMode } from "@/components/theme/theme";
-import { readStoredThemeMode, setThemeMode } from "@/components/theme/theme";
+import type { ThemeMode } from "@/styles/theme/theme";
+import { readStoredThemeMode, setThemeMode } from "@/styles/theme/theme";
 import { useI18n } from "@/i18n/i18n";
 
 function SettingsIcon({
@@ -173,18 +173,14 @@ function Row({
   const Root = onClick ? "button" : "div";
   return (
     <Root
-      {...(onClick
-        ? { type: "button", onClick }
-        : {})}
+      {...(onClick ? { type: "button", onClick } : {})}
       className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
     >
       <div className="flex items-center gap-3">
         <div className="text-muted">
           <SettingsIcon type={icon} />
         </div>
-        <div className="text-sm font-semibold text-foreground">
-          {label}
-        </div>
+        <div className="text-sm font-semibold text-foreground">{label}</div>
       </div>
 
       <div className="flex items-center gap-3">

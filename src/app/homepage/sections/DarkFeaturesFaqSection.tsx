@@ -120,7 +120,9 @@ export default function DarkFeaturesFaqSection() {
                     id={contentId}
                     className={[
                       "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
-                      open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                      open
+                        ? "grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0",
                     ].join(" ")}
                   >
                     <div className="overflow-hidden">
