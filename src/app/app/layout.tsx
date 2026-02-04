@@ -12,9 +12,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         strategy="beforeInteractive"
       />
       <TelegramProvider>
-        <TelegramGate>{children}</TelegramGate>
+        <div
+          className="min-h-[100vh]"
+          style={{ minHeight: "calc(var(--cc-app-vh, 1vh) * 100)" }}
+        >
+          <TelegramGate>{children}</TelegramGate>
+        </div>
       </TelegramProvider>
     </>
   );
 }
-

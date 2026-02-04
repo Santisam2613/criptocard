@@ -18,6 +18,7 @@ export type TelegramWebApp = {
   version?: string;
   ready?: () => void;
   expand?: () => void;
+  disableVerticalSwipes?: () => void;
 };
 
 export type TelegramGlobal = {
@@ -29,4 +30,3 @@ declare global {
     Telegram?: TelegramGlobal;
   }
 }
-

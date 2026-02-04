@@ -6,6 +6,12 @@ import { TelegramProviderBase } from "@/components/telegram/TelegramContext";
 import type { TelegramState } from "@/components/telegram/TelegramContext";
 import type { TelegramWebAppUser } from "@/components/telegram/telegram";
 
+function setAppViewportHeightVar() {
+  const vv = window.visualViewport;
+  const height = vv?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty("--cc-app-vh", `${height / 100}px`);
+}
+
 function readTelegramUser(): {
   ok: true;
   user: TelegramWebAppUser;
@@ -41,6 +47,9 @@ export default function TelegramProvider({
       const webApp = window.Telegram?.WebApp;
       if (webApp?.ready) webApp.ready();
       if (webApp?.expand) webApp.expand();
+      if (webApp?.disableVerticalSwipes) webApp.disableVerticalSwipes();
+
+      setAppViewportHeightVar();
 
       const result = readTelegramUser();
       if (!result.ok) {
@@ -56,9 +65,16 @@ export default function TelegramProvider({
       });
     }, 0);
 
-    return () => window.clearTimeout(t);
+    const onResize = () => setAppViewportHeightVar();
+    window.addEventListener("resize", onResize, { passive: true });
+    window.visualViewport?.addEventListener("resize", onResize, { passive: true });
+
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", onResize);
+      window.visualViewport?.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return <TelegramProviderBase value={state}>{children}</TelegramProviderBase>;
 }
-
