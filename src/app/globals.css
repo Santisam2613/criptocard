@@ -176,6 +176,18 @@ body {
   }
 }
 
+@keyframes ccFloat {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0) rotate(-0.6deg) scale(1.02);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
 @layer utilities {
   .cc-glass {
     background: var(--glass);
@@ -203,6 +215,12 @@ body {
 
   .cc-holo {
     animation: ccHolo 6s ease-in-out infinite;
+  }
+
+  .cc-img-anim {
+    will-change: transform;
+    transform: translateZ(0);
+    animation: ccFloat 9s ease-in-out infinite;
   }
 
   .cc-gold-cta {

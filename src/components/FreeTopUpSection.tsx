@@ -23,7 +23,7 @@ export default function FreeTopUpSection() {
               fill
               priority
               sizes="(min-width: 1024px) 520px, (min-width: 640px) 520px, 100vw"
-              className="cc-holo object-contain drop-shadow-[0_30px_70px_rgba(0,0,0,0.25)]"
+              className="cc-holo cc-img-anim object-contain drop-shadow-[0_30px_70px_rgba(0,0,0,0.25)]"
             />
           </div>
         </div>
