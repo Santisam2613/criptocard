@@ -41,13 +41,35 @@ export default function DashboardView() {
       : window.open("about:blank", "_blank", "noopener,noreferrer");
 
     try {
+      async function ensureDevSession(): Promise<boolean> {
+        const r = await fetch("/api/auth/dev", {
+          method: "POST",
+          credentials: "include",
+        });
+        const json = (await r.json().catch(() => null)) as
+          | { ok: boolean; error?: string }
+          | null;
+        if (r.status === 404) {
+          window.alert(
+            "Login de desarrollo desactivado. Activa DEV_BYPASS_AUTH=1 o abre en Telegram.",
+          );
+          return false;
+        }
+        if (!json?.ok) {
+          window.alert(json?.error ?? "No se pudo autenticar (dev)");
+          return false;
+        }
+        return true;
+      }
+
       let res = await fetch("/api/kyc/sumsub/websdk-link", {
         method: "POST",
         credentials: "include",
       });
       if (res.status === 401) {
         if (bypassTelegramGate) {
-          await fetch("/api/auth/dev", { method: "POST", credentials: "include" });
+          const ok = await ensureDevSession();
+          if (!ok) return;
         } else {
           await refresh();
         }
@@ -57,9 +79,20 @@ export default function DashboardView() {
         });
       }
 
-      const data = (await res.json()) as { ok: boolean; url?: string; error?: string };
-      if (!data.ok || !data.url) {
-        window.alert(data.error ?? "No se pudo iniciar verificación");
+      if (res.status === 401) {
+        window.alert(
+          bypassTelegramGate
+            ? "No autenticado. Activa DEV_BYPASS_AUTH=1 o abre en Telegram."
+            : "No autenticado. Abre la miniapp dentro de Telegram.",
+        );
+        return;
+      }
+
+      const data = (await res.json().catch(() => null)) as
+        | { ok: boolean; url?: string; error?: string }
+        | null;
+      if (!data || !data.ok || !data.url) {
+        window.alert(data?.error ?? "No se pudo iniciar verificación");
         return;
       }
 

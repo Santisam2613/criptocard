@@ -141,9 +141,9 @@ function Chevron() {
 }
 
 function LogoBadge({ avatarUrl }: { avatarUrl?: string | null }) {
-  return (
-    <div className="cc-glass inline-flex h-20 w-20 items-center justify-center rounded-full">
-      {avatarUrl ? (
+  if (avatarUrl) {
+    return (
+      <div className="cc-glass inline-flex h-20 w-20 items-center justify-center rounded-full">
         <Image
           src={avatarUrl}
           alt=""
@@ -152,20 +152,25 @@ function LogoBadge({ avatarUrl }: { avatarUrl?: string | null }) {
           className="h-20 w-20 rounded-full object-cover"
           sizes="80px"
         />
-      ) : null}
+      </div>
+    );
+  }
+
+  return (
+    <div className="cc-glass inline-flex h-20 w-20 items-center justify-center rounded-full">
       <Image
         src="/assets/logo-header.png"
         alt="Criptocard"
         width={120}
         height={24}
-        className={`${avatarUrl ? "hidden" : ""} h-8 w-auto dark:hidden`}
+        className="h-8 w-auto dark:hidden"
       />
       <Image
         src="/assets/logo-header-blanco.png"
         alt="Criptocard"
         width={120}
         height={24}
-        className={`${avatarUrl ? "hidden" : ""} hidden h-8 w-auto dark:block`}
+        className="hidden h-8 w-auto dark:block"
       />
     </div>
   );

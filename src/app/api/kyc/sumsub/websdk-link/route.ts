@@ -96,14 +96,24 @@ export async function POST(req: Request) {
         (e.status === 409 || errName.toLowerCase().includes("exist"));
 
       if (!couldExist) {
+        const baseMessage = e instanceof Error ? e.message : "Error creando applicant";
+        const suffix = errName ? ` (${errName})` : "";
         return NextResponse.json(
-          { ok: false, error: "Error creando applicant" },
+          { ok: false, error: `${baseMessage}${suffix}` },
           { status: 500 },
         );
       }
 
-      const existing = await getApplicantByExternalUserId(externalUserId);
-      applicantId = existing.id;
+      try {
+        const existing = await getApplicantByExternalUserId(externalUserId);
+        applicantId = existing.id;
+      } catch (fetchExistingError) {
+        const message =
+          fetchExistingError instanceof Error
+            ? fetchExistingError.message
+            : "Error consultando applicant";
+        return NextResponse.json({ ok: false, error: message }, { status: 500 });
+      }
     }
 
     if (userRow) {
