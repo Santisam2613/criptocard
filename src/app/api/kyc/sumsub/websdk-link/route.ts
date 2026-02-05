@@ -4,7 +4,6 @@ import {
   UnauthorizedError,
   requireTelegramSession,
 } from "@/lib/auth/requireTelegramSession";
-import { getEnv } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   SumsubApiError,
@@ -12,11 +11,12 @@ import {
   createWebSdkLink,
   getApplicantByExternalUserId,
 } from "@/lib/sumsub/client";
+import { getServerCredentials } from "@/config/credentials";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const env = getEnv();
+  const creds = getServerCredentials();
   let telegramId: bigint;
   try {
     telegramId = requireTelegramSession(req).telegramId;
@@ -24,10 +24,11 @@ export async function POST(req: Request) {
     if (e instanceof UnauthorizedError) {
       return NextResponse.json({ ok: false }, { status: 401 });
     }
-    return NextResponse.json({ ok: false }, { status: 500 });
+    const message = e instanceof Error ? e.message : "Error interno";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 
-  const levelName = env.sumsubLevelName;
+  const levelName = creds.sumsub.levelName;
   if (!levelName) {
     return NextResponse.json(
       { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },
@@ -35,23 +36,43 @@ export async function POST(req: Request) {
     );
   }
 
-  const supabase = getSupabaseAdminClient();
-  const { data: userRow, error: userError } = await supabase
-    .from("users")
-    .select(
-      "id, telegram_id, telegram_first_name, telegram_last_name, sumsub_applicant_id, verification_status",
-    )
-    .eq("telegram_id", telegramId.toString())
-    .single();
+  type UserRow = {
+    id: string;
+    telegram_first_name: string | null;
+    telegram_last_name: string | null;
+    sumsub_applicant_id: string | null;
+    verification_status: string;
+  };
 
-  if (userError || !userRow) {
-    return NextResponse.json(
-      { ok: false, error: "Usuario no encontrado" },
-      { status: 404 },
-    );
+  let userRow: UserRow | null = null;
+
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data: existing } = await supabase
+      .from("users")
+      .select(
+        "id, telegram_first_name, telegram_last_name, sumsub_applicant_id, verification_status",
+      )
+      .eq("telegram_id", telegramId.toString())
+      .maybeSingle();
+
+    if (existing) {
+      userRow = existing as UserRow;
+    } else {
+      const { data: created, error: createError } = await supabase
+        .from("users")
+        .upsert({ telegram_id: telegramId.toString() }, { onConflict: "telegram_id" })
+        .select(
+          "id, telegram_first_name, telegram_last_name, sumsub_applicant_id, verification_status",
+        )
+        .single();
+      if (!createError && created) userRow = created as UserRow;
+    }
+  } catch {
+    userRow = null;
   }
 
-  let applicantId = userRow.sumsub_applicant_id as string | null;
+  let applicantId = (userRow?.sumsub_applicant_id as string | null) ?? null;
   if (!applicantId) {
     const externalUserId = telegramId.toString();
     try {
@@ -60,8 +81,8 @@ export async function POST(req: Request) {
         levelName,
         type: "individual",
         fixedInfo: {
-          firstName: userRow.telegram_first_name ?? undefined,
-          lastName: userRow.telegram_last_name ?? undefined,
+          firstName: userRow?.telegram_first_name ?? undefined,
+          lastName: userRow?.telegram_last_name ?? undefined,
         },
       });
       applicantId = created.id;
@@ -85,30 +106,46 @@ export async function POST(req: Request) {
       applicantId = existing.id;
     }
 
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({
-        sumsub_applicant_id: applicantId,
-        verification_status:
-          userRow.verification_status === "not_started"
-            ? "pending"
-            : userRow.verification_status,
-      })
-      .eq("id", userRow.id);
+    if (userRow) {
+      try {
+        const supabase = getSupabaseAdminClient();
+        const { error: updateError } = await supabase
+          .from("users")
+          .update({
+            sumsub_applicant_id: applicantId,
+            verification_status:
+              userRow.verification_status === "not_started"
+                ? "pending"
+                : userRow.verification_status,
+          })
+          .eq("id", userRow.id);
 
-    if (updateError) {
-      return NextResponse.json(
-        { ok: false, error: "No se pudo persistir applicant" },
-        { status: 500 },
-      );
+        if (updateError) {
+          return NextResponse.json(
+            { ok: false, error: "No se pudo persistir applicant" },
+            { status: 500 },
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { ok: false, error: "Supabase no configurado" },
+          { status: 500 },
+        );
+      }
     }
   }
 
-  const link = await createWebSdkLink({
-    userId: telegramId.toString(),
-    levelName,
-    ttlInSecs: 30 * 60,
-  });
+  let link: { url: string };
+  try {
+    link = await createWebSdkLink({
+      userId: telegramId.toString(),
+      levelName,
+      ttlInSecs: 30 * 60,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Error Sumsub";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
 
   return NextResponse.json(
     { ok: true, applicant_id: applicantId, url: link.url },

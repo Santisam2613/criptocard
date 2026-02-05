@@ -5,8 +5,8 @@ import {
   TelegramInitDataError,
   validateTelegramInitData,
 } from "@/lib/auth/telegramInitData";
-import { getEnv } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getServerCredentials } from "@/config/credentials";
 
 export const runtime = "nodejs";
 
@@ -20,14 +20,20 @@ function getInitDataFromRequest(req: Request): Promise<string> | string {
 }
 
 export async function POST(req: Request) {
-  const env = getEnv();
+  const creds = getServerCredentials();
+  if (!creds.telegram.botToken) {
+    return NextResponse.json(
+      { ok: false, error: "TELEGRAM_BOT_TOKEN no configurado" },
+      { status: 500 },
+    );
+  }
   const initData = await getInitDataFromRequest(req);
 
   try {
     const validated = validateTelegramInitData({
       initData,
-      botToken: env.telegramBotToken,
-      maxAgeSeconds: env.telegramInitDataMaxAgeSeconds,
+      botToken: creds.telegram.botToken,
+      maxAgeSeconds: creds.telegram.initDataMaxAgeSeconds,
     });
 
     const supabase = getSupabaseAdminClient();
@@ -66,8 +72,8 @@ export async function POST(req: Request) {
 
     const sessionToken = createTelegramSessionToken({
       telegramId: validated.telegramId,
-      ttlSeconds: env.sessionTtlSeconds,
-      secret: env.sessionSecret,
+      ttlSeconds: creds.app.sessionTtlSeconds,
+      secret: creds.app.sessionSecret,
     });
 
     const res = NextResponse.json(
@@ -97,7 +103,7 @@ export async function POST(req: Request) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: env.sessionTtlSeconds,
+      maxAge: creds.app.sessionTtlSeconds,
     });
 
     return res;

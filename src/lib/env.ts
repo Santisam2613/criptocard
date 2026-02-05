@@ -1,5 +1,7 @@
+import { getServerCredentials } from "@/config/credentials";
+
 export type AppEnv = {
-  telegramBotToken: string;
+  telegramBotToken?: string;
   telegramInitDataMaxAgeSeconds: number;
   sessionSecret: string;
   sessionTtlSeconds: number;
@@ -12,36 +14,19 @@ export type AppEnv = {
   sumsubWebhookSecretKey?: string;
 };
 
-function requireEnv(name: string): string {
-  const v = process.env[name];
-  if (!v) throw new Error(`Falta variable de entorno ${name}`);
-  return v;
-}
-
-function numberEnv(name: string, fallback: number): number {
-  const v = process.env[name];
-  if (!v) return fallback;
-  const n = Number(v);
-  if (!Number.isFinite(n)) throw new Error(`Variable inválida ${name}`);
-  return n;
-}
-
 export function getEnv(): AppEnv {
+  const creds = getServerCredentials();
   return {
-    telegramBotToken: requireEnv("TELEGRAM_BOT_TOKEN"),
-    telegramInitDataMaxAgeSeconds: numberEnv(
-      "TELEGRAM_INITDATA_MAX_AGE_SECONDS",
-      300,
-    ),
-    sessionSecret: requireEnv("APP_SESSION_SECRET"),
-    sessionTtlSeconds: numberEnv("APP_SESSION_TTL_SECONDS", 60 * 60 * 24),
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    sumsubAppToken: process.env.SUMSUB_APP_TOKEN,
-    sumsubSecretKey: process.env.SUMSUB_SECRET_KEY,
-    sumsubBaseUrl: process.env.SUMSUB_BASE_URL ?? "https://api.sumsub.com",
-    sumsubLevelName: process.env.SUMSUB_LEVEL_NAME,
-    sumsubWebhookSecretKey: process.env.SUMSUB_WEBHOOK_SECRET_KEY,
+    telegramBotToken: creds.telegram.botToken,
+    telegramInitDataMaxAgeSeconds: creds.telegram.initDataMaxAgeSeconds,
+    sessionSecret: creds.app.sessionSecret,
+    sessionTtlSeconds: creds.app.sessionTtlSeconds,
+    supabaseUrl: creds.supabase.url,
+    supabaseServiceRoleKey: creds.supabase.serviceRoleKey,
+    sumsubAppToken: creds.sumsub.appToken,
+    sumsubSecretKey: creds.sumsub.secretKey,
+    sumsubBaseUrl: creds.sumsub.baseUrl,
+    sumsubLevelName: creds.sumsub.levelName,
+    sumsubWebhookSecretKey: creds.sumsub.webhookSecretKey,
   };
 }
-

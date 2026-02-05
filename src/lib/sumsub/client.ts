@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { getEnv } from "@/lib/env";
+import { getServerCredentials } from "@/config/credentials";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -43,14 +43,14 @@ async function sumsubRequest<T>(params: {
   pathWithQuery: string;
   body?: unknown;
 }): Promise<T> {
-  const env = getEnv();
-  const appToken = env.sumsubAppToken;
-  const secretKey = env.sumsubSecretKey;
+  const creds = getServerCredentials();
+  const appToken = creds.sumsub.appToken;
+  const secretKey = creds.sumsub.secretKey;
   if (!appToken || !secretKey) throw new Error("Sumsub no configurado");
 
   const bodyString =
     params.body === undefined ? "" : JSON.stringify(params.body);
-  const url = `${env.sumsubBaseUrl}${params.pathWithQuery}`;
+  const url = `${creds.sumsub.baseUrl}${params.pathWithQuery}`;
   const maxAttempts = 3;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

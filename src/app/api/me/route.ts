@@ -40,6 +40,10 @@ export async function GET(req: Request) {
     );
   } catch (e) {
     const status = e instanceof UnauthorizedError ? 401 : 500;
-    return NextResponse.json({ ok: false }, { status });
+    const message = e instanceof Error ? e.message : "Error interno";
+    return NextResponse.json(
+      status === 401 ? { ok: false } : { ok: false, error: message },
+      { status },
+    );
   }
 }

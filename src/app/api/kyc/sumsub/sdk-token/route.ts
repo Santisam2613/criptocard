@@ -4,7 +4,6 @@ import {
   UnauthorizedError,
   requireTelegramSession,
 } from "@/lib/auth/requireTelegramSession";
-import { getEnv } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
   SumsubApiError,
@@ -12,11 +11,12 @@ import {
   createSdkAccessToken,
   getApplicantByExternalUserId,
 } from "@/lib/sumsub/client";
+import { getServerCredentials } from "@/config/credentials";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const env = getEnv();
+  const creds = getServerCredentials();
   let telegramId: bigint;
   try {
     telegramId = requireTelegramSession(req).telegramId;
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 
-  const levelName = env.sumsubLevelName;
+  const levelName = creds.sumsub.levelName;
   if (!levelName) {
     return NextResponse.json(
       { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },

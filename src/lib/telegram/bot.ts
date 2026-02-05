@@ -1,11 +1,12 @@
-import { getEnv } from "@/lib/env";
+import { getServerCredentials } from "@/config/credentials";
 
 export async function sendTelegramBotMessage(params: {
   telegramId: string;
   text: string;
 }): Promise<void> {
-  const env = getEnv();
-  const token = env.telegramBotToken;
+  const creds = getServerCredentials();
+  const token = creds.telegram.botToken;
+  if (!token) throw new Error("Falta variable de entorno TELEGRAM_BOT_TOKEN");
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   await fetch(url, {
     method: "POST",
@@ -17,4 +18,3 @@ export async function sendTelegramBotMessage(params: {
     }),
   });
 }
-

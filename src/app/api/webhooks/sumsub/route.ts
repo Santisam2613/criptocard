@@ -1,9 +1,9 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
-import { getEnv } from "@/lib/env";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sendTelegramBotMessage } from "@/lib/telegram/bot";
+import { getServerCredentials } from "@/config/credentials";
 
 export const runtime = "nodejs";
 
@@ -23,8 +23,8 @@ function algoFromHeader(v: string | null): "sha256" | "sha512" | "sha1" | null {
 }
 
 export async function POST(req: Request) {
-  const env = getEnv();
-  const webhookSecret = env.sumsubWebhookSecretKey;
+  const creds = getServerCredentials();
+  const webhookSecret = creds.sumsub.webhookSecretKey;
   if (!webhookSecret) {
     return NextResponse.json(
       { ok: false, error: "SUMSUB_WEBHOOK_SECRET_KEY no configurado" },

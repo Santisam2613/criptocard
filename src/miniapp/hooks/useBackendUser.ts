@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useTelegram } from "@/telegram/TelegramContext";
+import { getPublicCredentials } from "@/config/credentials";
 
 export type VerificationStatus =
   | "not_started"
@@ -37,6 +38,14 @@ async function authWithTelegram(initData: string) {
   return res.json() as Promise<{ ok: boolean; error?: string }>;
 }
 
+async function authWithDev() {
+  const res = await fetch("/api/auth/dev", {
+    method: "POST",
+    credentials: "include",
+  });
+  return res.json().catch(() => ({ ok: false })) as Promise<{ ok: boolean; error?: string }>;
+}
+
 async function fetchMe() {
   const res = await fetch("/api/me", { credentials: "include", cache: "no-store" });
   return res.json() as Promise<{ ok: boolean; user?: BackendUser; error?: string }>;
@@ -45,6 +54,7 @@ async function fetchMe() {
 export function useBackendUser() {
   const telegram = useTelegram();
   const [state, setState] = useState<BackendUserState>({ status: "idle" });
+  const { bypassTelegramGate } = getPublicCredentials();
 
   const refresh = useCallback(async () => {
     try {
@@ -64,6 +74,21 @@ export function useBackendUser() {
           setState({ status: "ready", user: meAfterAuthFail.user });
           return;
         }
+      } else if (bypassTelegramGate) {
+        const meBeforeDev = await fetchMe();
+        if (!meBeforeDev.ok || !meBeforeDev.user) {
+          const devAuth = await authWithDev();
+          if (!devAuth.ok) {
+            setState({
+              status: "error",
+              error: devAuth.error ?? meBeforeDev.error ?? "No autenticado",
+            });
+            return;
+          }
+        } else {
+          setState({ status: "ready", user: meBeforeDev.user });
+          return;
+        }
       }
 
       const me = await fetchMe();
@@ -78,16 +103,16 @@ export function useBackendUser() {
     } catch {
       setState({ status: "error", error: "Error cargando perfil" });
     }
-  }, [telegram]);
+  }, [bypassTelegramGate, telegram]);
 
   useEffect(() => {
-    if (telegram.status !== "ready") return;
+    if (!bypassTelegramGate && telegram.status !== "ready") return;
     if (state.status !== "idle") return;
     const t = window.setTimeout(() => {
       void refresh();
     }, 0);
     return () => window.clearTimeout(t);
-  }, [telegram.status, refresh, state.status]);
+  }, [bypassTelegramGate, telegram.status, refresh, state.status]);
 
   const user = useMemo(() => (state.status === "ready" ? state.user : null), [state]);
 

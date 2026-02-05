@@ -1,5 +1,5 @@
-import { getEnv } from "@/lib/env";
 import { verifyTelegramSessionToken } from "@/lib/auth/session";
+import { getServerCredentials } from "@/config/credentials";
 
 export class UnauthorizedError extends Error {
   name = "UnauthorizedError";
@@ -20,7 +20,7 @@ function parseCookies(header: string): Record<string, string> {
 }
 
 export function requireTelegramSession(req: Request): { telegramId: bigint } {
-  const env = getEnv();
+  const creds = getServerCredentials();
   const cookieHeader = req.headers.get("cookie") ?? "";
   const cookies = parseCookies(cookieHeader);
   const token = cookies["cc_session"] ?? "";
@@ -28,7 +28,7 @@ export function requireTelegramSession(req: Request): { telegramId: bigint } {
 
   const session = verifyTelegramSessionToken({
     token,
-    secret: env.sessionSecret,
+    secret: creds.app.sessionSecret,
   });
   if (!session) throw new UnauthorizedError("Sesión inválida");
 
@@ -41,4 +41,3 @@ export function requireTelegramSession(req: Request): { telegramId: bigint } {
 
   return { telegramId };
 }
-

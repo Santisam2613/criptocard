@@ -1,14 +1,13 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { getEnv } from "@/lib/env";
+import { getServerCredentials } from "@/config/credentials";
 
 export function getSupabaseAdminClient() {
-  const env = getEnv();
-  if (!env.supabaseUrl || !env.supabaseServiceRoleKey) {
+  const creds = getServerCredentials();
+  if (!creds.supabase.url || !creds.supabase.serviceRoleKey) {
     throw new Error("Supabase no configurado");
   }
-  return createClient(env.supabaseUrl, env.supabaseServiceRoleKey, {
+  return createClient(creds.supabase.url, creds.supabase.serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
-

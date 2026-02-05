@@ -10,6 +10,7 @@ import VirtualAccountsSheetContent from "@/miniapp/dashboard/VirtualAccountsShee
 import VisaCardSheetContent from "@/miniapp/dashboard/VisaCardSheetContent";
 import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
+import { getPublicCredentials } from "@/config/credentials";
 
 type Sheet =
   | "settings"
@@ -26,27 +27,42 @@ export default function DashboardView() {
   const { user, refresh } = useBackendUser();
 
   async function startVerification() {
+    const { bypassTelegramGate } = getPublicCredentials();
+    const webApp = window.Telegram?.WebApp;
+    const popup = webApp?.openLink
+      ? null
+      : window.open("about:blank", "_blank", "noopener,noreferrer");
+
     try {
       let res = await fetch("/api/kyc/sumsub/websdk-link", {
         method: "POST",
         credentials: "include",
       });
       if (res.status === 401) {
-        await refresh();
+        if (bypassTelegramGate) {
+          await fetch("/api/auth/dev", { method: "POST", credentials: "include" });
+        } else {
+          await refresh();
+        }
         res = await fetch("/api/kyc/sumsub/websdk-link", {
           method: "POST",
           credentials: "include",
         });
       }
 
-      const data = (await res.json()) as { ok: boolean; url?: string };
-      if (!data.ok || !data.url) return;
-      const webApp = window.Telegram?.WebApp;
+      const data = (await res.json()) as { ok: boolean; url?: string; error?: string };
+      if (!data.ok || !data.url) {
+        window.alert(data.error ?? "No se pudo iniciar verificación");
+        return;
+      }
+
       if (webApp?.openLink) webApp.openLink(data.url);
-      else window.open(data.url, "_blank", "noopener,noreferrer");
-      await refresh();
+      else if (popup) popup.location.href = data.url;
+      else window.location.href = data.url;
+
+      await refresh().catch(() => undefined);
     } catch {
-      return;
+      window.alert("No se pudo iniciar verificación");
     }
   }
 

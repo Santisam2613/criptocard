@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { useTelegram } from "@/telegram/TelegramContext";
 import { useI18n } from "@/i18n/i18n";
+import { getPublicCredentials } from "@/config/credentials";
 
 export default function TelegramGate({
   children,
@@ -12,6 +13,7 @@ export default function TelegramGate({
 }) {
   const state = useTelegram();
   const { t } = useI18n();
+  const { bypassTelegramGate } = getPublicCredentials();
 
   const message = useMemo(() => {
     if (state.status === "loading") return t("telegram.loading");
@@ -23,7 +25,7 @@ export default function TelegramGate({
     return "";
   }, [state, t]);
 
-  if (state.status !== "ready") {
+  if (!bypassTelegramGate && state.status !== "ready") {
     return (
       <main className="min-h-screen bg-background px-4 py-10 text-foreground">
         <div className="mx-auto w-full max-w-[420px]">
