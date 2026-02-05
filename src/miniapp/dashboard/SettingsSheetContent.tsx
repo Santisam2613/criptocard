@@ -8,6 +8,7 @@ import type { ThemeMode } from "@/styles/theme/theme";
 import { readStoredThemeMode, setThemeMode } from "@/styles/theme/theme";
 import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
+import { useTelegram } from "@/telegram/TelegramContext";
 
 function SettingsIcon({
   type,
@@ -139,22 +140,32 @@ function Chevron() {
   );
 }
 
-function LogoBadge() {
+function LogoBadge({ avatarUrl }: { avatarUrl?: string | null }) {
   return (
     <div className="cc-glass inline-flex h-20 w-20 items-center justify-center rounded-full">
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt=""
+          width={80}
+          height={80}
+          className="h-20 w-20 rounded-full object-cover"
+          sizes="80px"
+        />
+      ) : null}
       <Image
         src="/assets/logo-header.png"
         alt="Criptocard"
         width={120}
         height={24}
-        className="h-8 w-auto dark:hidden"
+        className={`${avatarUrl ? "hidden" : ""} h-8 w-auto dark:hidden`}
       />
       <Image
         src="/assets/logo-header-blanco.png"
         alt="Criptocard"
         width={120}
         height={24}
-        className="hidden h-8 w-auto dark:block"
+        className={`${avatarUrl ? "hidden" : ""} hidden h-8 w-auto dark:block`}
       />
     </div>
   );
@@ -215,6 +226,33 @@ export default function SettingsSheetContent() {
   const { locale, setLocale, t } = useI18n();
   const [mode, setMode] = useState<ThemeMode>(() => readStoredThemeMode());
   const { user } = useBackendUser();
+  const telegram = useTelegram();
+  const avatarUrl =
+    telegram.status === "ready"
+      ? (telegram.user.photo_url ?? null)
+      : (user?.telegram_photo_url ?? null);
+
+  const displayName = useMemo(() => {
+    if (telegram.status === "ready") {
+      const first = telegram.user.first_name ?? "";
+      const last = telegram.user.last_name ?? "";
+      const full = `${first}${last ? ` ${last}` : ""}`.trim();
+      if (full) return full;
+      const username = telegram.user.username ? `@${telegram.user.username}` : "";
+      if (username) return username;
+      return `ID: ${telegram.user.id}`;
+    }
+
+    if (user) {
+      if (user.telegram_first_name) {
+        return `${user.telegram_first_name}${user.telegram_last_name ? ` ${user.telegram_last_name}` : ""}`;
+      }
+      if (user.telegram_username) return `@${user.telegram_username}`;
+      if (user.telegram_id) return `ID: ${user.telegram_id}`;
+    }
+
+    return t("settings.placeholderName");
+  }, [t, telegram, user]);
 
   const appearanceValue = useMemo(() => {
     if (mode === "dark") return t("nav.dark");
@@ -240,11 +278,9 @@ export default function SettingsSheetContent() {
   return (
     <div className="px-6 pb-8 pt-6 text-foreground">
       <div className="flex flex-col items-center">
-        <LogoBadge />
+        <LogoBadge avatarUrl={avatarUrl} />
         <div className="mt-5 text-2xl font-extrabold tracking-tight">
-          {user?.telegram_first_name
-            ? `${user.telegram_first_name}${user.telegram_last_name ? ` ${user.telegram_last_name}` : ""}`
-            : t("settings.placeholderName")}
+          {displayName}
         </div>
         {user ? (
           <div className="mt-1 text-sm font-semibold text-muted-2">

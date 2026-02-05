@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 import BottomSheet from "@/components/ui/BottomSheet";
 import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
@@ -11,6 +12,7 @@ import VisaCardSheetContent from "@/miniapp/dashboard/VisaCardSheetContent";
 import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { getPublicCredentials } from "@/config/credentials";
+import { useTelegram } from "@/telegram/TelegramContext";
 
 type Sheet =
   | "settings"
@@ -25,6 +27,11 @@ export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const { t } = useI18n();
   const { user, refresh } = useBackendUser();
+  const telegram = useTelegram();
+  const avatarUrl =
+    telegram.status === "ready"
+      ? (telegram.user.photo_url ?? null)
+      : (user?.telegram_photo_url ?? null);
 
   async function startVerification() {
     const { bypassTelegramGate } = getPublicCredentials();
@@ -76,19 +83,51 @@ export default function DashboardView() {
             onClick={() => setSheet("settings")}
             aria-label="Settings"
           >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="h-5 w-5 text-brand drop-shadow-[0_0_22px_var(--shadow-brand)]"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-              <path d="M19.4 15a8.7 8.7 0 0 0 .1-2l2-1.3-2-3.4-2.3.8a8.7 8.7 0 0 0-1.7-1L15.3 4h-4l-.2 2.4a8.7 8.7 0 0 0-1.7 1L7.1 6.6l-2 3.4 2 1.3a8.7 8.7 0 0 0 0 2l-2 1.3 2 3.4 2.3-.8a8.7 8.7 0 0 0 1.7 1L11.3 20h4l.2-2.4a8.7 8.7 0 0 0 1.7-1l2.3.8 2-3.4-2.1-1.3z" />
-            </svg>
+            <div className="relative h-full w-full">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-full w-full rounded-full object-cover"
+                  sizes="40px"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <Image
+                    src="/assets/logo-header.png"
+                    alt="Criptocard"
+                    width={120}
+                    height={24}
+                    className="h-5 w-auto dark:hidden"
+                  />
+                  <Image
+                    src="/assets/logo-header-blanco.png"
+                    alt="Criptocard"
+                    width={120}
+                    height={24}
+                    className="hidden h-5 w-auto dark:block"
+                  />
+                </div>
+              )}
+
+              <div className="cc-glass cc-neon-outline absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 text-brand drop-shadow-[0_0_16px_var(--shadow-brand)]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                  <path d="M19.4 15a8.7 8.7 0 0 0 .1-2l2-1.3-2-3.4-2.3.8a8.7 8.7 0 0 0-1.7-1L15.3 4h-4l-.2 2.4a8.7 8.7 0 0 0-1.7 1L7.1 6.6l-2 3.4 2 1.3a8.7 8.7 0 0 0 0 2l-2 1.3 2 3.4 2.3-.8a8.7 8.7 0 0 0 1.7 1L11.3 20h4l.2-2.4a8.7 8.7 0 0 0 1.7-1l2.3.8 2-3.4-2.1-1.3z" />
+                </svg>
+              </div>
+            </div>
           </button>
 
           <div className="text-center">
