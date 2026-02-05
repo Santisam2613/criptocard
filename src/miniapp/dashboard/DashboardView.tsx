@@ -13,6 +13,7 @@ import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { getPublicCredentials } from "@/config/credentials";
 import { useTelegram } from "@/telegram/TelegramContext";
+import SumsubWebSdkModal from "@/miniapp/kyc/SumsubWebSdkModal";
 
 type Sheet =
   | "settings"
@@ -25,6 +26,7 @@ type Sheet =
 
 export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
+  const [kycOpen, setKycOpen] = useState(false);
   const { t } = useI18n();
   const { user, refresh } = useBackendUser();
   const telegram = useTelegram();
@@ -36,9 +38,6 @@ export default function DashboardView() {
   async function startVerification() {
     const { bypassTelegramGate } = getPublicCredentials();
     const webApp = window.Telegram?.WebApp;
-    const popup = webApp?.openLink
-      ? null
-      : window.open("about:blank", "_blank", "noopener,noreferrer");
 
     try {
       async function ensureDevSession(): Promise<boolean> {
@@ -62,47 +61,27 @@ export default function DashboardView() {
         return true;
       }
 
-      let res = await fetch("/api/kyc/sumsub/websdk-link", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.status === 401) {
-        if (bypassTelegramGate) {
-          const ok = await ensureDevSession();
-          if (!ok) return;
-        } else {
-          const r = await refresh();
-          if (!r.ok) {
-            window.alert(r.error);
-            return;
-          }
+      if (bypassTelegramGate) {
+        const ok = await ensureDevSession();
+        if (!ok) return;
+      } else {
+        const r = await refresh();
+        if (!r.ok) {
+          window.alert(r.error);
+          return;
         }
-        res = await fetch("/api/kyc/sumsub/websdk-link", {
-          method: "POST",
-          credentials: "include",
-        });
       }
 
-      if (res.status === 401) {
-        window.alert(
-          bypassTelegramGate
-            ? "No autenticado. Activa DEV_BYPASS_AUTH=1 o abre en Telegram."
-            : "No autenticado. Abre la miniapp dentro de Telegram.",
-        );
-        return;
+      const wa = webApp as unknown as {
+        HapticFeedback?: { impactOccurred?: (style: string) => void };
+      } | null;
+      if (wa?.HapticFeedback?.impactOccurred) {
+        try {
+          wa.HapticFeedback.impactOccurred("light");
+        } catch {}
       }
 
-      const data = (await res.json().catch(() => null)) as
-        | { ok: boolean; url?: string; error?: string }
-        | null;
-      if (!data || !data.ok || !data.url) {
-        window.alert(data?.error ?? "No se pudo iniciar verificación");
-        return;
-      }
-
-      if (webApp?.openLink) webApp.openLink(data.url);
-      else if (popup) popup.location.href = data.url;
-      else window.location.href = data.url;
+      setKycOpen(true);
 
       await refresh().catch(() => undefined);
     } catch {
@@ -113,6 +92,11 @@ export default function DashboardView() {
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-[420px]">
+        <SumsubWebSdkModal
+          open={kycOpen}
+          onClose={() => setKycOpen(false)}
+          onCompleted={() => void refresh()}
+        />
         <div className="flex items-center justify-between">
           <button
             type="button"
