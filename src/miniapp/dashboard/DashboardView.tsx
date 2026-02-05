@@ -71,7 +71,11 @@ export default function DashboardView() {
           const ok = await ensureDevSession();
           if (!ok) return;
         } else {
-          await refresh();
+          const r = await refresh();
+          if (!r.ok) {
+            window.alert(r.error);
+            return;
+          }
         }
         res = await fetch("/api/kyc/sumsub/websdk-link", {
           method: "POST",

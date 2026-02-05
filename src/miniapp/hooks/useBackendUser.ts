@@ -65,43 +65,49 @@ export function useBackendUser() {
         if (!auth.ok) {
           const meAfterAuthFail = await fetchMe();
           if (!meAfterAuthFail.ok || !meAfterAuthFail.user) {
+            const error = auth.error ?? meAfterAuthFail.error ?? "No autenticado";
             setState({
               status: "error",
-              error: auth.error ?? meAfterAuthFail.error ?? "No autenticado",
+              error,
             });
-            return;
+            return { ok: false as const, error };
           }
           setState({ status: "ready", user: meAfterAuthFail.user });
-          return;
+          return { ok: true as const, user: meAfterAuthFail.user };
         }
       } else if (bypassTelegramGate) {
         const meBeforeDev = await fetchMe();
         if (!meBeforeDev.ok || !meBeforeDev.user) {
           const devAuth = await authWithDev();
           if (!devAuth.ok) {
+            const error = devAuth.error ?? meBeforeDev.error ?? "No autenticado";
             setState({
               status: "error",
-              error: devAuth.error ?? meBeforeDev.error ?? "No autenticado",
+              error,
             });
-            return;
+            return { ok: false as const, error };
           }
         } else {
           setState({ status: "ready", user: meBeforeDev.user });
-          return;
+          return { ok: true as const, user: meBeforeDev.user };
         }
       }
 
       const me = await fetchMe();
       if (!me.ok || !me.user) {
+        const error = me.error ?? "No autenticado";
         setState({
           status: "error",
-          error: me.error ?? "No autenticado",
+          error,
         });
-        return;
+        return { ok: false as const, error };
       }
       setState({ status: "ready", user: me.user });
+      return { ok: true as const, user: me.user };
     } catch {
-      setState({ status: "error", error: "Error cargando perfil" });
+      const error = "Error cargando perfil";
+      setState({ status: "error", error });
+      return { ok: false as const, error };
     }
   }, [bypassTelegramGate, telegram]);
 

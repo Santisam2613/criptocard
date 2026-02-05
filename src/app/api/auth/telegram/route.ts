@@ -20,7 +20,13 @@ function getInitDataFromRequest(req: Request): Promise<string> | string {
 }
 
 export async function POST(req: Request) {
-  const creds = getServerCredentials();
+  let creds: ReturnType<typeof getServerCredentials>;
+  try {
+    creds = getServerCredentials();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Error interno";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
   if (!creds.telegram.botToken) {
     return NextResponse.json(
       { ok: false, error: "TELEGRAM_BOT_TOKEN no configurado" },
@@ -36,7 +42,13 @@ export async function POST(req: Request) {
       maxAgeSeconds: creds.telegram.initDataMaxAgeSeconds,
     });
 
-    const supabase = getSupabaseAdminClient();
+    let supabase: ReturnType<typeof getSupabaseAdminClient>;
+    try {
+      supabase = getSupabaseAdminClient();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Supabase no configurado";
+      return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    }
     await supabase.from("telegram_initdata_replays").upsert(
       {
         telegram_id: validated.telegramId.toString(),

@@ -16,7 +16,13 @@ import { getServerCredentials } from "@/config/credentials";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const creds = getServerCredentials();
+  let creds: ReturnType<typeof getServerCredentials>;
+  try {
+    creds = getServerCredentials();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Error interno";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+  }
   let telegramId: bigint;
   try {
     telegramId = requireTelegramSession(req).telegramId;
