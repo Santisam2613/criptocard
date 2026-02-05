@@ -300,7 +300,9 @@ export default function SettingsSheetContent() {
             icon="user"
             label={t("settings.personalDetails")}
             value={
-              user ? t(`verification.${user.verification_status}`) : t("settings.notVerified")
+              user && user.verification_status === "approved"
+                ? t("verification.approved")
+                : t("settings.notVerified")
             }
           />
         </div>
