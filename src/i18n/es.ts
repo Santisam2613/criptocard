@@ -135,8 +135,8 @@ export const es = {
   },
   verification: {
     not_started: "Verificación pendiente",
-    pending: "🕓 Verificación en proceso",
-    approved: "✅ Usuario verificado",
-    rejected: "❌ Verificación rechazada",
+    pending: "Verificación en proceso",
+    approved: "Usuario verificado",
+    rejected: "Verificación rechazada",
   },
 } as const;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 import BottomSheet from "@/components/ui/BottomSheet";
+import Skeleton from "@/components/ui/Skeleton";
 import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
 import SendSheetContent from "@/miniapp/dashboard/SendSheetContent";
 import TopUpSheetContent from "@/miniapp/dashboard/TopUpSheetContent";
@@ -28,12 +29,13 @@ export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const [kycOpen, setKycOpen] = useState(false);
   const { t } = useI18n();
-  const { user, refresh } = useBackendUser();
+  const { state, user, refresh } = useBackendUser();
   const telegram = useTelegram();
   const avatarUrl =
     telegram.status === "ready"
       ? (telegram.user.photo_url ?? null)
       : (user?.telegram_photo_url ?? null);
+  const isProfileLoading = state.status === "idle" || state.status === "loading";
 
   async function startVerification() {
     const { bypassTelegramGate } = getPublicCredentials();
@@ -155,9 +157,13 @@ export default function DashboardView() {
             <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
               {t("dashboard.balanceLabel")}
             </div>
-            <div className="mt-2 text-5xl font-extrabold tracking-tight">
-              $0.00
+          {isProfileLoading ? (
+            <div className="mt-3 flex justify-center">
+              <Skeleton className="h-12 w-40" rounded="2xl" />
             </div>
+          ) : (
+            <div className="mt-2 text-5xl font-extrabold tracking-tight">$0.00</div>
+          )}
           </div>
 
           <div className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full">
@@ -198,14 +204,69 @@ export default function DashboardView() {
         </div>
 
         {user?.verification_status !== "approved" ? (
-          <button
-            type="button"
-            onClick={startVerification}
-            className="cc-glass-strong cc-neon-outline cc-holo mt-5 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,var(--color-brand),transparent_60%)] ring-1 ring-black/10">
+          isProfileLoading ? (
+            <div className="cc-glass-strong cc-neon-outline mt-5 w-full rounded-3xl p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="mt-0.5 h-10 w-10" rounded="2xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-3 w-44" rounded="md" />
+                    <Skeleton className="mt-3 h-5 w-52" rounded="md" />
+                    <Skeleton className="mt-2 h-4 w-56" rounded="md" />
+                    <Skeleton className="mt-3 h-3 w-36" rounded="md" />
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-10" rounded="2xl" />
+              </div>
+
+              <div className="mt-5">
+                <Skeleton className="h-2 w-full" rounded="full" />
+                <Skeleton className="mt-3 h-3 w-40" rounded="md" />
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={startVerification}
+              className="cc-glass-strong cc-neon-outline cc-holo mt-5 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,var(--color-brand),transparent_60%)] ring-1 ring-black/10">
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-6 w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 3c4 0 7 3 7 7 0 3.8-2.8 7.5-7 11-4.2-3.5-7-7.2-7-11 0-4 3-7 7-7z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
+                      {t("dashboard.getCryptoCard")}
+                    </div>
+                    <div className="mt-1 text-lg font-extrabold text-foreground">
+                      {t("dashboard.verifyTitle")}
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-muted">
+                      {t("dashboard.verifySubtitle")}
+                    </div>
+                    {user ? (
+                      <div className="mt-1 text-xs font-semibold text-muted-2">
+                        {t(`verification.${user.verification_status}`)}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-surface ring-1 ring-border">
                   <svg
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -216,54 +277,21 @@ export default function DashboardView() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M12 3c4 0 7 3 7 7 0 3.8-2.8 7.5-7 11-4.2-3.5-7-7.2-7-11 0-4 3-7 7-7z" />
-                    <path d="M9 12l2 2 4-4" />
+                    <path d="M10 8l6 4-6 4V8z" />
                   </svg>
                 </div>
+              </div>
 
-                <div>
-                  <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
-                    {t("dashboard.getCryptoCard")}
-                  </div>
-                  <div className="mt-1 text-lg font-extrabold text-foreground">
-                    {t("dashboard.verifyTitle")}
-                  </div>
-                  <div className="mt-1 text-sm font-medium text-muted">
-                    {t("dashboard.verifySubtitle")}
-                  </div>
-                  {user ? (
-                    <div className="mt-1 text-xs font-semibold text-muted-2">
-                      {t(`verification.${user.verification_status}`)}
-                    </div>
-                  ) : null}
+              <div className="mt-5">
+                <div className="h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
+                  <div className="h-2 w-0 rounded-full bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand),var(--color-neon))]" />
+                </div>
+                <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-muted">
+                  {t("dashboard.stepsDone")}
                 </div>
               </div>
-
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-surface ring-1 ring-border">
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M10 8l6 4-6 4V8z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <div className="h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
-                <div className="h-2 w-0 rounded-full bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand),var(--color-neon))]" />
-              </div>
-              <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-muted">
-                {t("dashboard.stepsDone")}
-              </div>
-            </div>
-          </button>
+            </button>
+          )
         ) : null}
 
         <div className="mt-6 grid grid-cols-2 gap-4">

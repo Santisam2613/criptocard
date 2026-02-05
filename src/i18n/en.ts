@@ -130,8 +130,8 @@ export const en = {
   },
   verification: {
     not_started: "Verification pending",
-    pending: "🕓 Verification in progress",
-    approved: "✅ Verified user",
-    rejected: "❌ Verification rejected",
+    pending: "Verification in progress",
+    approved: "Verified user",
+    rejected: "Verification rejected",
   },
 } as const;

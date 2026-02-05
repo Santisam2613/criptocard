@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import type { ThemeMode } from "@/styles/theme/theme";
 import { readStoredThemeMode, setThemeMode } from "@/styles/theme/theme";
 import { useI18n } from "@/i18n/i18n";
+import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { useTelegram } from "@/telegram/TelegramContext";
 
@@ -187,6 +188,7 @@ function Row({
   value?: ReactNode;
   onClick?: () => void;
 }) {
+  const showValueSkeleton = value === undefined;
   const content = (
     <>
       <div className="flex items-center gap-3">
@@ -197,9 +199,11 @@ function Row({
       </div>
 
       <div className="flex items-center gap-3">
-        {value ? (
+        {showValueSkeleton ? (
+          <Skeleton className="h-4 w-20" rounded="md" />
+        ) : (
           <div className="text-sm font-semibold text-muted-2">{value}</div>
-        ) : null}
+        )}
         <div className="text-muted-2">
           <Chevron />
         </div>
@@ -230,12 +234,13 @@ function Row({
 export default function SettingsSheetContent() {
   const { locale, setLocale, t } = useI18n();
   const [mode, setMode] = useState<ThemeMode>(() => readStoredThemeMode());
-  const { user } = useBackendUser();
+  const { state, user } = useBackendUser();
   const telegram = useTelegram();
   const avatarUrl =
     telegram.status === "ready"
       ? (telegram.user.photo_url ?? null)
       : (user?.telegram_photo_url ?? null);
+  const isProfileLoading = state.status === "idle" || state.status === "loading";
 
   const displayName = useMemo(() => {
     if (telegram.status === "ready") {
@@ -284,14 +289,16 @@ export default function SettingsSheetContent() {
     <div className="px-6 pb-8 pt-6 text-foreground">
       <div className="flex flex-col items-center">
         <LogoBadge avatarUrl={avatarUrl} />
-        <div className="mt-5 text-2xl font-extrabold tracking-tight">
-          {displayName}
-        </div>
-        {user ? (
-          <div className="mt-1 text-sm font-semibold text-muted-2">
-            {t(`verification.${user.verification_status}`)}
+        {isProfileLoading && telegram.status !== "ready" ? (
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <Skeleton className="h-7 w-44" rounded="2xl" />
+            <Skeleton className="h-4 w-28" rounded="2xl" />
           </div>
-        ) : null}
+        ) : (
+          <div className="mt-5 text-2xl font-extrabold tracking-tight">
+            {displayName}
+          </div>
+        )}
       </div>
 
       <div className="mt-8 space-y-4">
@@ -300,9 +307,11 @@ export default function SettingsSheetContent() {
             icon="user"
             label={t("settings.personalDetails")}
             value={
-              user && user.verification_status === "approved"
-                ? t("verification.approved")
-                : t("settings.notVerified")
+              isProfileLoading
+                ? undefined
+                : user && user.verification_status === "approved"
+                  ? t("verification.approved")
+                  : t("settings.notVerified")
             }
           />
         </div>

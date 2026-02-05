@@ -188,6 +188,15 @@ body {
   }
 }
 
+@keyframes ccShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 @layer utilities {
   .cc-glass {
     background: var(--glass);
@@ -273,5 +282,40 @@ body {
 
   .cc-card {
     border-radius: 24px;
+  }
+
+  .cc-skeleton {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .cc-skeleton {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .cc-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-120%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.30) 45%,
+      transparent 80%
+    );
+    opacity: 0.75;
+    animation: ccShimmer 1.15s ease-in-out infinite;
+  }
+
+  .dark .cc-skeleton::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.18) 45%,
+      transparent 80%
+    );
   }
 }
