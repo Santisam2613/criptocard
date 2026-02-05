@@ -92,7 +92,7 @@ export default function DashboardView() {
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-10 text-foreground">
+    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-[420px]">
         <SumsubWebSdkModal
           open={kycOpen}

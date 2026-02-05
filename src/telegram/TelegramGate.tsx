@@ -27,7 +27,7 @@ export default function TelegramGate({
 
   if (!bypassTelegramGate && state.status !== "ready") {
     return (
-      <main className="min-h-screen bg-background px-4 py-10 text-foreground">
+      <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
         <div className="mx-auto w-full max-w-[420px]">
           <div className="cc-glass cc-neon-outline rounded-3xl p-6 text-center">
             <div className="text-lg font-extrabold tracking-tight">
