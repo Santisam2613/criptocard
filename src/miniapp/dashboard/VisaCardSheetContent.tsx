@@ -10,6 +10,7 @@ type VisaCardSheetContentProps = {
   tags: [string, string, string, string];
   actionLabel: string;
   rightBadge?: ReactNode;
+  onAction?: () => void;
 };
 
 export default function VisaCardSheetContent({
@@ -19,6 +20,7 @@ export default function VisaCardSheetContent({
   tags,
   actionLabel,
   rightBadge,
+  onAction,
 }: VisaCardSheetContentProps) {
   const { t } = useI18n();
   return (
@@ -102,6 +104,7 @@ export default function VisaCardSheetContent({
         <button
           type="button"
           className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+          onClick={onAction}
         >
           {actionLabel}
         </button>

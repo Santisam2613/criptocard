@@ -133,4 +133,10 @@ export const es = {
     missingUser:
       "No pudimos leer tus datos de usuario de Telegram. Abre la Mini App desde Telegram e inténtalo de nuevo.",
   },
+  verification: {
+    not_started: "Verificación pendiente",
+    pending: "🕓 Verificación en proceso",
+    approved: "✅ Usuario verificado",
+    rejected: "❌ Verificación rechazada",
+  },
 } as const;

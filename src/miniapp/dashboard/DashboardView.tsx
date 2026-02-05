@@ -9,6 +9,7 @@ import TopUpSheetContent from "@/miniapp/dashboard/TopUpSheetContent";
 import VirtualAccountsSheetContent from "@/miniapp/dashboard/VirtualAccountsSheetContent";
 import VisaCardSheetContent from "@/miniapp/dashboard/VisaCardSheetContent";
 import { useI18n } from "@/i18n/i18n";
+import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 type Sheet =
   | "settings"
@@ -22,6 +23,32 @@ type Sheet =
 export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const { t } = useI18n();
+  const { user, refresh } = useBackendUser();
+
+  async function startVerification() {
+    try {
+      let res = await fetch("/api/kyc/sumsub/websdk-link", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.status === 401) {
+        await refresh();
+        res = await fetch("/api/kyc/sumsub/websdk-link", {
+          method: "POST",
+          credentials: "include",
+        });
+      }
+
+      const data = (await res.json()) as { ok: boolean; url?: string };
+      if (!data.ok || !data.url) return;
+      const webApp = window.Telegram?.WebApp;
+      if (webApp?.openLink) webApp.openLink(data.url);
+      else window.open(data.url, "_blank", "noopener,noreferrer");
+      await refresh();
+    } catch {
+      return;
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background px-4 py-10 text-foreground">
@@ -94,7 +121,11 @@ export default function DashboardView() {
           </button>
         </div>
 
-        <div className="cc-glass-strong cc-neon-outline cc-holo mt-5 rounded-3xl p-5">
+        <button
+          type="button"
+          onClick={startVerification}
+          className="cc-glass-strong cc-neon-outline cc-holo mt-5 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,var(--color-brand),transparent_60%)] ring-1 ring-black/10">
@@ -123,6 +154,11 @@ export default function DashboardView() {
                 <div className="mt-1 text-sm font-medium text-muted">
                   {t("dashboard.verifySubtitle")}
                 </div>
+                {user ? (
+                  <div className="mt-1 text-xs font-semibold text-muted-2">
+                    {t(`verification.${user.verification_status}`)}
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -150,7 +186,7 @@ export default function DashboardView() {
               {t("dashboard.stepsDone")}
             </div>
           </div>
-        </div>
+        </button>
 
         <div className="mt-6 grid grid-cols-2 gap-4">
           <button
@@ -305,6 +341,7 @@ export default function DashboardView() {
             t("visaCard.tagVisaBenefits"),
           ]}
           actionLabel={t("sheets.verifyAccount")}
+          onAction={startVerification}
         />
       </BottomSheet>
 
@@ -324,6 +361,7 @@ export default function DashboardView() {
             t("visaCard.tagVisaBenefits"),
           ]}
           actionLabel={t("sheets.verifyAccount")}
+          onAction={startVerification}
         />
       </BottomSheet>
     </main>

@@ -19,6 +19,7 @@ export type TelegramWebApp = {
   ready?: () => void;
   expand?: () => void;
   disableVerticalSwipes?: () => void;
+  openLink?: (url: string) => void;
 };
 
 export type TelegramGlobal = {

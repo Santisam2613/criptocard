@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import type { ThemeMode } from "@/styles/theme/theme";
 import { readStoredThemeMode, setThemeMode } from "@/styles/theme/theme";
 import { useI18n } from "@/i18n/i18n";
+import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 function SettingsIcon({
   type,
@@ -213,6 +214,7 @@ function Row({
 export default function SettingsSheetContent() {
   const { locale, setLocale, t } = useI18n();
   const [mode, setMode] = useState<ThemeMode>(() => readStoredThemeMode());
+  const { user } = useBackendUser();
 
   const appearanceValue = useMemo(() => {
     if (mode === "dark") return t("nav.dark");
@@ -240,8 +242,15 @@ export default function SettingsSheetContent() {
       <div className="flex flex-col items-center">
         <LogoBadge />
         <div className="mt-5 text-2xl font-extrabold tracking-tight">
-          {t("settings.placeholderName")}
+          {user?.telegram_first_name
+            ? `${user.telegram_first_name}${user.telegram_last_name ? ` ${user.telegram_last_name}` : ""}`
+            : t("settings.placeholderName")}
         </div>
+        {user ? (
+          <div className="mt-1 text-sm font-semibold text-muted-2">
+            {t(`verification.${user.verification_status}`)}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-8 space-y-4">
@@ -249,7 +258,9 @@ export default function SettingsSheetContent() {
           <Row
             icon="user"
             label={t("settings.personalDetails")}
-            value={t("settings.notVerified")}
+            value={
+              user ? t(`verification.${user.verification_status}`) : t("settings.notVerified")
+            }
           />
         </div>
 

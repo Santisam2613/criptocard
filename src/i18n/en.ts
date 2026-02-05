@@ -128,4 +128,10 @@ export const en = {
     missingUser:
       "We couldn't read your Telegram user data. Please open the Mini App from Telegram and try again.",
   },
+  verification: {
+    not_started: "Verification pending",
+    pending: "🕓 Verification in progress",
+    approved: "✅ Verified user",
+    rejected: "❌ Verification rejected",
+  },
 } as const;
