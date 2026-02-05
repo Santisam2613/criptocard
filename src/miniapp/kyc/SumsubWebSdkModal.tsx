@@ -55,6 +55,8 @@ export default function SumsubWebSdkModal(props: {
   const { t, locale } = useI18n();
   const containerId = useId().replaceAll(":", "");
   const instanceRef = useRef<unknown>(null);
+  const onCompletedRef = useRef<(() => void) | undefined>(undefined);
+  const completedOnceRef = useRef(false);
   const [status, setStatus] = useState<
     | { state: "idle" }
     | { state: "loading" }
@@ -67,6 +69,21 @@ export default function SumsubWebSdkModal(props: {
     const isDark = document.documentElement.classList.contains("dark");
     return isDark ? "dark" : "light";
   }, []);
+
+  useEffect(() => {
+    onCompletedRef.current = props.onCompleted;
+  }, [props.onCompleted]);
+
+  useEffect(() => {
+    if (!props.open) {
+      completedOnceRef.current = false;
+      setStatus({ state: "idle" });
+      if (typeof document !== "undefined") {
+        const el = document.getElementById(containerId);
+        if (el) el.innerHTML = "";
+      }
+    }
+  }, [containerId, props.open]);
 
   useEffect(() => {
     if (!props.open) return;
@@ -109,6 +126,12 @@ export default function SumsubWebSdkModal(props: {
 
         const selector = `#${containerId}`;
 
+        const notifyCompleted = () => {
+          if (completedOnceRef.current) return;
+          completedOnceRef.current = true;
+          onCompletedRef.current?.();
+        };
+
         const instance = sdk
           .init(token.token, async () => {
             const refreshed = await fetchSdkToken();
@@ -122,17 +145,9 @@ export default function SumsubWebSdkModal(props: {
             addViewportTag: false,
             adaptIframeHeight: true,
           })
-          .on("idCheck.onApplicantSubmitted", () => {
-            props.onCompleted?.();
-          })
-          .on("idCheck.onApplicantStatusChanged", () => {
-            props.onCompleted?.();
-          })
+          .on("idCheck.onApplicantSubmitted", notifyCompleted)
+          .on("idCheck.onApplicantStatusChanged", notifyCompleted)
           .on("idCheck.onError", () => undefined)
-          .onMessage((type: string) => {
-            if (type === "idCheck.onApplicantSubmitted") props.onCompleted?.();
-            if (type === "idCheck.onApplicantStatusChanged") props.onCompleted?.();
-          })
           .build();
 
         instanceRef.current = instance;
@@ -151,7 +166,7 @@ export default function SumsubWebSdkModal(props: {
       cancelled = true;
       instanceRef.current = null;
     };
-  }, [containerId, locale, props, theme]);
+  }, [containerId, locale, props.open, theme]);
 
   if (!props.open) return null;
 
