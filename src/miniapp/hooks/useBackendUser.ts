@@ -20,6 +20,7 @@ export type BackendUser = {
   verification_status: VerificationStatus;
   verification_completed: boolean;
   verified_at: string | null;
+  balance_usdt: number;
 };
 
 type BackendUserState =

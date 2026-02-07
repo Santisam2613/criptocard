@@ -30,6 +30,7 @@ type Sheet =
 
 import PrivacyPolicyContent from "@/miniapp/dashboard/PrivacyPolicyContent";
 import TermsAndConditionsContent from "@/miniapp/dashboard/TermsAndConditionsContent";
+import TransactionList from "@/miniapp/dashboard/TransactionList";
 
 export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
@@ -216,10 +217,12 @@ export default function DashboardView() {
             </div>
           {isProfileLoading ? (
             <div className="mt-3 flex justify-center">
-              <Skeleton className="h-12 w-40" rounded="2xl" />
+              <Skeleton className="h-12 w-48" rounded="2xl" />
             </div>
           ) : (
-            <div className="mt-2 text-5xl font-extrabold tracking-tight">$0.00</div>
+            <div className="mt-2 text-5xl font-extrabold tracking-tight">
+              {`$${(user?.balance_usdt ?? 0).toFixed(2)}`}
+            </div>
           )}
           </div>
 
@@ -468,13 +471,8 @@ export default function DashboardView() {
           <div className="text-xl font-extrabold tracking-tight">
             {t("dashboard.transactions")}
           </div>
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl">
-            <div className="flex h-44 flex-col items-center justify-center gap-5 bg-[radial-gradient(100%_90%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] dark:bg-[radial-gradient(100%_90%_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]">
-              <div className="text-5xl">🧐</div>
-              <div className="text-base font-semibold text-zinc-950 dark:text-white/90">
-                {t("dashboard.noHistory")}
-              </div>
-            </div>
+          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-1">
+            <TransactionList />
           </div>
         </div>
       </div>
