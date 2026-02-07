@@ -11,6 +11,9 @@ import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { useTelegram } from "@/telegram/TelegramContext";
 
+import BottomSheet from "@/components/ui/BottomSheet";
+import PrivacyPolicyContent from "@/miniapp/dashboard/PrivacyPolicyContent";
+
 function SettingsIcon({
   type,
 }: {
@@ -241,6 +244,7 @@ export default function SettingsSheetContent() {
       ? (telegram.user.photo_url ?? null)
       : (user?.telegram_photo_url ?? null);
   const isProfileLoading = state.status === "idle" || state.status === "loading";
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const displayName = useMemo(() => {
     if (telegram.status === "ready") {
@@ -263,6 +267,18 @@ export default function SettingsSheetContent() {
 
     return t("settings.placeholderName");
   }, [t, telegram, user]);
+
+  const displayHandle = useMemo(() => {
+    if (telegram.status === "ready") {
+      if (telegram.user.username) return `@${telegram.user.username}`;
+      return `ID: ${telegram.user.id}`;
+    }
+    if (user) {
+      if (user.telegram_username) return `@${user.telegram_username}`;
+      if (user.telegram_id) return `ID: ${user.telegram_id}`;
+    }
+    return null;
+  }, [telegram, user]);
 
   const appearanceValue = useMemo(() => {
     if (mode === "dark") return t("nav.dark");
@@ -295,8 +311,15 @@ export default function SettingsSheetContent() {
             <Skeleton className="h-4 w-28" rounded="2xl" />
           </div>
         ) : (
-          <div className="mt-5 text-2xl font-extrabold tracking-tight">
-            {displayName}
+          <div className="mt-5 text-center">
+            <div className="text-2xl font-extrabold tracking-tight">
+              {displayName}
+            </div>
+            {displayHandle && (
+              <div className="mt-1 text-sm font-medium text-muted">
+                {displayHandle}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -332,18 +355,15 @@ export default function SettingsSheetContent() {
             onClick={cycleAppearance}
           />
         </div>
-
-        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
-          <Row icon="limits" label={t("settings.limitsFees")} />
-        </div>
-
-        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
-          <div className="border-b border-glass-border">
-            <Row icon="question" label={t("settings.askQuestion")} />
-          </div>
-          <Row icon="privacy" label={t("settings.privacy")} />
-        </div>
       </div>
+
+      <BottomSheet
+        open={privacyOpen}
+        label={t("settings.privacy")}
+        onClose={() => setPrivacyOpen(false)}
+      >
+        <PrivacyPolicyContent />
+      </BottomSheet>
     </div>
   );
 }

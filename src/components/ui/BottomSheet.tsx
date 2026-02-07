@@ -130,24 +130,26 @@ export default function BottomSheet({
         <div
           ref={sheetRef}
           className={[
-            "cc-glass-strong cc-neon-outline rounded-[28px]",
+            "cc-glass-strong cc-neon-outline flex max-h-[85vh] flex-col rounded-t-[28px]",
             dragging ? "" : "transition-transform duration-200 ease-out",
           ].join(" ")}
-          style={{ transform: `translateY(${dragY}px)`, touchAction: "none" }}
+          style={{ transform: `translateY(${dragY}px)` }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={finishDrag}
           onPointerCancel={finishDrag}
         >
-          <div className="flex justify-center pt-3">
-            <div className="h-1.5 w-12 rounded-full bg-black/15 dark:bg-white/15 shadow-[0_0_22px_var(--shadow-neon)]" />
+          <div className="shrink-0 cursor-grab px-4 pb-2 pt-3 active:cursor-grabbing">
+            <div className="mx-auto h-1.5 w-12 rounded-full bg-black/15 shadow-[0_0_22px_var(--shadow-neon)] dark:bg-white/15" />
           </div>
 
           <div id={labelId} className="sr-only">
             {label}
           </div>
 
-          {children}
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            {children}
+          </div>
         </div>
       </div>
     </div>

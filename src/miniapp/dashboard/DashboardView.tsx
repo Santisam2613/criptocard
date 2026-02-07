@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import BottomSheet from "@/components/ui/BottomSheet";
+import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
 import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
 import SendSheetContent from "@/miniapp/dashboard/SendSheetContent";
@@ -23,11 +24,18 @@ type Sheet =
   | "accounts"
   | "virtual"
   | "physical"
+  | "privacy"
+  | "terms"
   | null;
+
+import PrivacyPolicyContent from "@/miniapp/dashboard/PrivacyPolicyContent";
+import TermsAndConditionsContent from "@/miniapp/dashboard/TermsAndConditionsContent";
 
 export default function DashboardView() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const [kycOpen, setKycOpen] = useState(false);
+  const [supportLink, setSupportLink] = useState<string | null>(null);
+  const [comingSoonOpen, setComingSoonOpen] = useState(false);
   const { t } = useI18n();
   const { state, user, refresh } = useBackendUser();
   const telegram = useTelegram();
@@ -36,6 +44,48 @@ export default function DashboardView() {
       ? (telegram.user.photo_url ?? null)
       : (user?.telegram_photo_url ?? null);
   const isProfileLoading = state.status === "idle" || state.status === "loading";
+  const comingSoonLabel = t("dashboard.comingSoon");
+  const comingSoonMessage = t("dashboard.comingSoonMessage");
+  const okLabel = t("dashboard.ok");
+  const isPhysicalComingSoon = true;
+  const isVirtualAccountsComingSoon = true;
+
+  useEffect(() => {
+    let canceled = false;
+    async function loadSupport() {
+      try {
+        const res = await fetch("/api/config/support-link", { cache: "no-store" });
+        const json = (await res.json().catch(() => null)) as
+          | { ok: boolean; supportLink?: string | null }
+          | null;
+        if (canceled) return;
+        setSupportLink(json?.ok ? (json.supportLink ?? null) : null);
+      } catch {
+        if (canceled) return;
+        setSupportLink(null);
+      }
+    }
+    void loadSupport();
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
+  function openSupport() {
+    if (!supportLink) return;
+    const wa = window.Telegram?.WebApp;
+    if (wa?.openLink) {
+      try {
+        wa.openLink(supportLink);
+        return;
+      } catch {}
+    }
+    window.open(supportLink, "_blank", "noopener,noreferrer");
+  }
+
+  function notifyComingSoon() {
+    setComingSoonOpen(true);
+  }
 
   async function startVerification() {
     const { bypassTelegramGate } = getPublicCredentials();
@@ -94,6 +144,13 @@ export default function DashboardView() {
   return (
     <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-[420px]">
+        <NoticeDialog
+          open={comingSoonOpen}
+          title={comingSoonLabel}
+          message={comingSoonMessage}
+          confirmLabel={okLabel}
+          onClose={() => setComingSoonOpen(false)}
+        />
         <SumsubWebSdkModal
           open={kycOpen}
           onClose={() => setKycOpen(false)}
@@ -166,7 +223,13 @@ export default function DashboardView() {
           )}
           </div>
 
-          <div className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full">
+          <button
+            type="button"
+            aria-label="Support"
+            onClick={openSupport}
+            disabled={!supportLink}
+            className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full transition-transform enabled:hover:-translate-y-0.5 enabled:active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+          >
             <svg
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -177,11 +240,15 @@ export default function DashboardView() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M21 15a4 4 0 0 1-4 4H8l-5 2V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-              <path d="M8 9h8" />
-              <path d="M8 13h6" />
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="4" />
+              <path d="M4.93 4.93 9.17 9.17" />
+              <path d="M14.83 14.83 19.07 19.07" />
+              <path d="M14.83 9.17 19.07 4.93" />
+              <path d="M14.83 9.17 15.66 8.34" />
+              <path d="M4.93 19.07 9.17 14.83" />
             </svg>
-          </div>
+          </button>
         </div>
 
         <div className="mt-7 grid grid-cols-2 gap-4">
@@ -311,8 +378,11 @@ export default function DashboardView() {
           </button>
           <button
             type="button"
-            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
-            onClick={() => setSheet("physical")}
+            aria-disabled={isPhysicalComingSoon}
+            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-not-allowed opacity-70"
+            onClick={() =>
+              isPhysicalComingSoon ? notifyComingSoon() : setSheet("physical")
+            }
           >
             <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
               <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.25),transparent_55%)]" />
@@ -323,13 +393,21 @@ export default function DashboardView() {
             <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
               {t("dashboard.visaPhysical")}
             </div>
+            {isPhysicalComingSoon ? (
+              <div className="mt-1 text-xs font-semibold tracking-[0.18em] text-muted">
+                {comingSoonLabel}
+              </div>
+            ) : null}
           </button>
         </div>
 
         <button
           type="button"
-          className="cc-glass cc-neon-outline mt-4 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
-          onClick={() => setSheet("accounts")}
+          aria-disabled={isVirtualAccountsComingSoon}
+          className="cc-glass cc-neon-outline mt-4 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-not-allowed opacity-70"
+          onClick={() =>
+            isVirtualAccountsComingSoon ? notifyComingSoon() : setSheet("accounts")
+          }
         >
           <div className="flex items-center gap-4">
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-foreground ring-1 ring-border">
@@ -340,13 +418,15 @@ export default function DashboardView() {
                 {t("dashboard.virtualAccounts")}
               </div>
               <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                {t("dashboard.notOpened")}
+                {isVirtualAccountsComingSoon
+                  ? comingSoonLabel
+                  : t("dashboard.notOpened")}
               </div>
             </div>
           </div>
         </button>
 
-        <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
+        <div className="cc-glass mt-4 rounded-3xl p-5 ring-1 ring-[rgba(205,255,0,0.35)] shadow-[0_0_0_1px_rgba(205,255,0,0.10),0_18px_50px_var(--glass-shadow),0_0_26px_rgba(205,255,0,0.16)]">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_60%)] text-foreground ring-1 ring-border">
@@ -470,6 +550,42 @@ export default function DashboardView() {
           onAction={startVerification}
         />
       </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "privacy"}
+        label={t("settings.privacy")}
+        onClose={() => setSheet(null)}
+      >
+        <PrivacyPolicyContent />
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === "terms"}
+        label="Términos y condiciones"
+        onClose={() => setSheet(null)}
+      >
+        <TermsAndConditionsContent />
+      </BottomSheet>
+
+      <footer className="mt-12 flex flex-col items-center gap-2 pb-6 text-center text-xs text-muted">
+        <p>&copy; 2026 CriptoCard. Todos los derechos reservados.</p>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={() => setSheet("privacy")}
+            className="text-xs text-muted underline decoration-muted/50 underline-offset-4 hover:text-foreground"
+          >
+            {t("settings.privacy")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSheet("terms")}
+            className="text-xs text-muted underline decoration-muted/50 underline-offset-4 hover:text-foreground"
+          >
+            Términos y condiciones
+          </button>
+        </div>
+      </footer>
     </main>
   );
 }
