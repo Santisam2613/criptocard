@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 import { useI18n } from "@/i18n/i18n";
+import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 function TelegramIcon() {
   return (
@@ -90,7 +92,38 @@ function CardRow({
 }
 
 export default function SendSheetContent() {
+  const router = useRouter();
   const { t } = useI18n();
+  const { user, refresh } = useBackendUser();
+  const isApproved = user?.verification_status === "approved";
+
+  async function onPrimaryAction() {
+    if (isApproved) {
+      router.push("/miniapp/send");
+      return;
+    }
+
+    const r = await refresh();
+    if (!r.ok) return;
+
+    const res = await fetch("/api/kyc/sumsub/websdk-link", {
+      method: "POST",
+      credentials: "include",
+    });
+    const json = (await res.json().catch(() => null)) as
+      | { ok: boolean; url?: string }
+      | null;
+    if (!json?.ok || !json.url) return;
+
+    const wa = window.Telegram?.WebApp;
+    if (wa?.openLink) {
+      try {
+        wa.openLink(json.url);
+        return;
+      } catch {}
+    }
+    window.location.href = json.url;
+  }
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
       <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
@@ -156,8 +189,9 @@ export default function SendSheetContent() {
             <button
               type="button"
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+              onClick={onPrimaryAction}
             >
-              {t("sheets.verifyAccount")}
+              {isApproved ? "Continuar" : t("sheets.verifyAccount")}
             </button>
           </div>
         </div>

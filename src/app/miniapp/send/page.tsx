@@ -1,0 +1,483 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import Button from "@/components/ui/Button";
+import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
+
+async function redirectToKyc() {
+  const res = await fetch("/api/kyc/sumsub/websdk-link", {
+    method: "POST",
+    credentials: "include",
+  });
+  const json = (await res.json().catch(() => null)) as
+    | { ok: boolean; url?: string }
+    | null;
+  if (!json?.ok || !json.url) return;
+
+  const wa = window.Telegram?.WebApp;
+  if (wa?.openLink) {
+    try {
+      wa.openLink(json.url);
+      return;
+    } catch {}
+  }
+  window.location.href = json.url;
+}
+
+type SearchUser = {
+  telegram_id: string;
+  telegram_username: string | null;
+  telegram_first_name: string | null;
+  telegram_last_name: string | null;
+  telegram_photo_url: string | null;
+};
+
+type SendType = "user" | "wallet";
+
+function ConfirmDialog(props: {
+  open: boolean;
+  title: string;
+  message: string;
+  cancelLabel: string;
+  confirmLabel: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const { open, title, message, cancelLabel, confirmLabel, onCancel, onConfirm } =
+    props;
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="cc-glass-strong cc-neon-outline relative w-full max-w-[380px] rounded-3xl p-6"
+      >
+        <div className="text-base font-extrabold tracking-tight text-foreground">
+          {title}
+        </div>
+        <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={onCancel}>
+            {cancelLabel}
+          </Button>
+          <Button variant="lime" onClick={onConfirm}>
+            {confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SendPage() {
+  const { state, user, refresh } = useBackendUser();
+  const [step, setStep] = useState<1 | 2>(1);
+  const [sendType, setSendType] = useState<SendType | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [pendingShown, setPendingShown] = useState(false);
+
+  const [recipientQuery, setRecipientQuery] = useState("");
+  const [recipientLoading, setRecipientLoading] = useState(false);
+  const [recipient, setRecipient] = useState<SearchUser | null>(null);
+  const [amountToUser, setAmountToUser] = useState("");
+  const [withdrawAddress, setWithdrawAddress] = useState("");
+  const [withdrawNetwork, setWithdrawNetwork] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+
+  useEffect(() => {
+    if (state.status === "idle" || state.status === "loading") return;
+    if (state.status === "ready" && user?.verification_status === "approved") return;
+
+    void (async () => {
+      await refresh().catch(() => undefined);
+      await redirectToKyc().catch(() => undefined);
+    })();
+  }, [refresh, state.status, user?.verification_status]);
+
+  if (state.status !== "ready" || user?.verification_status !== "approved") {
+    return <div />;
+  }
+
+  const recipientDisplay = (() => {
+    if (!recipient) return null;
+    const name =
+      recipient.telegram_username ||
+      [recipient.telegram_first_name, recipient.telegram_last_name]
+        .filter(Boolean)
+        .join(" ")
+        .trim() ||
+      recipient.telegram_id;
+    return name;
+  })();
+
+  function openConfirm(params: {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }) {
+    setConfirmTitle(params.title);
+    setConfirmMessage(params.message);
+    setConfirmAction(() => params.onConfirm);
+    setConfirmOpen(true);
+  }
+
+  function onContinue() {
+    if (!sendType) return;
+    setPendingShown(false);
+    setStep(2);
+  }
+
+  function onBack() {
+    setStep(1);
+  }
+
+  async function onSearchRecipient() {
+    const q = recipientQuery.trim();
+    if (!q) return;
+
+    setRecipientLoading(true);
+    try {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; users?: SearchUser[] }
+        | null;
+      if (!json?.ok || !json.users?.length) {
+        setRecipient(null);
+        return;
+      }
+      setRecipient(json.users[0]);
+    } finally {
+      setRecipientLoading(false);
+    }
+  }
+
+  async function performSendToUser() {
+    if (!recipient) return;
+    const amount = Number(amountToUser);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+
+    const res = await fetch("/api/transfers/internal", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        recipient_telegram_id: recipient.telegram_id,
+        amount_usdt: amount,
+      }),
+    });
+    const json = (await res.json().catch(() => null)) as
+      | { ok: boolean; error?: string }
+      | null;
+    if (!json?.ok) {
+      window.alert(json?.error ?? "No se pudo transferir");
+      return;
+    }
+
+    setAmountToUser("");
+    setRecipientQuery("");
+    setRecipient(null);
+    await refresh().catch(() => undefined);
+  }
+
+  async function performWithdraw() {
+    const amount = Number(withdrawAmount);
+    if (!withdrawAddress.trim() || !withdrawNetwork.trim()) return;
+    if (!Number.isFinite(amount) || amount <= 0) return;
+
+    const res = await fetch("/api/transfers/withdraw", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: withdrawAddress,
+        network: withdrawNetwork,
+        amount_usdt: amount,
+      }),
+    });
+    const json = (await res.json().catch(() => null)) as
+      | { ok: boolean; error?: string }
+      | null;
+    if (!json?.ok) {
+      window.alert(json?.error ?? "No se pudo crear solicitud");
+      return;
+    }
+
+    setPendingShown(true);
+    setWithdrawAddress("");
+    setWithdrawNetwork("");
+    setWithdrawAmount("");
+    await refresh().catch(() => undefined);
+  }
+
+  return (
+    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+      <div className="mx-auto w-full max-w-[420px]">
+        <div className="text-2xl font-extrabold tracking-tight">Transferencias</div>
+
+        <ConfirmDialog
+          open={confirmOpen}
+          title={confirmTitle}
+          message={confirmMessage}
+          cancelLabel="Cancelar"
+          confirmLabel="Confirmar"
+          onCancel={() => {
+            setConfirmOpen(false);
+            setConfirmAction(null);
+          }}
+          onConfirm={() => {
+            const action = confirmAction;
+            setConfirmOpen(false);
+            setConfirmAction(null);
+            if (action) action();
+          }}
+        />
+
+        <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
+          <div className="text-xs font-semibold text-muted">Paso {step} de 2</div>
+          <div className="flex items-center gap-2">
+            <div
+              className={[
+                "h-2 w-10 rounded-full",
+                step >= 1
+                  ? "bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand))]"
+                  : "bg-white/10",
+              ].join(" ")}
+            />
+            <div
+              className={[
+                "h-2 w-10 rounded-full",
+                step >= 2
+                  ? "bg-[linear-gradient(90deg,var(--color-brand),var(--color-neon))]"
+                  : "bg-white/10",
+              ].join(" ")}
+            />
+          </div>
+        </div>
+
+        {step === 1 ? (
+          <div className="mt-8">
+            <div className="text-lg font-bold">PASO 1: Tipo de envío</div>
+
+            <div className="mt-4 space-y-3">
+              <button
+                type="button"
+                onClick={() => setSendType("user")}
+                className={[
+                  "cc-glass cc-neon-outline w-full rounded-3xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+                  sendType === "user"
+                    ? "cc-holo bg-white/10 ring-2 ring-[var(--color-neon)] scale-[1.01]"
+                    : sendType
+                      ? "opacity-50 hover:bg-white/5"
+                      : "hover:bg-white/5",
+                ].join(" ")}
+              >
+                <div className="text-base font-extrabold">Enviar de usuario a usuario</div>
+                <div className="mt-1 text-sm text-muted">
+                  Busca por telegram_id o username y envía USDT.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSendType("wallet")}
+                className={[
+                  "cc-glass cc-neon-outline w-full rounded-3xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+                  sendType === "wallet"
+                    ? "cc-holo bg-white/10 ring-2 ring-[var(--color-neon)] scale-[1.01]"
+                    : sendType
+                      ? "opacity-55 hover:bg-white/5"
+                      : "hover:bg-white/5",
+                ].join(" ")}
+              >
+                <div className="text-base font-extrabold">Enviar a wallet externa</div>
+                <div className="mt-1 text-sm text-muted">
+                  Ingresa dirección, red y monto. Quedará en espera.
+                </div>
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <button
+                type="button"
+                aria-disabled={!sendType}
+                onClick={onContinue}
+                className={[
+                  "cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10",
+                  !sendType
+                    ? "cursor-not-allowed opacity-70"
+                    : "hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0",
+                ].join(" ")}
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-bold">
+                PASO 2: {sendType === "wallet" ? "Enviar a wallet externa" : "Enviar a usuario"}
+              </div>
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-xs font-semibold text-muted underline decoration-muted/50 underline-offset-4 hover:text-foreground"
+              >
+                Cambiar
+              </button>
+            </div>
+
+            {sendType === "user" ? (
+              <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
+                <div className="text-sm font-semibold text-muted">Buscar destinatario</div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={recipientQuery}
+                    onChange={(e) => setRecipientQuery(e.target.value)}
+                    placeholder="telegram_id o @username"
+                    className="cc-glass cc-neon-outline h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  />
+                  <button
+                    type="button"
+                    className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    onClick={onSearchRecipient}
+                  >
+                    {recipientLoading ? "..." : "Buscar"}
+                  </button>
+                </div>
+
+                {recipient ? (
+                  <div className="mt-4 rounded-2xl bg-white/5 p-4">
+                    <div className="text-xs font-semibold text-muted">Usuario encontrado</div>
+                    <div className="mt-1 text-sm font-semibold">{recipientDisplay}</div>
+                    <div className="mt-1 text-xs text-muted">telegram_id: {recipient.telegram_id}</div>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
+                    Busca un usuario para continuar.
+                  </div>
+                )}
+
+                <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
+                <input
+                  value={amountToUser}
+                  onChange={(e) => setAmountToUser(e.target.value)}
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                />
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    onClick={() =>
+                      openConfirm({
+                        title: "Confirmar envío",
+                        message: `Enviar ${Number(amountToUser || 0).toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
+                        onConfirm: () => void performSendToUser(),
+                      })
+                    }
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
+                <div className="rounded-2xl bg-white/5 p-4 text-sm text-muted">
+                  La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada
+                </div>
+
+                {pendingShown ? (
+                  <div className="mt-4 rounded-2xl bg-white/5 p-4">
+                    <div className="text-sm font-semibold">En espera</div>
+                    <div className="mt-1 text-xs text-muted">
+                      Solicitud enviada con estado pendiente.
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 text-sm font-semibold text-muted">Dirección</div>
+                <input
+                  value={withdrawAddress}
+                  onChange={(e) => setWithdrawAddress(e.target.value)}
+                  placeholder="0x..."
+                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                />
+
+                <div className="mt-4 text-sm font-semibold text-muted">Red</div>
+                <input
+                  value={withdrawNetwork}
+                  onChange={(e) => setWithdrawNetwork(e.target.value)}
+                  placeholder="TRC20 / ERC20 / ..."
+                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                />
+
+                <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
+                <input
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                />
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    onClick={() =>
+                      openConfirm({
+                        title: "Confirmar solicitud",
+                        message: `Solicitar retiro de ${Number(withdrawAmount || 0).toFixed(2)} USDT a wallet externa?`,
+                        onConfirm: () => void performWithdraw(),
+                      })
+                    }
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}

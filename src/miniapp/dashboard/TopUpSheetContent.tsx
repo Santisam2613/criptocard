@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { useI18n } from "@/i18n/i18n";
+import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 function ChevronDown() {
   return (
@@ -107,6 +108,8 @@ function SelectRow({
 
 export default function TopUpSheetContent() {
   const { t } = useI18n();
+  const { user } = useBackendUser();
+  const isApproved = user?.verification_status === "approved";
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
       <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
@@ -167,7 +170,7 @@ export default function TopUpSheetContent() {
               type="button"
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
-              {t("sheets.verifyAccount")}
+              {isApproved ? "Continuar" : t("sheets.verifyAccount")}
             </button>
           </div>
         </div>
