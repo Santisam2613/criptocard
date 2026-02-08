@@ -35,53 +35,32 @@ export async function POST(req: Request) {
 
     const supabase = getSupabaseAdminClient();
 
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("telegram_id", telegramId.toString())
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("create_withdraw_request", {
+      p_sender_telegram_id: telegramId.toString(),
+      p_amount_usdt: amount,
+      p_address: address,
+      p_network: network,
+    });
 
-    if (userError || !user) {
+    if (error) {
+      const msg = error.message || "No se pudo crear solicitud";
+      const looksLikeMissingRpc =
+        msg.toLowerCase().includes("could not find the function") ||
+        msg.toLowerCase().includes("schema cache") ||
+        msg.toLowerCase().includes("pgrst202");
+
       return NextResponse.json(
-        { ok: false, error: "Usuario no encontrado" },
-        { status: 404 },
-      );
-    }
-
-    const { data: wallet } = await supabase
-      .from("wallets")
-      .select("usdt_balance")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const balance = Number(wallet?.usdt_balance ?? 0);
-    if (!Number.isFinite(balance) || balance < amount) {
-      return NextResponse.json(
-        { ok: false, error: "Fondos insuficientes" },
+        {
+          ok: false,
+          error: looksLikeMissingRpc
+            ? "RPC create_withdraw_request no está instalada. Ejecuta supabase/sql/002_app_config.sql en tu proyecto Supabase."
+            : msg,
+        },
         { status: 400 },
       );
     }
 
-    const { error: insertError } = await supabase.from("transactions").insert({
-      type: "withdraw",
-      user_id: user.id,
-      amount_usdt: -amount,
-      status: "pending",
-      metadata: {
-        address,
-        network,
-        description: "Retiro a wallet externa",
-      },
-    });
-
-    if (insertError) {
-      return NextResponse.json(
-        { ok: false, error: "No se pudo crear solicitud" },
-        { status: 500 },
-      );
-    }
-
-    return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.json({ ok: true, request_id: data }, { status: 200 });
   } catch (e) {
     if (e instanceof UnauthorizedError) {
       return NextResponse.json({ ok: false }, { status: 401 });
@@ -92,4 +71,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

@@ -260,6 +260,90 @@ begin
 end;
 $$;
 
+create or replace function public.create_withdraw_request(
+  p_sender_telegram_id bigint,
+  p_amount_usdt numeric(20, 6),
+  p_address text,
+  p_network text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  sender_user_id uuid;
+  sender_balance numeric(20, 6);
+  request_id uuid := gen_random_uuid();
+  sender_status public.verification_status;
+begin
+  if p_amount_usdt is null or p_amount_usdt <= 0 then
+    raise exception 'Monto inválido';
+  end if;
+
+  if p_sender_telegram_id is null then
+    raise exception 'Usuario inválido';
+  end if;
+
+  if p_address is null or btrim(p_address) = '' or p_network is null or btrim(p_network) = '' then
+    raise exception 'Datos inválidos';
+  end if;
+
+  select id, verification_status
+    into sender_user_id, sender_status
+  from public.users
+  where telegram_id = p_sender_telegram_id
+  limit 1;
+
+  if sender_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  if sender_status != 'approved' then
+    raise exception 'Cuenta no verificada';
+  end if;
+
+  insert into public.wallets (user_id, usdt_balance)
+  values (sender_user_id, 0)
+  on conflict (user_id) do nothing;
+
+  select usdt_balance
+    into sender_balance
+  from public.wallets
+  where user_id = sender_user_id;
+
+  if sender_balance is null then
+    sender_balance := 0;
+  end if;
+
+  if sender_balance < p_amount_usdt then
+    raise exception 'Fondos insuficientes';
+  end if;
+
+  insert into public.transactions (
+    id,
+    type,
+    user_id,
+    amount_usdt,
+    status,
+    metadata
+  ) values (
+    request_id,
+    'withdraw',
+    sender_user_id,
+    -p_amount_usdt,
+    'pending',
+    jsonb_build_object(
+      'address', btrim(p_address),
+      'network', btrim(p_network),
+      'description', 'Retiro a wallet externa'
+    )
+  );
+
+  return request_id;
+end;
+$$;
+
 -- ==============================================================================
 -- 7. TARJETAS
 -- ==============================================================================

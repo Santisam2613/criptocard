@@ -73,6 +73,19 @@ function getTransactionTitle(tx: Transaction) {
   }
 }
 
+function getStatusLabel(status: Transaction["status"]) {
+  switch (status) {
+    case "pending":
+      return "En espera";
+    case "completed":
+      return "Completado";
+    case "rejected":
+      return "Rechazado";
+    default:
+      return null;
+  }
+}
+
 export default function TransactionList() {
   const { transactions, isLoading } = useTransactions();
 
@@ -111,6 +124,7 @@ export default function TransactionList() {
       {transactions.map((tx) => {
         const isPositive = tx.amount_usdt > 0;
         const formattedDate = format(new Date(tx.created_at), "dd MMM, HH:mm");
+        const statusLabel = tx.type === "withdraw" ? getStatusLabel(tx.status) : null;
         
         return (
           <div
@@ -123,7 +137,9 @@ export default function TransactionList() {
                 <div className="text-sm font-semibold text-foreground">
                   {getTransactionTitle(tx)}
                 </div>
-                <div className="text-xs text-muted">{formattedDate}</div>
+                <div className="text-xs text-muted">
+                  {statusLabel ? `${statusLabel} · ${formattedDate}` : formattedDate}
+                </div>
               </div>
             </div>
             <div

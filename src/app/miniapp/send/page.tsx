@@ -231,6 +231,8 @@ export default function SendPage() {
   const [recipientError, setRecipientError] = useState<string | null>(null);
   const [approvedGate, setApprovedGate] = useState(false);
   const [isCheckingBalance, setIsCheckingBalance] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [isCheckingWithdrawBalance, setIsCheckingWithdrawBalance] = useState(false);
 
   const [recipientQuery, setRecipientQuery] = useState("");
   const [recipientLoading, setRecipientLoading] = useState(false);
@@ -343,6 +345,44 @@ export default function SendPage() {
       });
     } finally {
       setIsCheckingBalance(false);
+    }
+  }
+
+  async function onRequestWithdrawConfirm() {
+    setWithdrawError(null);
+
+    const amount = parseUsdLikeAmount(withdrawAmount);
+    if (!withdrawAddress.trim() || !withdrawNetwork.trim()) {
+      setWithdrawError("Completa dirección y red antes de enviar.");
+      return;
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setWithdrawError("Ingresa un monto válido en USDT.");
+      return;
+    }
+
+    setIsCheckingWithdrawBalance(true);
+    try {
+      const refreshed = await refresh().catch(() => ({ ok: false as const }));
+      const available =
+        refreshed && "ok" in refreshed && refreshed.ok && "user" in refreshed && refreshed.user
+          ? Number((refreshed.user as { balance_usdt?: number }).balance_usdt ?? 0)
+          : Number(user?.balance_usdt ?? 0);
+
+      if (!Number.isFinite(available) || available < amount) {
+        setWithdrawError(
+          `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
+        );
+        return;
+      }
+
+      openConfirm({
+        title: "Confirmar solicitud",
+        message: `Solicitar retiro de ${amount.toFixed(2)} USDT a wallet externa?`,
+        onConfirm: () => void performWithdraw(),
+      });
+    } finally {
+      setIsCheckingWithdrawBalance(false);
     }
   }
 
@@ -743,19 +783,21 @@ export default function SendPage() {
                   className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
                 />
 
+                {withdrawError ? (
+                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+                    {withdrawError}
+                  </div>
+                ) : null}
+
                 <div className="mt-4">
                   <button
                     type="button"
+                    disabled={isCheckingWithdrawBalance}
+                    aria-busy={isCheckingWithdrawBalance}
                     className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
-                    onClick={() =>
-                      openConfirm({
-                        title: "Confirmar solicitud",
-                        message: `Solicitar retiro de ${parseUsdLikeAmount(withdrawAmount || "0").toFixed(2)} USDT a wallet externa?`,
-                        onConfirm: () => void performWithdraw(),
-                      })
-                    }
+                    onClick={onRequestWithdrawConfirm}
                   >
-                    Enviar
+                    {isCheckingWithdrawBalance ? "Validando..." : "Enviar"}
                   </button>
                 </div>
               </div>
