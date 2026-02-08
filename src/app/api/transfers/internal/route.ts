@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       | { recipient_telegram_id?: string; amount_usdt?: number }
       | null;
 
-    const recipientTelegramId = (body?.recipient_telegram_id ?? "").trim();
+    const recipientTelegramId = String(body?.recipient_telegram_id ?? "").trim();
     const amount = Number(body?.amount_usdt);
 
     if (!recipientTelegramId || !/^[0-9]+$/.test(recipientTelegramId)) {
@@ -35,14 +35,27 @@ export async function POST(req: Request) {
     const supabase = getSupabaseAdminClient();
 
     const { data, error } = await supabase.rpc("create_internal_transfer", {
-      p_sender_telegram_id: telegramId,
-      p_recipient_telegram_id: BigInt(recipientTelegramId),
+      p_sender_telegram_id: telegramId.toString(),
+      p_recipient_telegram_id: recipientTelegramId,
       p_amount_usdt: amount,
     });
 
     if (error) {
       const msg = error.message || "No se pudo transferir";
-      return NextResponse.json({ ok: false, error: msg }, { status: 400 });
+      const looksLikeMissingRpc =
+        msg.toLowerCase().includes("could not find the function") ||
+        msg.toLowerCase().includes("schema cache") ||
+        msg.toLowerCase().includes("pgrst202");
+
+      return NextResponse.json(
+        {
+          ok: false,
+          error: looksLikeMissingRpc
+            ? "RPC create_internal_transfer no está instalada. Ejecuta supabase/sql/002_app_config.sql en tu proyecto Supabase."
+            : msg,
+        },
+        { status: 400 },
+      );
     }
 
     return NextResponse.json(
@@ -59,4 +72,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

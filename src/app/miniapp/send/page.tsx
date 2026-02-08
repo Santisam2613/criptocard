@@ -275,13 +275,14 @@ export default function SendPage() {
       | { ok: boolean; error?: string }
       | null;
     if (!json?.ok) {
-      window.alert(json?.error ?? "No se pudo transferir");
+      setUserTransferError(json?.error ?? "No se pudo transferir");
       return;
     }
 
     setAmountToUser("");
     setRecipientQuery("");
     setRecipient(null);
+    setRecipientError(null);
     await refresh().catch(() => undefined);
   }
 

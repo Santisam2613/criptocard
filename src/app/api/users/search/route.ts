@@ -27,6 +27,7 @@ export async function GET(req: Request) {
         "telegram_id, telegram_username, telegram_first_name, telegram_last_name, telegram_photo_url",
       )
       .neq("telegram_id", telegramId.toString())
+      .eq("verification_status", "approved")
       .limit(10);
 
     const isNumeric = /^[0-9]+$/.test(q);
@@ -53,4 +54,3 @@ export async function GET(req: Request) {
     );
   }
 }
-
