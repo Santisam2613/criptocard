@@ -94,10 +94,12 @@ function CardRow({
 export default function SendSheetContent() {
   const router = useRouter();
   const { t } = useI18n();
-  const { user, refresh } = useBackendUser();
-  const isApproved = user?.verification_status === "approved";
+  const { state, user, refresh } = useBackendUser();
+  const isReady = state.status === "ready";
+  const isApproved = isReady && user?.verification_status === "approved";
 
   async function onPrimaryAction() {
+    if (!isReady) return;
     if (isApproved) {
       router.push("/miniapp/send");
       return;
@@ -188,10 +190,12 @@ export default function SendSheetContent() {
           <div className="mt-7">
             <button
               type="button"
-              className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+              disabled={!isReady}
+              aria-busy={!isReady}
+              className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:brightness-100 disabled:hover:shadow-none disabled:hover:translate-y-0"
               onClick={onPrimaryAction}
             >
-              {isApproved ? "Continuar" : t("sheets.verifyAccount")}
+              {!isReady ? "Cargando..." : isApproved ? "Continuar" : t("sheets.verifyAccount")}
             </button>
           </div>
         </div>
