@@ -35,6 +35,28 @@ type SearchUser = {
 
 type SendType = "user" | "wallet";
 
+function extractDigits(input: string) {
+  return input.replace(/[^0-9]/g, "");
+}
+
+function addThousandsSeparators(integerPart: string) {
+  return integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatUsdLikeAmountFromDigits(digits: string) {
+  const normalized = digits.replace(/^0+/, "");
+  if (!normalized) return "";
+  if (normalized.length === 1) return `0.0${normalized}`;
+  if (normalized.length === 2) return `0.${normalized}`;
+  const integer = normalized.slice(0, -2);
+  const decimals = normalized.slice(-2);
+  return `${addThousandsSeparators(integer)}.${decimals}`;
+}
+
+function parseUsdLikeAmount(input: string) {
+  return Number(input.replace(/,/g, ""));
+}
+
 function ConfirmDialog(props: {
   open: boolean;
   title: string;
@@ -98,6 +120,63 @@ function ConfirmDialog(props: {
   );
 }
 
+function NoticeDialog(props: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  onClose: () => void;
+}) {
+  const { open, title, message, confirmLabel, onClose } = props;
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="cc-glass-strong cc-neon-outline relative w-full max-w-[380px] rounded-3xl p-6"
+      >
+        <div className="text-base font-extrabold tracking-tight text-foreground">
+          {title}
+        </div>
+        <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
+        <div className="mt-5 flex justify-end">
+          <Button variant="lime" onClick={onClose}>
+            {confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SendPage() {
   const router = useRouter();
   const { state, user, refresh } = useBackendUser();
@@ -107,9 +186,16 @@ export default function SendPage() {
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [noticeOpen, setNoticeOpen] = useState(false);
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeMessage, setNoticeMessage] = useState("");
+  const [noticeConfirmLabel, setNoticeConfirmLabel] = useState("Aceptar");
+  const [noticeAction, setNoticeAction] = useState<(() => void) | null>(null);
   const [pendingShown, setPendingShown] = useState(false);
   const [userTransferError, setUserTransferError] = useState<string | null>(null);
   const [recipientError, setRecipientError] = useState<string | null>(null);
+  const [approvedGate, setApprovedGate] = useState(false);
+  const [isCheckingBalance, setIsCheckingBalance] = useState(false);
 
   const [recipientQuery, setRecipientQuery] = useState("");
   const [recipientLoading, setRecipientLoading] = useState(false);
@@ -129,7 +215,11 @@ export default function SendPage() {
     })();
   }, [refresh, state.status, user?.verification_status]);
 
-  if (state.status !== "ready" || user?.verification_status !== "approved") {
+  useEffect(() => {
+    if (user?.verification_status === "approved") setApprovedGate(true);
+  }, [user?.verification_status]);
+
+  if (!approvedGate && user?.verification_status !== "approved") {
     return <div />;
   }
 
@@ -156,6 +246,19 @@ export default function SendPage() {
     setConfirmOpen(true);
   }
 
+  function openNotice(params: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    onClose?: () => void;
+  }) {
+    setNoticeTitle(params.title);
+    setNoticeMessage(params.message);
+    setNoticeConfirmLabel(params.confirmLabel);
+    setNoticeAction(() => params.onClose ?? null);
+    setNoticeOpen(true);
+  }
+
   function onContinue() {
     if (!sendType) return;
     setPendingShown(false);
@@ -174,30 +277,35 @@ export default function SendPage() {
       return;
     }
 
-    const amount = Number(amountToUser);
+    const amount = parseUsdLikeAmount(amountToUser);
     if (!Number.isFinite(amount) || amount <= 0) {
       setUserTransferError("Ingresa un monto válido en USDT.");
       return;
     }
 
-    const refreshed = await refresh().catch(() => ({ ok: false as const }));
-    const available =
-      refreshed && "ok" in refreshed && refreshed.ok && "user" in refreshed && refreshed.user
-        ? Number((refreshed.user as { balance_usdt?: number }).balance_usdt ?? 0)
-        : Number(user?.balance_usdt ?? 0);
+    setIsCheckingBalance(true);
+    try {
+      const refreshed = await refresh().catch(() => ({ ok: false as const }));
+      const available =
+        refreshed && "ok" in refreshed && refreshed.ok && "user" in refreshed && refreshed.user
+          ? Number((refreshed.user as { balance_usdt?: number }).balance_usdt ?? 0)
+          : Number(user?.balance_usdt ?? 0);
 
-    if (!Number.isFinite(available) || available < amount) {
-      setUserTransferError(
-        `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
-      );
-      return;
+      if (!Number.isFinite(available) || available < amount) {
+        setUserTransferError(
+          `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
+        );
+        return;
+      }
+
+      openConfirm({
+        title: "Confirmar envío",
+        message: `Enviar ${amount.toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
+        onConfirm: () => void performSendToUser(),
+      });
+    } finally {
+      setIsCheckingBalance(false);
     }
-
-    openConfirm({
-      title: "Confirmar envío",
-      message: `Enviar ${amount.toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
-      onConfirm: () => void performSendToUser(),
-    });
   }
 
   async function onSearchRecipient() {
@@ -259,7 +367,7 @@ export default function SendPage() {
 
   async function performSendToUser() {
     if (!recipient) return;
-    const amount = Number(amountToUser);
+    const amount = parseUsdLikeAmount(amountToUser);
     if (!Number.isFinite(amount) || amount <= 0) return;
 
     const res = await fetch("/api/transfers/internal", {
@@ -275,7 +383,11 @@ export default function SendPage() {
       | { ok: boolean; error?: string }
       | null;
     if (!json?.ok) {
-      setUserTransferError(json?.error ?? "No se pudo transferir");
+      openNotice({
+        title: "No se pudo transferir",
+        message: json?.error ?? "Error interno",
+        confirmLabel: "Cerrar",
+      });
       return;
     }
 
@@ -284,10 +396,17 @@ export default function SendPage() {
     setRecipient(null);
     setRecipientError(null);
     await refresh().catch(() => undefined);
+
+    openNotice({
+      title: "Transferencia exitosa",
+      message: `Se envió ${amount.toFixed(2)} USDT correctamente.`,
+      confirmLabel: "Ir al inicio",
+      onClose: () => router.push("/miniapp"),
+    });
   }
 
   async function performWithdraw() {
-    const amount = Number(withdrawAmount);
+    const amount = parseUsdLikeAmount(withdrawAmount);
     if (!withdrawAddress.trim() || !withdrawNetwork.trim()) return;
     if (!Number.isFinite(amount) || amount <= 0) return;
 
@@ -305,7 +424,11 @@ export default function SendPage() {
       | { ok: boolean; error?: string }
       | null;
     if (!json?.ok) {
-      window.alert(json?.error ?? "No se pudo crear solicitud");
+      openNotice({
+        title: "No se pudo enviar",
+        message: json?.error ?? "Error interno",
+        confirmLabel: "Cerrar",
+      });
       return;
     }
 
@@ -314,6 +437,14 @@ export default function SendPage() {
     setWithdrawNetwork("");
     setWithdrawAmount("");
     await refresh().catch(() => undefined);
+
+    openNotice({
+      title: "Solicitud enviada",
+      message:
+        "La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada.",
+      confirmLabel: "Ir al inicio",
+      onClose: () => router.push("/miniapp"),
+    });
   }
 
   return (
@@ -356,6 +487,19 @@ export default function SendPage() {
             const action = confirmAction;
             setConfirmOpen(false);
             setConfirmAction(null);
+            if (action) action();
+          }}
+        />
+
+        <NoticeDialog
+          open={noticeOpen}
+          title={noticeTitle}
+          message={noticeMessage}
+          confirmLabel={noticeConfirmLabel}
+          onClose={() => {
+            const action = noticeAction;
+            setNoticeOpen(false);
+            setNoticeAction(null);
             if (action) action();
           }}
         />
@@ -489,7 +633,11 @@ export default function SendPage() {
                 <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
                 <input
                   value={amountToUser}
-                  onChange={(e) => setAmountToUser(e.target.value)}
+                  onChange={(e) =>
+                    setAmountToUser(
+                      formatUsdLikeAmountFromDigits(extractDigits(e.target.value)),
+                    )
+                  }
                   inputMode="decimal"
                   placeholder="0.00"
                   className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
@@ -504,10 +652,12 @@ export default function SendPage() {
                 <div className="mt-4">
                   <button
                     type="button"
+                    disabled={isCheckingBalance}
+                    aria-busy={isCheckingBalance}
                     className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
                     onClick={onRequestUserTransferConfirm}
                   >
-                    Enviar
+                    {isCheckingBalance ? "Validando..." : "Enviar"}
                   </button>
                 </div>
               </div>
@@ -545,7 +695,11 @@ export default function SendPage() {
                 <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
                 <input
                   value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  onChange={(e) =>
+                    setWithdrawAmount(
+                      formatUsdLikeAmountFromDigits(extractDigits(e.target.value)),
+                    )
+                  }
                   inputMode="decimal"
                   placeholder="0.00"
                   className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
@@ -558,7 +712,7 @@ export default function SendPage() {
                     onClick={() =>
                       openConfirm({
                         title: "Confirmar solicitud",
-                        message: `Solicitar retiro de ${Number(withdrawAmount || 0).toFixed(2)} USDT a wallet externa?`,
+                        message: `Solicitar retiro de ${parseUsdLikeAmount(withdrawAmount || "0").toFixed(2)} USDT a wallet externa?`,
                         onConfirm: () => void performWithdraw(),
                       })
                     }
