@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
@@ -99,6 +99,7 @@ function ConfirmDialog(props: {
 }
 
 export default function SendPage() {
+  const router = useRouter();
   const { state, user, refresh } = useBackendUser();
   const [step, setStep] = useState<1 | 2>(1);
   const [sendType, setSendType] = useState<SendType | null>(null);
@@ -107,6 +108,7 @@ export default function SendPage() {
   const [confirmMessage, setConfirmMessage] = useState("");
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [pendingShown, setPendingShown] = useState(false);
+  const [userTransferError, setUserTransferError] = useState<string | null>(null);
 
   const [recipientQuery, setRecipientQuery] = useState("");
   const [recipientLoading, setRecipientLoading] = useState(false);
@@ -161,6 +163,40 @@ export default function SendPage() {
 
   function onBack() {
     setStep(1);
+  }
+
+  async function onRequestUserTransferConfirm() {
+    setUserTransferError(null);
+
+    if (!recipient) {
+      setUserTransferError("Selecciona un destinatario antes de enviar.");
+      return;
+    }
+
+    const amount = Number(amountToUser);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setUserTransferError("Ingresa un monto válido en USDT.");
+      return;
+    }
+
+    const refreshed = await refresh().catch(() => ({ ok: false as const }));
+    const available =
+      refreshed && "ok" in refreshed && refreshed.ok && "user" in refreshed && refreshed.user
+        ? Number((refreshed.user as { balance_usdt?: number }).balance_usdt ?? 0)
+        : Number(user?.balance_usdt ?? 0);
+
+    if (!Number.isFinite(available) || available < amount) {
+      setUserTransferError(
+        `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
+      );
+      return;
+    }
+
+    openConfirm({
+      title: "Confirmar envío",
+      message: `Enviar ${amount.toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
+      onConfirm: () => void performSendToUser(),
+    });
   }
 
   async function onSearchRecipient() {
@@ -247,7 +283,28 @@ export default function SendPage() {
   return (
     <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-[420px]">
-        <div className="text-2xl font-extrabold tracking-tight">Transferencias</div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            aria-label="Volver"
+            className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            onClick={() => router.back()}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div className="text-2xl font-extrabold tracking-tight">Transferencias</div>
+        </div>
 
         <ConfirmDialog
           open={confirmOpen}
@@ -402,17 +459,17 @@ export default function SendPage() {
                   className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
                 />
 
+                {userTransferError ? (
+                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+                    {userTransferError}
+                  </div>
+                ) : null}
+
                 <div className="mt-4">
                   <button
                     type="button"
                     className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
-                    onClick={() =>
-                      openConfirm({
-                        title: "Confirmar envío",
-                        message: `Enviar ${Number(amountToUser || 0).toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
-                        onConfirm: () => void performSendToUser(),
-                      })
-                    }
+                    onClick={onRequestUserTransferConfirm}
                   >
                     Enviar
                   </button>
