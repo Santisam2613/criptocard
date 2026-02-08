@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 async function redirectToKyc() {
@@ -177,6 +178,40 @@ function NoticeDialog(props: {
   );
 }
 
+function SendPageLoading() {
+  return (
+    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+      <div className="mx-auto w-full max-w-[420px]">
+        <div className="flex items-center gap-3">
+          <div className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full">
+            <Skeleton className="h-4 w-4" rounded="full" />
+          </div>
+          <Skeleton className="h-7 w-44" rounded="2xl" />
+        </div>
+
+        <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
+          <Skeleton className="h-3 w-20" rounded="md" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-2 w-10" rounded="full" />
+            <Skeleton className="h-2 w-10" rounded="full" />
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <Skeleton className="h-5 w-56" rounded="md" />
+          <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
+            <Skeleton className="h-3 w-40" rounded="md" />
+            <Skeleton className="mt-3 h-12 w-full" rounded="2xl" />
+            <Skeleton className="mt-4 h-3 w-32" rounded="md" />
+            <Skeleton className="mt-3 h-12 w-full" rounded="2xl" />
+            <Skeleton className="mt-4 h-12 w-full" rounded="2xl" />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
 export default function SendPage() {
   const router = useRouter();
   const { state, user, refresh } = useBackendUser();
@@ -220,6 +255,9 @@ export default function SendPage() {
   }, [user?.verification_status]);
 
   if (!approvedGate && user?.verification_status !== "approved") {
+    if (state.status === "idle" || state.status === "loading") {
+      return <SendPageLoading />;
+    }
     return <div />;
   }
 

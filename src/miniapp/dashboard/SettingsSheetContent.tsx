@@ -280,6 +280,16 @@ export default function SettingsSheetContent() {
     return null;
   }, [telegram, user]);
 
+  const displayTelegramId = useMemo(() => {
+    if (telegram.status === "ready") return telegram.user?.id ? String(telegram.user.id) : null;
+    if (user?.telegram_id) return String(user.telegram_id);
+    return null;
+  }, [telegram, user]);
+
+  const showTelegramIdLine = useMemo(() => {
+    return Boolean(displayTelegramId) && Boolean(displayHandle?.startsWith("@"));
+  }, [displayHandle, displayTelegramId]);
+
   const appearanceValue = useMemo(() => {
     if (mode === "dark") return t("nav.dark");
     if (mode === "light") return t("nav.light");
@@ -320,6 +330,11 @@ export default function SettingsSheetContent() {
                 {displayHandle}
               </div>
             )}
+            {showTelegramIdLine && displayTelegramId && (
+              <div className="mt-1 text-sm font-medium text-muted">
+                ID: {displayTelegramId}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -333,8 +348,8 @@ export default function SettingsSheetContent() {
               isProfileLoading
                 ? undefined
                 : user && user.verification_status === "approved"
-                  ? t("verification.approved")
-                  : t("settings.notVerified")
+                  ? "Verificado"
+                  : "No verificado"
             }
           />
         </div>
