@@ -109,6 +109,7 @@ export default function SendPage() {
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [pendingShown, setPendingShown] = useState(false);
   const [userTransferError, setUserTransferError] = useState<string | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
 
   const [recipientQuery, setRecipientQuery] = useState("");
   const [recipientLoading, setRecipientLoading] = useState(false);
@@ -203,19 +204,53 @@ export default function SendPage() {
     const q = recipientQuery.trim();
     if (!q) return;
 
+    const normalized = q.startsWith("@") ? q.slice(1) : q;
+    const selfId = String(user?.telegram_id ?? "").trim();
+    const selfUsername = String(user?.telegram_username ?? "").trim().toLowerCase();
+    if (
+      (selfId && normalized === selfId) ||
+      (selfUsername && normalized.toLowerCase() === selfUsername)
+    ) {
+      setRecipient(null);
+      setRecipientError("No puedes enviarte a ti mismo.");
+      return;
+    }
+
+    setRecipient(null);
+    setRecipientError(null);
     setRecipientLoading(true);
     try {
-      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const json = (await res.json().catch(() => null)) as
-        | { ok: boolean; users?: SearchUser[] }
-        | null;
-      if (!json?.ok || !json.users?.length) {
-        setRecipient(null);
+      async function doFetch() {
+        return fetch(`/api/users/search?q=${encodeURIComponent(normalized)}`, {
+          credentials: "include",
+          cache: "no-store",
+        });
+      }
+
+      let res = await doFetch();
+      if (res.status === 401) {
+        await refresh().catch(() => undefined);
+        res = await doFetch();
+      }
+
+      if (!res.ok) {
+        setRecipientError("No se pudo buscar el usuario.");
         return;
       }
+
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; users?: SearchUser[]; error?: string }
+        | null;
+      if (!json?.ok) {
+        setRecipientError(json?.error ?? "No se pudo buscar el usuario.");
+        return;
+      }
+
+      if (!json.users?.length) {
+        setRecipientError("No encontramos un usuario con ese dato.");
+        return;
+      }
+
       setRecipient(json.users[0]);
     } finally {
       setRecipientLoading(false);
@@ -229,7 +264,7 @@ export default function SendPage() {
 
     const res = await fetch("/api/transfers/internal", {
       method: "POST",
-      credentials: "include",
+        credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         recipient_telegram_id: recipient.telegram_id,
@@ -446,7 +481,7 @@ export default function SendPage() {
                   </div>
                 ) : (
                   <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
-                    Busca un usuario para continuar.
+                    {recipientError ?? "Busca un usuario para continuar."}
                   </div>
                 )}
 
