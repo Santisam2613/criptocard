@@ -241,6 +241,7 @@ export default function SendPage() {
   const [withdrawAddress, setWithdrawAddress] = useState("");
   const [withdrawNetwork, setWithdrawNetwork] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [minWithdrawalUsdt, setMinWithdrawalUsdt] = useState<number | null>(null);
 
   useEffect(() => {
     if (state.status === "idle" || state.status === "loading") return;
@@ -255,6 +256,30 @@ export default function SendPage() {
   useEffect(() => {
     if (user?.verification_status === "approved") setApprovedGate(true);
   }, [user?.verification_status]);
+
+  useEffect(() => {
+    let canceled = false;
+    async function loadMinWithdrawal() {
+      try {
+        const res = await fetch("/api/config/min-withdrawal", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const json = (await res.json().catch(() => null)) as
+          | { ok: boolean; minWithdrawalUsdt?: number }
+          | null;
+        if (!json?.ok) return;
+        if (canceled) return;
+        setMinWithdrawalUsdt(
+          Number.isFinite(Number(json.minWithdrawalUsdt)) ? Number(json.minWithdrawalUsdt) : 0,
+        );
+      } catch {}
+    }
+    void loadMinWithdrawal();
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   if (!approvedGate && user?.verification_status !== "approved") {
     if (state.status === "idle" || state.status === "loading") {
@@ -358,6 +383,12 @@ export default function SendPage() {
     }
     if (!Number.isFinite(amount) || amount <= 0) {
       setWithdrawError("Ingresa un monto válido en USDT.");
+      return;
+    }
+    if (minWithdrawalUsdt !== null && amount < minWithdrawalUsdt) {
+      setWithdrawError(
+        `El monto mínimo de retiro es ${minWithdrawalUsdt.toFixed(2)} USDT.`,
+      );
       return;
     }
 
@@ -742,7 +773,9 @@ export default function SendPage() {
             ) : (
               <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
                 <div className="rounded-2xl bg-white/5 p-4 text-sm text-muted">
-                  La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada
+                  El monto mínimo de retiro es{" "}
+                  {(minWithdrawalUsdt ?? 0).toFixed(2)} USDT. La solicitud quedará en espera y
+                  puede tardar hasta 72 horas en ser aprobada
                 </div>
 
                 {pendingShown ? (

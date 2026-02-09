@@ -185,6 +185,8 @@ export default function ReferralPage() {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const isProfileLoading = state.status === "idle" || state.status === "loading";
+  const rewardPageSize = 8;
+  const [rewardPage, setRewardPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -385,8 +387,18 @@ export default function ReferralPage() {
   const rate = summary?.diamond_to_usdt_rate ?? 0.01;
 
   const rewardItems = summary?.referrals ?? [];
+  const rewardTotalPages = Math.max(1, Math.ceil(rewardItems.length / rewardPageSize));
+  const rewardCurrentPage = Math.min(rewardPage, rewardTotalPages);
+  const rewardPageItems = useMemo(() => {
+    const start = (rewardCurrentPage - 1) * rewardPageSize;
+    return rewardItems.slice(start, start + rewardPageSize);
+  }, [rewardCurrentPage, rewardItems]);
   const myReferrer = summary?.my_referrer ?? null;
   const myReferrerName = myReferrer?.referrer ? personLabel(myReferrer.referrer) : null;
+
+  useEffect(() => {
+    setRewardPage(1);
+  }, [rewardItems.length]);
 
   return (
     <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
@@ -611,7 +623,7 @@ export default function ReferralPage() {
         ) : (
           <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-1">
             <div className="space-y-2 p-2">
-              {rewardItems.map((r) => {
+              {rewardPageItems.map((r) => {
                 const name =
                   r.referred?.telegram_username
                     ? `@${r.referred.telegram_username}`
@@ -644,6 +656,29 @@ export default function ReferralPage() {
                 );
               })}
             </div>
+            {rewardTotalPages > 1 ? (
+              <div className="flex items-center justify-between gap-3 px-3 pb-3">
+                <button
+                  type="button"
+                  disabled={rewardCurrentPage <= 1}
+                  onClick={() => setRewardPage((p) => Math.max(1, p - 1))}
+                  className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Anterior
+                </button>
+                <div className="text-xs font-semibold text-muted">
+                  Página {rewardCurrentPage} de {rewardTotalPages}
+                </div>
+                <button
+                  type="button"
+                  disabled={rewardCurrentPage >= rewardTotalPages}
+                  onClick={() => setRewardPage((p) => Math.min(rewardTotalPages, p + 1))}
+                  className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Siguiente
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

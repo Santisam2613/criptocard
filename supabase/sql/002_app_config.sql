@@ -357,9 +357,24 @@ declare
   v_user_id uuid;
   v_status public.verification_status;
   v_tx_id uuid := gen_random_uuid();
+  v_min_topup numeric(20, 6);
 begin
   if p_amount_usdt is null or p_amount_usdt <= 0 then
     raise exception 'Monto inválido';
+  end if;
+
+  select coalesce(nullif(value, '')::numeric(20, 6), 0::numeric(20, 6))
+    into v_min_topup
+  from public.config
+  where key = 'min_topup_usdt'
+  limit 1;
+
+  if v_min_topup is null then
+    v_min_topup := 0::numeric(20, 6);
+  end if;
+
+  if v_min_topup > 0 and p_amount_usdt < v_min_topup then
+    raise exception 'El monto mínimo de recarga es % USDT', v_min_topup;
   end if;
 
   select id, verification_status
@@ -780,7 +795,8 @@ create table if not exists public.config (
 insert into public.config (key, value) values
 ('diamond_to_usdt_rate', '0.01'), -- 1 diamante = 0.01 USDT
 ('referral_reward_usdt', '5.00'),
-('min_withdrawal_usdt', '10.00')
+('min_withdrawal_usdt', '10.00'),
+('min_topup_usdt', '1.00')
 on conflict (key) do nothing;
 
 alter table public.config enable row level security;

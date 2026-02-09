@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useTransactions, Transaction } from "@/miniapp/hooks/useTransactions";
 import Skeleton from "@/components/ui/Skeleton";
@@ -9,6 +10,25 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-500">
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M12 5v14M5 12h14" />
+          </svg>
+        </div>
+      );
+    case "referral_conversion":
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M19 8l1 1-1 1" />
+            <path d="M21 9h-4" />
           </svg>
         </div>
       );
@@ -88,6 +108,19 @@ function getStatusLabel(status: Transaction["status"]) {
 
 export default function TransactionList() {
   const { transactions, isLoading } = useTransactions();
+  const pageSize = 8;
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [transactions.length]);
+
+  const totalPages = Math.max(1, Math.ceil(transactions.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return transactions.slice(start, start + pageSize);
+  }, [currentPage, transactions]);
 
   if (isLoading) {
     return (
@@ -120,8 +153,9 @@ export default function TransactionList() {
   }
 
   return (
-    <div className="space-y-2">
-      {transactions.map((tx) => {
+    <div>
+      <div className="space-y-2">
+        {pageItems.map((tx) => {
         const isPositive = tx.amount_usdt > 0;
         const formattedDate = format(new Date(tx.created_at), "dd MMM, HH:mm");
         const statusLabel = tx.type === "withdraw" ? getStatusLabel(tx.status) : null;
@@ -152,7 +186,32 @@ export default function TransactionList() {
             </div>
           </div>
         );
-      })}
+        })}
+      </div>
+
+      {totalPages > 1 ? (
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Anterior
+          </button>
+          <div className="text-xs font-semibold text-muted">
+            Página {currentPage} de {totalPages}
+          </div>
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Siguiente
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -35,6 +35,7 @@ export default function TopUpPage() {
   const [approvedGate, setApprovedGate] = useState(false);
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [minTopupUsdt, setMinTopupUsdt] = useState<number | null>(null);
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
@@ -50,6 +51,30 @@ export default function TopUpPage() {
   useEffect(() => {
     if (user?.verification_status === "approved") setApprovedGate(true);
   }, [user?.verification_status]);
+
+  useEffect(() => {
+    let canceled = false;
+    async function loadMinTopup() {
+      try {
+        const res = await fetch("/api/config/min-topup", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const json = (await res.json().catch(() => null)) as
+          | { ok: boolean; minTopupUsdt?: number }
+          | null;
+        if (!json?.ok) return;
+        if (canceled) return;
+        setMinTopupUsdt(
+          Number.isFinite(Number(json.minTopupUsdt)) ? Number(json.minTopupUsdt) : 0,
+        );
+      } catch {}
+    }
+    void loadMinTopup();
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   if (!approvedGate && user?.verification_status !== "approved") {
     if (state.status === "idle" || state.status === "loading") {
@@ -94,6 +119,14 @@ export default function TopUpPage() {
       openNotice({
         title: "Monto inválido",
         message: "Ingresa un monto válido en USDT.",
+        confirmLabel: "Cerrar",
+      });
+      return;
+    }
+    if (minTopupUsdt !== null && value < minTopupUsdt) {
+      openNotice({
+        title: "Monto mínimo",
+        message: `El monto mínimo para recargar es ${minTopupUsdt.toFixed(2)} USDT.`,
         confirmLabel: "Cerrar",
       });
       return;
@@ -187,6 +220,9 @@ export default function TopUpPage() {
             placeholder="0.00"
             className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
           />
+          <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
+            El monto mínimo para recargar es {(minTopupUsdt ?? 0).toFixed(2)} USDT
+          </div>
 
           <div className="mt-4">
             <button
@@ -204,4 +240,3 @@ export default function TopUpPage() {
     </main>
   );
 }
-
