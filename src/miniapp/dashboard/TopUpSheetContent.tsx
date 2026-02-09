@@ -175,8 +175,12 @@ export default function TopUpSheetContent() {
               disabled={!isReady}
               aria-busy={!isReady}
               onClick={() => {
-                if (!isReady || !isApproved) return;
-                router.push("/miniapp/topup");
+                if (!isReady) return;
+                if (isApproved) {
+                  router.push("/miniapp/topup");
+                  return;
+                }
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
               }}
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >

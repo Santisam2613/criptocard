@@ -105,26 +105,8 @@ export default function SendSheetContent() {
       return;
     }
 
-    const r = await refresh();
-    if (!r.ok) return;
-
-    const res = await fetch("/api/kyc/sumsub/websdk-link", {
-      method: "POST",
-      credentials: "include",
-    });
-    const json = (await res.json().catch(() => null)) as
-      | { ok: boolean; url?: string }
-      | null;
-    if (!json?.ok || !json.url) return;
-
-    const wa = window.Telegram?.WebApp;
-    if (wa?.openLink) {
-      try {
-        wa.openLink(json.url);
-        return;
-      } catch {}
-    }
-    window.location.href = json.url;
+    await refresh().catch(() => undefined);
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
   }
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
