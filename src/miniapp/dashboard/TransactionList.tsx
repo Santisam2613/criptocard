@@ -13,6 +13,24 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
           </svg>
         </div>
       );
+    case "card_purchase":
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20 text-violet-500">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="6" width="18" height="12" rx="2" />
+            <path d="M3 10h18" />
+            <path d="M8 15h3" />
+          </svg>
+        </div>
+      );
     case "referral_conversion":
       return (
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500">
@@ -84,6 +102,8 @@ function getTransactionTitle(tx: Transaction) {
       return "Retiro de fondos";
     case "referral_conversion":
       return "Recompensa por referido";
+    case "card_purchase":
+      return "Compra tarjeta virtual";
     case "stripe_payment":
       return tx.metadata?.merchant_name || "Pago con tarjeta";
     case "diamond_conversion":

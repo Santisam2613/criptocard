@@ -32,7 +32,8 @@ create type public.transaction_type as enum (
   'withdraw',
   'referral_conversion',
   'stripe_payment',
-  'diamond_conversion'
+  'diamond_conversion',
+  'card_purchase'
 );
 
 create type public.transaction_status as enum (
@@ -447,6 +448,168 @@ create policy cards_select_own
 on public.cards for select
 using (user_id in (select id from public.users where telegram_id = public.request_telegram_id()));
 
+create or replace function public.purchase_virtual_card(
+  p_buyer_telegram_id bigint
+)
+returns table (
+  card_id uuid,
+  transaction_id uuid,
+  price_usdt numeric(20, 6),
+  last_4 text,
+  expiry_month int,
+  expiry_year int,
+  status public.card_status,
+  brand text,
+  cardholder_name text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid;
+  v_status public.verification_status;
+  v_first_name text;
+  v_last_name text;
+  v_username text;
+  v_price numeric(20, 6);
+  v_balance numeric(20, 6);
+  v_tx_id uuid := gen_random_uuid();
+  v_card_id uuid := gen_random_uuid();
+  v_last4 text;
+  v_exp_month int;
+  v_exp_year int;
+  v_cardholder text;
+begin
+  select id,
+         verification_status,
+         telegram_first_name,
+         telegram_last_name,
+         telegram_username
+    into v_user_id, v_status, v_first_name, v_last_name, v_username
+  from public.users
+  where telegram_id = p_buyer_telegram_id
+  limit 1;
+
+  if v_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  if v_status != 'approved' then
+    raise exception 'Cuenta no verificada';
+  end if;
+
+  if exists (
+    select 1
+    from public.cards c
+    where c.user_id = v_user_id
+      and c.type = 'virtual'::public.card_type
+  ) then
+    raise exception 'Ya tienes una tarjeta virtual';
+  end if;
+
+  select coalesce(nullif(value, '')::numeric(20, 6), 30::numeric(20, 6))
+    into v_price
+  from public.config
+  where key = 'virtual_card_price_usdt'
+  limit 1;
+
+  if v_price is null or v_price <= 0 then
+    v_price := 30::numeric(20, 6);
+  end if;
+
+  insert into public.wallets (user_id, usdt_balance)
+  values (v_user_id, 0)
+  on conflict (user_id) do nothing;
+
+  select usdt_balance
+    into v_balance
+  from public.wallets
+  where user_id = v_user_id
+  for update;
+
+  if v_balance is null then
+    v_balance := 0;
+  end if;
+
+  if v_balance < v_price then
+    raise exception 'Fondos insuficientes';
+  end if;
+
+  v_last4 := lpad((floor(random() * 10000))::int::text, 4, '0');
+  v_exp_month := 12;
+  v_exp_year := (extract(year from now())::int + 3);
+  v_cardholder := btrim(
+    coalesce(nullif(v_first_name, ''), '') ||
+    case when coalesce(nullif(v_last_name, ''), '') <> '' then
+      ' ' || v_last_name
+    else
+      ''
+    end
+  );
+  if v_cardholder = '' then
+    v_cardholder := coalesce(nullif(v_username, ''), p_buyer_telegram_id::text);
+  end if;
+
+  insert into public.cards (
+    id,
+    user_id,
+    type,
+    status,
+    last_4,
+    expiry_month,
+    expiry_year,
+    brand,
+    currency,
+    metadata
+  ) values (
+    v_card_id,
+    v_user_id,
+    'virtual'::public.card_type,
+    'active'::public.card_status,
+    v_last4,
+    v_exp_month,
+    v_exp_year,
+    'visa',
+    'USD',
+    jsonb_build_object(
+      'cardholder_name', v_cardholder
+    )
+  );
+
+  insert into public.transactions (
+    id,
+    type,
+    user_id,
+    amount_usdt,
+    status,
+    metadata
+  ) values (
+    v_tx_id,
+    'card_purchase',
+    v_user_id,
+    -v_price,
+    'completed',
+    jsonb_build_object(
+      'description', 'Compra tarjeta virtual',
+      'card_id', v_card_id,
+      'card_type', 'virtual'
+    )
+  );
+
+  card_id := v_card_id;
+  transaction_id := v_tx_id;
+  price_usdt := v_price;
+  last_4 := v_last4;
+  expiry_month := v_exp_month;
+  expiry_year := v_exp_year;
+  status := 'active'::public.card_status;
+  brand := 'visa';
+  cardholder_name := v_cardholder;
+  return next;
+end;
+$$;
+
 -- ==============================================================================
 -- 8. SISTEMA DE REFERIDOS
 -- ==============================================================================
@@ -796,7 +959,8 @@ insert into public.config (key, value) values
 ('diamond_to_usdt_rate', '0.01'), -- 1 diamante = 0.01 USDT
 ('referral_reward_usdt', '5.00'),
 ('min_withdrawal_usdt', '10.00'),
-('min_topup_usdt', '1.00')
+('min_topup_usdt', '1.00'),
+('virtual_card_price_usdt', '30.00')
 on conflict (key) do nothing;
 
 alter table public.config enable row level security;

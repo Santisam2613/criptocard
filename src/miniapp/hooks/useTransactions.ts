@@ -6,6 +6,7 @@ export type TransactionType =
   | "transfer"
   | "withdraw"
   | "referral_conversion"
+  | "card_purchase"
   | "stripe_payment"
   | "diamond_conversion";
 

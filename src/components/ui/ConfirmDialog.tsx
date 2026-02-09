@@ -2,16 +2,18 @@ import { useEffect } from "react";
 
 import Button from "@/components/ui/Button";
 
-export type NoticeDialogProps = {
+export type ConfirmDialogProps = {
   open: boolean;
   title: string;
   message: string;
+  cancelLabel: string;
   confirmLabel: string;
-  onClose: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
 };
 
-export default function NoticeDialog(props: NoticeDialogProps) {
-  const { open, title, message, confirmLabel, onClose } = props;
+export default function ConfirmDialog(props: ConfirmDialogProps) {
+  const { open, title, message, cancelLabel, confirmLabel, onCancel, onConfirm } = props;
 
   useEffect(() => {
     if (!open) return;
@@ -25,11 +27,11 @@ export default function NoticeDialog(props: NoticeDialogProps) {
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCancel();
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [open, onCancel]);
 
   if (!open) return null;
 
@@ -39,7 +41,7 @@ export default function NoticeDialog(props: NoticeDialogProps) {
         type="button"
         aria-label="Close"
         className="absolute inset-0 bg-black/45 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={onCancel}
       />
       <div
         role="dialog"
@@ -51,8 +53,15 @@ export default function NoticeDialog(props: NoticeDialogProps) {
           {title}
         </div>
         <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
-        <div className="mt-5 flex justify-end">
-          <Button variant="lime" onClick={onClose}>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            className="cc-cta cc-glass inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-foreground ring-1 ring-border"
+            onClick={onCancel}
+          >
+            {cancelLabel}
+          </button>
+          <Button variant="lime" onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>
@@ -60,3 +69,4 @@ export default function NoticeDialog(props: NoticeDialogProps) {
     </div>
   );
 }
+

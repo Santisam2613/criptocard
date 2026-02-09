@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import BottomSheet from "@/components/ui/BottomSheet";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
 import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
@@ -12,6 +13,7 @@ import SendSheetContent from "@/miniapp/dashboard/SendSheetContent";
 import TopUpSheetContent from "@/miniapp/dashboard/TopUpSheetContent";
 import VirtualAccountsSheetContent from "@/miniapp/dashboard/VirtualAccountsSheetContent";
 import VisaCardSheetContent from "@/miniapp/dashboard/VisaCardSheetContent";
+import VirtualVisaCardOwnedSheetContent from "@/miniapp/dashboard/VirtualVisaCardOwnedSheetContent";
 import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { getPublicCredentials } from "@/config/credentials";
@@ -39,8 +41,29 @@ export default function DashboardView() {
   const [kycOpen, setKycOpen] = useState(false);
   const [supportLink, setSupportLink] = useState<string | null>(null);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [noticeOpen, setNoticeOpen] = useState(false);
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeMessage, setNoticeMessage] = useState("");
+  const [noticeLabel, setNoticeLabel] = useState("OK");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmLabel, setConfirmLabel] = useState("Confirmar");
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [referralEligible, setReferralEligible] = useState<number | null>(null);
   const [referralRate, setReferralRate] = useState<number | null>(null);
+  const [virtualCardLoading, setVirtualCardLoading] = useState(false);
+  const [virtualCardPrice, setVirtualCardPrice] = useState<number | null>(null);
+  const [virtualCard, setVirtualCard] = useState<null | {
+    id: string;
+    status: string;
+    last4: string | null;
+    expiryMonth: number | null;
+    expiryYear: number | null;
+    brand: string | null;
+    currency: string | null;
+    cardholderName: string;
+  }>(null);
   const { t } = useI18n();
   const { state, user, refresh } = useBackendUser();
   const telegram = useTelegram();
@@ -54,6 +77,7 @@ export default function DashboardView() {
   const okLabel = t("dashboard.ok");
   const isPhysicalComingSoon = true;
   const isVirtualAccountsComingSoon = true;
+  const isApproved = state.status === "ready" && user?.verification_status === "approved";
 
   useEffect(() => {
     if (state.status !== "ready") return;
@@ -85,6 +109,98 @@ export default function DashboardView() {
       canceled = true;
     };
   }, [state.status]);
+
+  useEffect(() => {
+    if (state.status !== "ready") return;
+    if (sheet !== "virtual") return;
+    let canceled = false;
+    async function loadVirtualCard() {
+      setVirtualCardLoading(true);
+      try {
+        const res = await fetch("/api/cards/virtual", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const json = (await res.json().catch(() => null)) as
+          | { ok: boolean; priceUsdt?: number; card?: typeof virtualCard }
+          | null;
+        if (!json?.ok) return;
+        if (canceled) return;
+        setVirtualCardPrice(Number(json.priceUsdt ?? 30));
+        setVirtualCard((json.card as any) ?? null);
+      } finally {
+        if (!canceled) setVirtualCardLoading(false);
+      }
+    }
+    void loadVirtualCard();
+    return () => {
+      canceled = true;
+    };
+  }, [sheet, state.status]);
+
+  function openNotice(params: { title: string; message: string; confirmLabel: string }) {
+    setNoticeTitle(params.title);
+    setNoticeMessage(params.message);
+    setNoticeLabel(params.confirmLabel);
+    setNoticeOpen(true);
+  }
+
+  function openConfirm(params: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+  }) {
+    setConfirmTitle(params.title);
+    setConfirmMessage(params.message);
+    setConfirmLabel(params.confirmLabel);
+    setConfirmAction(() => params.onConfirm);
+    setConfirmOpen(true);
+  }
+
+  async function performBuyVirtualCard() {
+    if (!isApproved) return;
+    try {
+      const res = await fetch("/api/cards/virtual/purchase", {
+        method: "POST",
+        credentials: "include",
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; error?: string }
+        | null;
+      if (!json?.ok) {
+        openNotice({
+          title: "No se pudo comprar",
+          message: json?.error ?? "Error interno",
+          confirmLabel: "Cerrar",
+        });
+        return;
+      }
+      await refresh().catch(() => undefined);
+      const vr = await fetch("/api/cards/virtual", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const vj = (await vr.json().catch(() => null)) as
+        | { ok: boolean; priceUsdt?: number; card?: any }
+        | null;
+      if (vj?.ok) {
+        setVirtualCardPrice(Number(vj.priceUsdt ?? 30));
+        setVirtualCard(vj.card ?? null);
+      }
+      openNotice({
+        title: "Tarjeta adquirida",
+        message: "Tu tarjeta virtual fue activada correctamente.",
+        confirmLabel: "OK",
+      });
+    } catch {
+      openNotice({
+        title: "No se pudo comprar",
+        message: "Error interno",
+        confirmLabel: "Cerrar",
+      });
+    }
+  }
 
   useEffect(() => {
     let canceled = false;
@@ -180,12 +296,36 @@ export default function DashboardView() {
   return (
     <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
       <div className="mx-auto w-full max-w-[420px]">
+        <ConfirmDialog
+          open={confirmOpen}
+          title={confirmTitle}
+          message={confirmMessage}
+          cancelLabel="Cancelar"
+          confirmLabel={confirmLabel}
+          onCancel={() => {
+            setConfirmOpen(false);
+            setConfirmAction(null);
+          }}
+          onConfirm={() => {
+            const action = confirmAction;
+            setConfirmOpen(false);
+            setConfirmAction(null);
+            if (action) action();
+          }}
+        />
         <NoticeDialog
           open={comingSoonOpen}
           title={comingSoonLabel}
           message={comingSoonMessage}
           confirmLabel={okLabel}
           onClose={() => setComingSoonOpen(false)}
+        />
+        <NoticeDialog
+          open={noticeOpen}
+          title={noticeTitle}
+          message={noticeMessage}
+          confirmLabel={noticeLabel}
+          onClose={() => setNoticeOpen(false)}
         />
         <SumsubWebSdkModal
           open={kycOpen}
@@ -556,7 +696,7 @@ export default function DashboardView() {
         label={t("dashboard.virtualAccountsSheet")}
         onClose={() => setSheet(null)}
       >
-        <VirtualAccountsSheetContent />
+        <VirtualAccountsSheetContent onAction={() => setSheet(null)} />
       </BottomSheet>
 
       <BottomSheet
@@ -564,19 +704,50 @@ export default function DashboardView() {
         label={t("dashboard.visaVirtualSheet")}
         onClose={() => setSheet(null)}
       >
-        <VisaCardSheetContent
-          header={t("dashboard.visaVirtualSheet")}
-          title={t("visaCard.titleSignature")}
-          description={t("visaCard.description")}
-          tags={[
-            t("visaCard.tagTopUp"),
-            t("visaCard.tagAppleGoogle"),
-            t("visaCard.tagNoLimits"),
-            t("visaCard.tagVisaBenefits"),
-          ]}
-          actionLabel={t("sheets.verifyAccount")}
-          onAction={startVerification}
-        />
+        {isApproved && virtualCard ? (
+          <VirtualVisaCardOwnedSheetContent
+            header={t("dashboard.visaVirtualSheet")}
+            cardholderName={virtualCard.cardholderName}
+            last4={virtualCard.last4 ?? "0000"}
+            expiryMonth={virtualCard.expiryMonth ?? 12}
+            expiryYear={virtualCard.expiryYear ?? new Date().getFullYear() + 3}
+            onUnlock={() => setComingSoonOpen(true)}
+            onReplace={() => setComingSoonOpen(true)}
+          />
+        ) : (
+          <VisaCardSheetContent
+            header={t("dashboard.visaVirtualSheet")}
+            title={t("visaCard.titleSignature")}
+            description={t("visaCard.description")}
+            tags={[
+              t("visaCard.tagTopUp"),
+              t("visaCard.tagAppleGoogle"),
+              t("visaCard.tagNoLimits"),
+              t("visaCard.tagVisaBenefits"),
+            ]}
+            actionLabel={
+              isApproved
+                ? virtualCardLoading
+                  ? "Cargando..."
+                  : `Comprar por ${(virtualCardPrice ?? 30).toFixed(2)} USDT`
+                : t("sheets.verifyAccount")
+            }
+            onAction={() => {
+              if (!isApproved) {
+                setSheet(null);
+                return;
+              }
+              if (virtualCardLoading) return;
+              const price = Number(virtualCardPrice ?? 30);
+              openConfirm({
+                title: "Confirmar compra",
+                message: `Comprar tarjeta virtual por ${price.toFixed(2)} USDT?`,
+                confirmLabel: "Comprar",
+                onConfirm: () => void performBuyVirtualCard(),
+              });
+            }}
+          />
+        )}
       </BottomSheet>
 
       <BottomSheet
