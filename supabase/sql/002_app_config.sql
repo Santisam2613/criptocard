@@ -10,6 +10,25 @@ create table if not exists public.wallets (
   constraint balance_non_negative check (usdt_balance >= 0)
 );
 
+create or replace function public.prevent_wallet_manual_write()
+returns trigger
+language plpgsql
+as $$
+begin
+  if current_setting('app.allow_wallet_write', true) = '1' then
+    if TG_OP = 'DELETE' then
+      return old;
+    end if;
+    return new;
+  end if;
+  raise exception 'No se permite modificar wallets directamente. Use el ledger (transactions).';
+end;
+$$;
+
+create trigger a_wallets_prevent_manual_write
+before insert or update or delete on public.wallets
+for each row execute function public.prevent_wallet_manual_write();
+
 -- Trigger para updated_at en wallets
 create trigger wallets_set_updated_at
 before update on public.wallets
@@ -82,7 +101,8 @@ as $$
 begin
   -- Solo procesar transacciones completadas
   if new.status = 'completed' and (old.status is null or old.status != 'completed') then
-    
+    perform set_config('app.allow_wallet_write', '1', true);
+
     -- Upsert wallet (crear si no existe)
     insert into public.wallets (user_id, usdt_balance)
     values (new.user_id, 0)
@@ -98,6 +118,7 @@ begin
       raise exception 'Fondos insuficientes para la transacción %', new.id;
     end if;
 
+    perform set_config('app.allow_wallet_write', '0', true);
   end if;
   return new;
 end;
@@ -627,6 +648,24 @@ create table if not exists public.referrals (
   updated_at timestamptz not null default now()
 );
 
+create or replace function public.prevent_referrals_reward_tampering()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.referrer_user_id != old.referrer_user_id
+    or new.referred_user_id != old.referred_user_id
+    or new.reward_amount_usdt != old.reward_amount_usdt then
+    raise exception 'No se permite modificar campos sensibles de referrals';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger a_referrals_prevent_reward_tampering
+before update on public.referrals
+for each row execute function public.prevent_referrals_reward_tampering();
+
 create trigger referrals_set_updated_at
 before update on public.referrals
 for each row execute function public.set_updated_at();
@@ -914,6 +953,8 @@ as $$
 declare
   current_bal int;
 begin
+  perform set_config('app.allow_diamonds_wallet_write', '1', true);
+
   insert into public.diamonds_wallet (user_id, balance) values (new.user_id, 0)
   on conflict (user_id) do nothing;
   
@@ -928,7 +969,8 @@ begin
   if current_bal < 0 then
     raise exception 'Balance de diamantes insuficiente';
   end if;
-  
+
+  perform set_config('app.allow_diamonds_wallet_write', '0', true);
   return new;
 end;
 $$;
@@ -943,6 +985,25 @@ alter table public.diamonds_ledger enable row level security;
 create policy diamonds_select_own
 on public.diamonds_wallet for select
 using (user_id in (select id from public.users where telegram_id = public.request_telegram_id()));
+
+create or replace function public.prevent_diamonds_wallet_manual_write()
+returns trigger
+language plpgsql
+as $$
+begin
+  if current_setting('app.allow_diamonds_wallet_write', true) = '1' then
+    if TG_OP = 'DELETE' then
+      return old;
+    end if;
+    return new;
+  end if;
+  raise exception 'No se permite modificar diamonds_wallet directamente. Use diamonds_ledger.';
+end;
+$$;
+
+create trigger a_diamonds_wallet_prevent_manual_write
+before insert or update or delete on public.diamonds_wallet
+for each row execute function public.prevent_diamonds_wallet_manual_write();
 
 -- ==============================================================================
 -- 10. CONFIGURACIÓN GLOBAL (Seed básico)
@@ -964,3 +1025,22 @@ on conflict (key) do nothing;
 
 alter table public.config enable row level security;
 create policy config_read_all on public.config for select using (true);
+
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    begin execute 'alter publication supabase_realtime add table public.wallets'; exception when others then null; end;
+    begin execute 'alter publication supabase_realtime add table public.transactions'; exception when others then null; end;
+    begin execute 'alter publication supabase_realtime add table public.referrals'; exception when others then null; end;
+    begin execute 'alter publication supabase_realtime add table public.cards'; exception when others then null; end;
+  end if;
+end;
+$$;
+
+do $$
+begin
+  begin execute 'revoke insert, update, delete on table public.wallets from anon, authenticated'; exception when others then null; end;
+  begin execute 'revoke insert, update, delete on table public.diamonds_wallet from anon, authenticated'; exception when others then null; end;
+  begin execute 'revoke update on table public.referrals from anon, authenticated'; exception when others then null; end;
+end;
+$$;
