@@ -19,6 +19,7 @@ import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { getPublicCredentials } from "@/config/credentials";
 import { useTelegram } from "@/telegram/TelegramContext";
 import SumsubWebSdkModal from "@/miniapp/kyc/SumsubWebSdkModal";
+import { formatInteger, formatUsdt } from "@/lib/format/number";
 
 type Sheet =
   | "settings"
@@ -396,7 +397,7 @@ export default function DashboardView() {
             </div>
           ) : (
             <div className="mt-2 text-5xl font-extrabold tracking-tight">
-              {`$${(user?.balance_usdt ?? 0).toFixed(2)}`}
+              {`$${formatUsdt(user?.balance_usdt ?? 0)}`}
             </div>
           )}
           </div>
@@ -646,10 +647,10 @@ export default function DashboardView() {
               ) : (
                 <>
                   <div className="text-sm font-semibold text-foreground">
-                    {referralEligible}
+                    {formatInteger(referralEligible)}
                   </div>
                   <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                    {(referralEligible * referralRate).toFixed(2)} USDT
+                    {formatUsdt(referralEligible * referralRate)} USDT
                   </div>
                 </>
               )}
@@ -729,7 +730,7 @@ export default function DashboardView() {
               isApproved
                 ? virtualCardLoading
                   ? "Cargando..."
-                  : `Comprar por ${(virtualCardPrice ?? 30).toFixed(2)} USDT`
+                  : `Comprar por ${formatUsdt(virtualCardPrice ?? 30)} USDT`
                 : t("sheets.verifyAccount")
             }
             onAction={() => {
@@ -741,7 +742,7 @@ export default function DashboardView() {
               const price = Number(virtualCardPrice ?? 30);
               openConfirm({
                 title: "Confirmar compra",
-                message: `Comprar tarjeta virtual por ${price.toFixed(2)} USDT?`,
+                message: `Comprar tarjeta virtual por ${formatUsdt(price)} USDT?`,
                 confirmLabel: "Comprar",
                 onConfirm: () => void performBuyVirtualCard(),
               });

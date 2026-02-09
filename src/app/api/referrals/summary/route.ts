@@ -140,12 +140,25 @@ export async function GET(req: Request) {
       { total: 0, pending: 0, eligible: 0, claimed: 0 },
     );
 
+    const { data: topupProbe } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("type", "topup")
+      .eq("status", "completed")
+      .gt("amount_usdt", 0)
+      .limit(1)
+      .maybeSingle();
+
+    const hasTopup = Boolean(topupProbe?.id);
+
     return NextResponse.json(
       {
         ok: true,
         summary: {
           counts: totals,
           diamond_to_usdt_rate: diamondToUsdtRate,
+          has_topup: hasTopup,
           my_referrer:
             (myReferrer
               ? {

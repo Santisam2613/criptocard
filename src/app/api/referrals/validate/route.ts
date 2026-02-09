@@ -23,10 +23,51 @@ export async function POST(req: Request) {
       );
     }
 
+    const normalized = inviter.startsWith("@") ? inviter.slice(1) : inviter;
+    const isTelegramId = /^\d+$/.test(normalized);
+    const isUsername = /^[a-zA-Z0-9_]{5,32}$/.test(normalized);
+    if (!isTelegramId && !isUsername) {
+      return NextResponse.json(
+        { ok: false, error: "Ingresa un @username válido o el telegram_id numérico." },
+        { status: 400 },
+      );
+    }
+
     const supabase = getSupabaseAdminClient();
+
+    const { data: me } = await supabase
+      .from("users")
+      .select("id")
+      .eq("telegram_id", telegramId.toString())
+      .maybeSingle();
+
+    if (!me?.id) {
+      return NextResponse.json(
+        { ok: false, error: "Usuario no encontrado" },
+        { status: 404 },
+      );
+    }
+
+    const { data: topupProbe } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("user_id", me.id)
+      .eq("type", "topup")
+      .eq("status", "completed")
+      .gt("amount_usdt", 0)
+      .limit(1)
+      .maybeSingle();
+
+    if (topupProbe?.id) {
+      return NextResponse.json(
+        { ok: false, error: "No puedes asociar un invitador después de tu primera recarga." },
+        { status: 400 },
+      );
+    }
+
     const { data, error } = await supabase.rpc("referral_set_inviter", {
       p_referred_telegram_id: telegramId.toString(),
-      p_referrer_identifier: inviter,
+      p_referrer_identifier: normalized,
     });
 
     if (error) {
@@ -64,4 +105,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useTransactions, Transaction } from "@/miniapp/hooks/useTransactions";
 import Skeleton from "@/components/ui/Skeleton";
+import { formatUsdt } from "@/lib/format/number";
 
 function TransactionIcon({ type }: { type: Transaction["type"] }) {
   switch (type) {
@@ -202,7 +203,7 @@ export default function TransactionList() {
               }`}
             >
               {isPositive ? "+" : ""}
-              {tx.amount_usdt.toFixed(2)} USDT
+              {formatUsdt(tx.amount_usdt)} USDT
             </div>
           </div>
         );

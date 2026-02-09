@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
+import { formatUsdt } from "@/lib/format/number";
 
 async function redirectToKyc() {
   const res = await fetch("/api/kyc/sumsub/websdk-link", {
@@ -358,14 +359,14 @@ export default function SendPage() {
 
       if (!Number.isFinite(available) || available < amount) {
         setUserTransferError(
-          `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
+          `Saldo insuficiente. Balance disponible: ${formatUsdt(available)} USDT.`,
         );
         return;
       }
 
       openConfirm({
         title: "Confirmar envío",
-        message: `Enviar ${amount.toFixed(2)} USDT a ${recipientDisplay ?? "destinatario"}?`,
+        message: `Enviar ${formatUsdt(amount)} USDT a ${recipientDisplay ?? "destinatario"}?`,
         onConfirm: () => void performSendToUser(),
       });
     } finally {
@@ -387,7 +388,7 @@ export default function SendPage() {
     }
     if (minWithdrawalUsdt !== null && amount < minWithdrawalUsdt) {
       setWithdrawError(
-        `El monto mínimo de retiro es ${minWithdrawalUsdt.toFixed(2)} USDT.`,
+        `El monto mínimo de retiro es ${formatUsdt(minWithdrawalUsdt)} USDT.`,
       );
       return;
     }
@@ -402,14 +403,14 @@ export default function SendPage() {
 
       if (!Number.isFinite(available) || available < amount) {
         setWithdrawError(
-          `Saldo insuficiente. Balance disponible: ${available.toFixed(2)} USDT.`,
+          `Saldo insuficiente. Balance disponible: ${formatUsdt(available)} USDT.`,
         );
         return;
       }
 
       openConfirm({
         title: "Confirmar solicitud",
-        message: `Solicitar retiro de ${amount.toFixed(2)} USDT a wallet externa?`,
+        message: `Solicitar retiro de ${formatUsdt(amount)} USDT a wallet externa?`,
         onConfirm: () => void performWithdraw(),
       });
     } finally {
@@ -508,7 +509,7 @@ export default function SendPage() {
 
     openNotice({
       title: "Transferencia exitosa",
-      message: `Se envió ${amount.toFixed(2)} USDT correctamente.`,
+      message: `Se envió ${formatUsdt(amount)} USDT correctamente.`,
       confirmLabel: "Ir al inicio",
       onClose: () => router.push("/miniapp"),
     });
@@ -774,7 +775,7 @@ export default function SendPage() {
               <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
                 <div className="rounded-2xl bg-white/5 p-4 text-sm text-muted">
                   El monto mínimo de retiro es{" "}
-                  {(minWithdrawalUsdt ?? 0).toFixed(2)} USDT. La solicitud quedará en espera y
+                  {formatUsdt(minWithdrawalUsdt ?? 0)} USDT. La solicitud quedará en espera y
                   puede tardar hasta 72 horas en ser aprobada
                 </div>
 

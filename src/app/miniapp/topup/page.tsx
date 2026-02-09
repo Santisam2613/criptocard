@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
+import { formatUsdt } from "@/lib/format/number";
 
 function extractDigits(input: string) {
   return input.replace(/[^0-9]/g, "");
@@ -126,7 +127,7 @@ export default function TopUpPage() {
     if (minTopupUsdt !== null && value < minTopupUsdt) {
       openNotice({
         title: "Monto mínimo",
-        message: `El monto mínimo para recargar es ${minTopupUsdt.toFixed(2)} USDT.`,
+        message: `El monto mínimo para recargar es ${formatUsdt(minTopupUsdt)} USDT.`,
         confirmLabel: "Cerrar",
       });
       return;
@@ -156,7 +157,7 @@ export default function TopUpPage() {
       await refresh().catch(() => undefined);
       openNotice({
         title: "Recarga exitosa",
-        message: `Se acreditó ${value.toFixed(2)} USDT a tu cuenta.`,
+        message: `Se acreditó ${formatUsdt(value)} USDT a tu cuenta.`,
         confirmLabel: "Ir al inicio",
         onClose: () => router.push("/miniapp"),
       });
@@ -207,7 +208,7 @@ export default function TopUpPage() {
         <div className="cc-glass cc-neon-outline mt-6 rounded-3xl p-5">
           <div className="text-xs font-semibold text-muted">Balance actual</div>
           <div className="mt-1 text-3xl font-extrabold tracking-tight">
-            {isReady ? `$${displayBalance.toFixed(2)}` : "—"}
+            {isReady ? `$${formatUsdt(displayBalance)}` : "—"}
           </div>
 
           <div className="mt-5 text-sm font-semibold text-muted">Monto (USDT)</div>
@@ -221,7 +222,7 @@ export default function TopUpPage() {
             className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
           />
           <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
-            El monto mínimo para recargar es {(minTopupUsdt ?? 0).toFixed(2)} USDT
+            El monto mínimo para recargar es {formatUsdt(minTopupUsdt ?? 0)} USDT
           </div>
 
           <div className="mt-4">

@@ -7,6 +7,7 @@ import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { useTelegram } from "@/telegram/TelegramContext";
+import { formatInteger, formatUsdt } from "@/lib/format/number";
 
 function CoinIcon() {
   return (
@@ -64,6 +65,7 @@ type ReferralItem = {
 type ReferralSummary = {
   counts: { total: number; pending: number; eligible: number; claimed: number };
   diamond_to_usdt_rate: number;
+  has_topup?: boolean;
   referrals: ReferralItem[];
   my_referrer:
     | {
@@ -322,7 +324,7 @@ export default function ReferralPage() {
 
     openConfirm({
       title: "Canjear diamantes",
-      message: `Canjear ${readyToClaim} diamante(s) por ${(readyToClaim * rate).toFixed(2)} USDT?`,
+      message: `Canjear ${formatInteger(readyToClaim)} diamante(s) por ${formatUsdt(readyToClaim * rate)} USDT?`,
       onConfirm: async () => {
         setIsClaiming(true);
         try {
@@ -367,7 +369,7 @@ export default function ReferralPage() {
 
           openNotice({
             title: "Canje realizado",
-            message: `Se agregaron ${totalUsdt.toFixed(2)} USDT a tu cuenta.${suffix}`,
+            message: `Se agregaron ${formatUsdt(totalUsdt)} USDT a tu cuenta.${suffix}`,
             confirmLabel: "Cerrar",
           });
         } finally {
@@ -385,6 +387,7 @@ export default function ReferralPage() {
   const pendingDiamonds = summary?.counts.pending ?? 0;
   const invitedCount = summary?.counts.total ?? 0;
   const rate = summary?.diamond_to_usdt_rate ?? 0.01;
+  const hasTopup = Boolean(summary?.has_topup);
 
   const rewardItems = summary?.referrals ?? [];
   const rewardTotalPages = Math.max(1, Math.ceil(rewardItems.length / rewardPageSize));
@@ -463,7 +466,7 @@ export default function ReferralPage() {
             {summaryLoading ? (
               <Skeleton className="h-10 w-16" rounded="2xl" />
             ) : (
-              <div className="text-4xl font-extrabold tracking-tight">{readyToClaim}</div>
+              <div className="text-4xl font-extrabold tracking-tight">{formatInteger(readyToClaim)}</div>
             )}
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--color-neon)] ring-1 ring-border">
               <DiamondIcon />
@@ -512,7 +515,7 @@ export default function ReferralPage() {
                 <Skeleton className="h-4 w-8" rounded="md" />
               </div>
             ) : (
-              <>Diamantes pendientes: {pendingDiamonds}</>
+              <>Diamantes pendientes: {formatInteger(pendingDiamonds)}</>
             )}
           </div>
         </div>
@@ -553,18 +556,29 @@ export default function ReferralPage() {
                 Tu cuenta ya quedó asociada a un invitador. No puedes cambiarlo.
               </div>
             </div>
+          ) : summaryLoading ? (
+            <div className="mt-3 rounded-2xl bg-white/5 p-4">
+              <Skeleton className="h-3 w-64" rounded="md" />
+              <Skeleton className="mt-3 h-3 w-48" rounded="md" />
+            </div>
+          ) : hasTopup ? (
+            <div className="mt-3 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+              Solo puedes ingresar el ID de tu invitador antes de realizar tu primera recarga.
+            </div>
           ) : (
             <>
               <div className="mt-2 flex items-center gap-2">
                 <input
                   value={inviterId}
-                  onChange={(e) => setInviterId(e.target.value)}
+                  onChange={(e) =>
+                    setInviterId(e.target.value.replace(/[^0-9a-zA-Z_@]/g, ""))
+                  }
                   placeholder="@username o telegram_id"
                   className="cc-glass cc-neon-outline h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
                 />
                 <button
                   type="button"
-                  disabled={isValidatingInviter}
+                  disabled={isValidatingInviter || !inviterId.trim()}
                   aria-busy={isValidatingInviter}
                   onClick={onRequestValidateInviter}
                   className="cc-cta cc-gold-cta inline-flex h-12 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
@@ -572,7 +586,11 @@ export default function ReferralPage() {
                   {isValidatingInviter ? "Validando..." : "Validar"}
                 </button>
               </div>
-              {inviterStatus ? (
+              {isValidatingInviter ? (
+                <div className="mt-3 rounded-2xl bg-white/5 p-4">
+                  <Skeleton className="h-3 w-56" rounded="md" />
+                </div>
+              ) : inviterStatus ? (
                 <div className="mt-3 text-sm font-semibold text-muted">{inviterStatus}</div>
               ) : null}
             </>
@@ -586,7 +604,7 @@ export default function ReferralPage() {
               <div className="text-sm font-semibold text-foreground">Amigos invitados</div>
             </div>
             <div className="text-sm font-semibold text-foreground">
-              {summaryLoading ? <Skeleton className="h-4 w-6" rounded="md" /> : invitedCount}
+              {summaryLoading ? <Skeleton className="h-4 w-6" rounded="md" /> : formatInteger(invitedCount)}
             </div>
           </div>
         </div>
@@ -650,7 +668,7 @@ export default function ReferralPage() {
                       </div>
                     </div>
                     <div className="text-sm font-bold text-foreground">
-                      {r.reward_amount_usdt.toFixed(2)} USDT
+                      {formatUsdt(r.reward_amount_usdt)} USDT
                     </div>
                   </div>
                 );
