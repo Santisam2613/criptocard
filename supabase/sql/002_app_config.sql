@@ -957,7 +957,6 @@ create table if not exists public.config (
 
 insert into public.config (key, value) values
 ('diamond_to_usdt_rate', '0.01'), -- 1 diamante = 0.01 USDT
-('referral_reward_usdt', '5.00'),
 ('min_withdrawal_usdt', '10.00'),
 ('min_topup_usdt', '1.00'),
 ('virtual_card_price_usdt', '30.00')
