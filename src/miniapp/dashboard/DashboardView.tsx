@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import BottomSheet from "@/components/ui/BottomSheet";
 import NoticeDialog from "@/components/ui/NoticeDialog";
@@ -33,10 +34,13 @@ import TermsAndConditionsContent from "@/miniapp/dashboard/TermsAndConditionsCon
 import TransactionList from "@/miniapp/dashboard/TransactionList";
 
 export default function DashboardView() {
+  const router = useRouter();
   const [sheet, setSheet] = useState<Sheet>(null);
   const [kycOpen, setKycOpen] = useState(false);
   const [supportLink, setSupportLink] = useState<string | null>(null);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [referralEligible, setReferralEligible] = useState<number | null>(null);
+  const [referralRate, setReferralRate] = useState<number | null>(null);
   const { t } = useI18n();
   const { state, user, refresh } = useBackendUser();
   const telegram = useTelegram();
@@ -50,6 +54,37 @@ export default function DashboardView() {
   const okLabel = t("dashboard.ok");
   const isPhysicalComingSoon = true;
   const isVirtualAccountsComingSoon = true;
+
+  useEffect(() => {
+    if (state.status !== "ready") return;
+    let canceled = false;
+    async function loadReferral() {
+      try {
+        const res = await fetch("/api/referrals/summary", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const json = (await res.json().catch(() => null)) as
+          | {
+              ok: boolean;
+              summary?: { counts?: { eligible?: number }; diamond_to_usdt_rate?: number };
+            }
+          | null;
+        if (!json?.ok) return;
+        if (canceled) return;
+        setReferralEligible(Number(json.summary?.counts?.eligible ?? 0));
+        setReferralRate(Number(json.summary?.diamond_to_usdt_rate ?? 0.01));
+      } catch {
+        if (canceled) return;
+        setReferralEligible(0);
+        setReferralRate(0.01);
+      }
+    }
+    void loadReferral();
+    return () => {
+      canceled = true;
+    };
+  }, [state.status]);
 
   useEffect(() => {
     let canceled = false;
@@ -429,7 +464,11 @@ export default function DashboardView() {
           </div>
         </button>
 
-        <div className="cc-glass mt-4 rounded-3xl p-5 ring-1 ring-[rgba(205,255,0,0.35)] shadow-[0_0_0_1px_rgba(205,255,0,0.10),0_18px_50px_var(--glass-shadow),0_0_26px_rgba(205,255,0,0.16)]">
+        <button
+          type="button"
+          onClick={() => router.push("/miniapp/referral")}
+          className="cc-glass mt-4 w-full rounded-3xl p-5 text-left ring-1 ring-[rgba(205,255,0,0.35)] shadow-[0_0_0_1px_rgba(205,255,0,0.10),0_18px_50px_var(--glass-shadow),0_0_26px_rgba(205,255,0,0.16)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_60%)] text-foreground ring-1 ring-border">
@@ -459,13 +498,24 @@ export default function DashboardView() {
             </div>
 
             <div className="text-right">
-              <div className="text-sm font-semibold text-foreground">0.00</div>
-              <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                0.00 USDT
-              </div>
+              {referralEligible === null || referralRate === null ? (
+                <>
+                  <Skeleton className="ml-auto h-4 w-10" rounded="md" />
+                  <Skeleton className="ml-auto mt-2 h-3 w-16" rounded="md" />
+                </>
+              ) : (
+                <>
+                  <div className="text-sm font-semibold text-foreground">
+                    {referralEligible}
+                  </div>
+                  <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                    {(referralEligible * referralRate).toFixed(2)} USDT
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
+        </button>
 
         <div className="mt-10">
           <div className="text-xl font-extrabold tracking-tight">

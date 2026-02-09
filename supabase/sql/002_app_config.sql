@@ -344,6 +344,61 @@ begin
 end;
 $$;
 
+create or replace function public.create_topup(
+  p_sender_telegram_id bigint,
+  p_amount_usdt numeric(20, 6)
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid;
+  v_status public.verification_status;
+  v_tx_id uuid := gen_random_uuid();
+begin
+  if p_amount_usdt is null or p_amount_usdt <= 0 then
+    raise exception 'Monto inválido';
+  end if;
+
+  select id, verification_status
+    into v_user_id, v_status
+  from public.users
+  where telegram_id = p_sender_telegram_id
+  limit 1;
+
+  if v_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  if v_status != 'approved' then
+    raise exception 'Cuenta no verificada';
+  end if;
+
+  insert into public.transactions (
+    id,
+    type,
+    user_id,
+    amount_usdt,
+    status,
+    metadata
+  ) values (
+    v_tx_id,
+    'topup',
+    v_user_id,
+    p_amount_usdt,
+    'completed',
+    jsonb_build_object(
+      'description', 'Recarga de saldo',
+      'source', 'miniapp_topup'
+    )
+  );
+
+  return v_tx_id;
+end;
+$$;
+
 -- ==============================================================================
 -- 7. TARJETAS
 -- ==============================================================================
@@ -403,6 +458,255 @@ alter table public.referrals enable row level security;
 create policy referrals_select_own
 on public.referrals for select
 using (referrer_user_id in (select id from public.users where telegram_id = public.request_telegram_id()));
+
+create or replace function public.referral_set_inviter(
+  p_referred_telegram_id bigint,
+  p_referrer_identifier text
+)
+returns table (referral_id uuid, status public.referral_status, reward_amount_usdt numeric(20, 6))
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_referred_user_id uuid;
+  v_referrer_user_id uuid;
+  v_identifier text;
+  v_username text;
+  v_rate numeric(20, 6);
+  v_referred_has_topup boolean;
+  v_new_id uuid;
+begin
+  v_identifier := btrim(coalesce(p_referrer_identifier, ''));
+  if v_identifier = '' then
+    raise exception 'ID de referido inválido';
+  end if;
+
+  if left(v_identifier, 1) = '@' then
+    v_identifier := substr(v_identifier, 2);
+  end if;
+
+  select id
+    into v_referred_user_id
+  from public.users
+  where telegram_id = p_referred_telegram_id
+  limit 1;
+
+  if v_referred_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  if v_identifier ~ '^[0-9]+$' then
+    select id
+      into v_referrer_user_id
+    from public.users
+    where telegram_id = v_identifier::bigint
+    limit 1;
+  else
+    v_username := lower(v_identifier);
+    select id
+      into v_referrer_user_id
+    from public.users
+    where lower(coalesce(telegram_username, '')) = v_username
+    limit 1;
+  end if;
+
+  if v_referrer_user_id is null then
+    raise exception 'Referido no encontrado';
+  end if;
+
+  if v_referrer_user_id = v_referred_user_id then
+    raise exception 'No se permite referirse a uno mismo';
+  end if;
+
+  select coalesce(nullif(value, '')::numeric(20, 6), 0.01::numeric(20, 6))
+    into v_rate
+  from public.config
+  where key = 'diamond_to_usdt_rate'
+  limit 1;
+
+  if v_rate is null or v_rate <= 0 then
+    v_rate := 0.01::numeric(20, 6);
+  end if;
+
+  select exists(
+    select 1
+    from public.transactions t
+    where t.user_id = v_referred_user_id
+      and t.type = 'topup'
+      and t.status = 'completed'
+      and t.amount_usdt > 0
+  )
+  into v_referred_has_topup;
+
+  insert into public.referrals (
+    referrer_user_id,
+    referred_user_id,
+    status,
+    reward_amount_usdt
+  ) values (
+    v_referrer_user_id,
+    v_referred_user_id,
+    (case when v_referred_has_topup then 'eligible' else 'pending' end)::public.referral_status,
+    v_rate
+  )
+  on conflict (referred_user_id) do nothing
+  returning id into v_new_id;
+
+  if v_new_id is null then
+    raise exception 'Ya existe un referido asociado a tu cuenta';
+  end if;
+
+  return query
+  select r.id, r.status, r.reward_amount_usdt
+  from public.referrals r
+  where r.id = v_new_id;
+end;
+$$;
+
+create or replace function public.referral_refresh_eligibility(
+  p_referrer_telegram_id bigint
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_referrer_user_id uuid;
+begin
+  select id
+    into v_referrer_user_id
+  from public.users
+  where telegram_id = p_referrer_telegram_id
+  limit 1;
+
+  if v_referrer_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  update public.referrals r
+  set status =
+        (case
+           when exists (
+             select 1
+             from public.transactions t
+             where t.user_id = r.referred_user_id
+               and t.type = 'topup'
+               and t.status = 'completed'
+               and t.amount_usdt > 0
+           ) then 'eligible'
+           else 'pending'
+         end)::public.referral_status,
+      updated_at = now()
+  where r.referrer_user_id = v_referrer_user_id
+    and r.status in ('pending'::public.referral_status, 'eligible'::public.referral_status);
+end;
+$$;
+
+create or replace function public.referral_claim_rewards(
+  p_referrer_telegram_id bigint
+)
+returns table (
+  claimed_count int,
+  total_usdt numeric(20, 6),
+  claimed_from jsonb
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_referrer_user_id uuid;
+begin
+  select id
+    into v_referrer_user_id
+  from public.users
+  where telegram_id = p_referrer_telegram_id
+  limit 1;
+
+  if v_referrer_user_id is null then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  update public.referrals r
+  set status =
+        (case
+           when exists (
+             select 1
+             from public.transactions t
+             where t.user_id = r.referred_user_id
+               and t.type = 'topup'
+               and t.status = 'completed'
+               and t.amount_usdt > 0
+           ) then 'eligible'
+           else 'pending'
+         end)::public.referral_status,
+      updated_at = now()
+  where r.referrer_user_id = v_referrer_user_id
+    and r.status in ('pending'::public.referral_status, 'eligible'::public.referral_status);
+
+  with eligible as (
+    select r.id,
+           r.referred_user_id,
+           r.reward_amount_usdt
+    from public.referrals r
+    where r.referrer_user_id = v_referrer_user_id
+      and r.status = 'eligible'::public.referral_status
+    for update
+  ),
+  ins_diamonds as (
+    insert into public.diamonds_ledger (user_id, amount, reason)
+    select v_referrer_user_id, 1, 'referral'
+    from eligible
+    returning 1
+  ),
+  ins_tx as (
+    insert into public.transactions (type, user_id, amount_usdt, status, metadata)
+    select
+      'referral_conversion',
+      v_referrer_user_id,
+      e.reward_amount_usdt,
+      'completed',
+      jsonb_build_object(
+        'description', 'Recompensa por referido',
+        'referred_user_id', e.referred_user_id
+      )
+    from eligible e
+    returning 1
+  ),
+  upd as (
+    update public.referrals r
+    set status = 'claimed'::public.referral_status,
+        claimed_at = now(),
+        updated_at = now()
+    from eligible e
+    where r.id = e.id
+    returning r.referred_user_id
+  )
+  select
+    (select count(*) from eligible)::int,
+    coalesce((select sum(reward_amount_usdt) from eligible), 0::numeric(20, 6))::numeric(20, 6),
+    coalesce(
+      (
+        select jsonb_agg(
+          jsonb_build_object(
+            'telegram_id', u.telegram_id::text,
+            'telegram_username', u.telegram_username,
+            'telegram_first_name', u.telegram_first_name,
+            'telegram_last_name', u.telegram_last_name
+          )
+        )
+        from upd
+        join public.users u on u.id = upd.referred_user_id
+      ),
+      '[]'::jsonb
+    )
+  into claimed_count, total_usdt, claimed_from;
+
+  return next;
+end;
+$$;
 
 -- ==============================================================================
 -- 9. DIAMANTES (REWARDS)

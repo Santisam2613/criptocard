@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
@@ -107,6 +109,7 @@ function SelectRow({
 }
 
 export default function TopUpSheetContent() {
+  const router = useRouter();
   const { t } = useI18n();
   const { state, user } = useBackendUser();
   const isReady = state.status === "ready";
@@ -171,6 +174,10 @@ export default function TopUpSheetContent() {
               type="button"
               disabled={!isReady}
               aria-busy={!isReady}
+              onClick={() => {
+                if (!isReady || !isApproved) return;
+                router.push("/miniapp/topup");
+              }}
               className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
             >
               {!isReady ? "Cargando..." : isApproved ? "Continuar" : t("sheets.verifyAccount")}
