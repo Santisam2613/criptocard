@@ -20,7 +20,7 @@ function PullSpinner({ progress }: { progress: number }) {
       style={{ opacity, transform: `translateY(${translateY}px)` }}
       aria-hidden="true"
     >
-      <div className="cc-glass cc-neon-outline inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground">
+      <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-zinc-900 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:text-white dark:ring-white/10">
         <svg
           viewBox="0 0 24 24"
           className="h-4 w-4 animate-spin"
@@ -239,34 +239,55 @@ function ConfirmDialog(props: {
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onCancel}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="cc-glass-strong cc-neon-outline relative w-full max-w-[380px] rounded-3xl p-6"
+        className="relative w-full max-w-[380px] scale-100 overflow-hidden rounded-[32px] bg-white p-0 shadow-2xl transition-all dark:bg-[#1A1D24]"
       >
-        <div className="text-base font-extrabold tracking-tight text-foreground">
-          {title}
-        </div>
-        <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
-        <div className="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            className="cc-cta cc-glass inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-foreground ring-1 ring-border"
-            onClick={onCancel}
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            className="cc-cta cc-gold-cta inline-flex h-10 items-center justify-center rounded-full px-5 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] active:brightness-[0.98]"
-            onClick={onConfirm}
-          >
-            {confirmLabel}
-          </button>
+        <div className="relative p-8 text-center">
+          <div className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full bg-yellow-50 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-8 w-8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+              <path d="M10.3 3.7h3.4L22 18.3a2 2 0 0 1-1.7 3H3.7a2 2 0 0 1-1.7-3L10.3 3.7z" />
+            </svg>
+          </div>
+
+          <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            {title}
+          </div>
+          <div className="mt-3 whitespace-pre-line text-base leading-relaxed text-zinc-600 dark:text-white/70">
+            {message}
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gray-100 text-sm font-bold text-zinc-900 transition-transform active:scale-[0.98] dark:bg-white/10 dark:text-white"
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform active:scale-[0.98]"
+            >
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -509,126 +530,132 @@ export default function ReferralPage() {
         await refresh().catch(() => undefined);
       }}
     >
-      <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+      <main className="relative min-h-screen bg-[#F4F5F7] px-4 py-10 text-zinc-950 dark:bg-[#0F1115] dark:text-white">
         <div className="mx-auto w-full max-w-[420px]">
-        <ConfirmDialog
-          open={confirmOpen}
-          title={confirmTitle}
-          message={confirmMessage}
-          cancelLabel="Cancelar"
-          confirmLabel="Confirmar"
-          onCancel={() => {
-            setConfirmOpen(false);
-            setConfirmAction(null);
-          }}
-          onConfirm={() => {
-            const action = confirmAction;
-            setConfirmOpen(false);
-            setConfirmAction(null);
-            if (action) action();
-          }}
-        />
+          <ConfirmDialog
+            open={confirmOpen}
+            title={confirmTitle}
+            message={confirmMessage}
+            cancelLabel="Cancelar"
+            confirmLabel="Confirmar"
+            onCancel={() => {
+              setConfirmOpen(false);
+              setConfirmAction(null);
+            }}
+            onConfirm={() => {
+              const action = confirmAction;
+              setConfirmOpen(false);
+              setConfirmAction(null);
+              if (action) action();
+            }}
+          />
 
-        <NoticeDialog
-          open={noticeOpen}
-          title={noticeTitle}
-          message={noticeMessage}
-          confirmLabel={noticeLabel}
-          onClose={() => {
-            const action = noticeAction;
-            setNoticeOpen(false);
-            setNoticeAction(null);
-            if (action) action();
-          }}
-        />
+          <NoticeDialog
+            open={noticeOpen}
+            title={noticeTitle}
+            message={noticeMessage}
+            confirmLabel={noticeLabel}
+            onClose={() => {
+              const action = noticeAction;
+              setNoticeOpen(false);
+              setNoticeAction(null);
+              if (action) action();
+            }}
+          />
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Volver"
-            className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
-            onClick={() => router.back()}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <div className="text-2xl font-extrabold tracking-tight">Club de amigos</div>
-        </div>
-
-        <div className="cc-glass cc-neon-outline mt-6 overflow-hidden rounded-3xl p-5">
-          <div className="text-center text-sm font-semibold text-muted">Listo para reclamar</div>
-          <div className="mt-3 flex items-center justify-center gap-2">
-            {summaryLoading ? (
-              <Skeleton className="h-10 w-16" rounded="2xl" />
-            ) : (
-              <div className="text-4xl font-extrabold tracking-tight">{formatInteger(readyToClaim)}</div>
-            )}
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-[var(--color-neon)] ring-1 ring-border">
-              <DiamondIcon />
-            </div>
-          </div>
-          {summaryLoading ? (
-            <div className="mt-3 flex justify-center">
-              <Skeleton className="h-4 w-44" rounded="2xl" />
-            </div>
-          ) : (
-            <div className="mt-2 text-center text-sm font-semibold text-muted">
-              1 DIAMANTE = {formatRate(rate)} USDT
-            </div>
-          )}
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              disabled={summaryLoading || isClaiming || readyToClaim <= 0}
-              aria-busy={isClaiming}
-              onClick={onClaim}
-              className="cc-cta cc-gold-cta col-span-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+              aria-label="Volver"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-[#1A1D24] dark:ring-white/10"
+              onClick={() => router.back()}
             >
-              <CoinIcon />
-              {isClaiming ? "Canjeando..." : "Reclamar"}
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
             </button>
+            <div className="text-2xl font-extrabold tracking-tight">Club de amigos</div>
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-muted">
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 8v4l3 2" />
-              <circle cx="12" cy="12" r="10" />
-            </svg>
+          <div className="mt-6 overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
+              Listo para reclamar
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-2">
+              {summaryLoading ? (
+                <Skeleton className="h-10 w-16" rounded="2xl" />
+              ) : (
+                <div className="text-4xl font-extrabold tracking-tight">
+                  {formatInteger(readyToClaim)}
+                </div>
+              )}
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-yellow-50 text-yellow-600 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20">
+                <DiamondIcon />
+              </div>
+            </div>
             {summaryLoading ? (
-              <div className="flex items-center gap-2">
-                <span>Diamantes pendientes:</span>
-                <Skeleton className="h-4 w-8" rounded="md" />
+              <div className="mt-3 flex justify-center">
+                <Skeleton className="h-4 w-44" rounded="2xl" />
               </div>
             ) : (
-              <>Diamantes pendientes: {formatInteger(pendingDiamonds)}</>
+              <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
+                1 DIAMANTE = {formatRate(rate)} USDT
+              </div>
             )}
-          </div>
-        </div>
 
-        <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-5">
-          <div className="text-sm font-semibold text-muted">Copiar ID de referido</div>
+            <div className="mt-5">
+              <button
+                type="button"
+                disabled={summaryLoading || isClaiming || readyToClaim <= 0}
+                aria-busy={isClaiming}
+                onClick={onClaim}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+              >
+                <CoinIcon />
+                {isClaiming ? "Canjeando..." : "Reclamar"}
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-zinc-500 dark:text-white/60">
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 8v4l3 2" />
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+              {summaryLoading ? (
+                <div className="flex items-center gap-2">
+                  <span>Diamantes pendientes:</span>
+                  <Skeleton className="h-4 w-8" rounded="md" />
+                </div>
+              ) : (
+                <>Diamantes pendientes: {formatInteger(pendingDiamonds)}</>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="text-sm font-semibold text-zinc-500 dark:text-white/60">
+              Copiar ID de referido
+            </div>
           <div className="mt-2 flex items-center gap-2">
-            <div className="cc-glass cc-neon-outline flex h-12 w-full items-center rounded-2xl px-4 text-sm font-semibold text-foreground">
+            <div className="flex h-12 w-full items-center rounded-2xl bg-gray-50 px-4 text-sm font-semibold text-zinc-950 ring-1 ring-black/5 dark:bg-white/5 dark:text-white dark:ring-white/10">
               {isProfileLoading && !referralId ? (
                 <Skeleton className="h-4 w-40" rounded="md" />
               ) : (
@@ -639,35 +666,37 @@ export default function ReferralPage() {
               type="button"
               onClick={onCopyReferralId}
               disabled={!referralId}
-              className="cc-cta cc-gold-cta inline-flex h-12 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
             >
               {copied ? "Copiado" : "Copiar"}
             </button>
           </div>
 
-          <div className="mt-4 text-sm font-semibold text-muted">
-            ID del referido que te invitó
-          </div>
+            <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
+              ID del referido que te invitó
+            </div>
           {myReferrer ? (
-            <div className="mt-3 rounded-2xl bg-white/5 p-4">
-              <div className="text-xs font-semibold text-muted">Invitador</div>
-              <div className="mt-1 text-sm font-semibold text-foreground">
+            <div className="mt-3 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
+              <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+                Invitador
+              </div>
+              <div className="mt-1 text-sm font-semibold text-zinc-950 dark:text-white">
                 {myReferrerName ?? "—"}
               </div>
-              <div className="mt-1 text-xs font-semibold text-muted">
+              <div className="mt-1 text-xs font-semibold text-zinc-500 dark:text-white/60">
                 {statusLabel(myReferrer.status)}
               </div>
-              <div className="mt-3 text-xs text-muted">
+              <div className="mt-3 text-xs text-zinc-500 dark:text-white/60">
                 Tu cuenta ya quedó asociada a un invitador. No puedes cambiarlo.
               </div>
             </div>
           ) : summaryLoading ? (
-            <div className="mt-3 rounded-2xl bg-white/5 p-4">
+            <div className="mt-3 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
               <Skeleton className="h-3 w-64" rounded="md" />
               <Skeleton className="mt-3 h-3 w-48" rounded="md" />
             </div>
           ) : hasTopup ? (
-            <div className="mt-3 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+            <div className="mt-3 rounded-2xl bg-gray-50 p-4 text-sm font-semibold text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
               Solo puedes ingresar el ID de tu invitador antes de realizar tu primera recarga.
             </div>
           ) : (
@@ -679,73 +708,83 @@ export default function ReferralPage() {
                     setInviterId(e.target.value.replace(/[^0-9a-zA-Z_@]/g, ""))
                   }
                   placeholder="@username o telegram_id"
-                  className="cc-glass cc-neon-outline h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
                 <button
                   type="button"
                   disabled={isValidatingInviter || !inviterId.trim()}
                   aria-busy={isValidatingInviter}
                   onClick={onRequestValidateInviter}
-                  className="cc-cta cc-gold-cta inline-flex h-12 shrink-0 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                  className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {isValidatingInviter ? "Validando..." : "Validar"}
                 </button>
               </div>
               {isValidatingInviter ? (
-                <div className="mt-3 rounded-2xl bg-white/5 p-4">
+                <div className="mt-3 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
                   <Skeleton className="h-3 w-56" rounded="md" />
                 </div>
               ) : inviterStatus ? (
-                <div className="mt-3 text-sm font-semibold text-muted">{inviterStatus}</div>
+                <div className="mt-3 text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  {inviterStatus}
+                </div>
               ) : null}
             </>
           )}
         </div>
 
-        <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-2xl">
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">👥</div>
-              <div className="text-sm font-semibold text-foreground">Amigos invitados</div>
-            </div>
-            <div className="text-sm font-semibold text-foreground">
-              {summaryLoading ? <Skeleton className="h-4 w-6" rounded="md" /> : formatInteger(invitedCount)}
+          <div className="mt-4 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="flex items-center justify-between px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">👥</div>
+                <div className="text-sm font-semibold text-zinc-950 dark:text-white">
+                  Amigos invitados
+                </div>
+              </div>
+              <div className="text-sm font-semibold text-zinc-950 dark:text-white">
+                {summaryLoading ? (
+                  <Skeleton className="h-4 w-6" rounded="md" />
+                ) : (
+                  formatInteger(invitedCount)
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-8 text-xl font-extrabold tracking-tight">Recompensas</div>
+          <div className="mt-8 text-xl font-extrabold tracking-tight">Recompensas</div>
         {summaryError ? (
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-5 text-sm font-semibold text-muted">
+          <div className="mt-4 overflow-hidden rounded-3xl bg-white p-5 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:text-white/60 dark:ring-white/10">
             {summaryError}
           </div>
         ) : summaryLoading ? (
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-8">
+          <div className="mt-4 overflow-hidden rounded-3xl bg-white p-8 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
             <div className="flex justify-center">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white/5 text-[var(--color-neon)] ring-1 ring-border">
+              <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-yellow-50 text-yellow-600 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20">
                 <DiamondIcon />
               </div>
             </div>
             <div className="mt-6 text-center text-2xl font-extrabold tracking-tight">…</div>
-            <div className="mt-2 text-center text-sm font-semibold text-muted">Cargando</div>
+            <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
+              Cargando
+            </div>
           </div>
         ) : rewardItems.length === 0 ? (
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-8">
+          <div className="mt-4 overflow-hidden rounded-3xl bg-white p-8 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
             <div className="flex justify-center">
-              <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-white/5 text-[var(--color-neon)] ring-1 ring-border">
+              <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-yellow-50 text-yellow-600 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20">
                 <DiamondIcon />
               </div>
             </div>
             <div className="mt-6 text-center text-2xl font-extrabold tracking-tight">
               Aún no hay diamantes
             </div>
-            <div className="mt-2 text-center text-sm font-semibold text-muted">
+            <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
               Empieza invitando amigos para ganar
             </div>
           </div>
         ) : (
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-1">
-            <div className="space-y-2 p-2">
+          <div className="mt-4 overflow-hidden rounded-3xl bg-white p-2 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="space-y-2">
               {rewardPageItems.map((r) => {
                 const name =
                   r.referred?.telegram_username
@@ -761,18 +800,22 @@ export default function ReferralPage() {
                 return (
                   <div
                     key={r.id}
-                    className="flex items-center justify-between rounded-2xl bg-white/5 p-3"
+                    className="flex items-center justify-between rounded-2xl bg-gray-50 p-3 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_60%)] text-foreground ring-1 ring-border">
+                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-yellow-50 text-yellow-600 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400 dark:ring-yellow-500/20">
                         <DiamondIcon />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-foreground">{name}</div>
-                        <div className="text-xs text-muted">{statusLabel(r.status)}</div>
+                        <div className="text-sm font-semibold text-zinc-950 dark:text-white">
+                          {name}
+                        </div>
+                        <div className="text-xs text-zinc-500 dark:text-white/60">
+                          {statusLabel(r.status)}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-foreground">
+                    <div className="text-sm font-bold text-zinc-950 dark:text-white">
                       {formatUsdt(r.reward_amount_usdt)} USDT
                     </div>
                   </div>
@@ -785,18 +828,18 @@ export default function ReferralPage() {
                   type="button"
                   disabled={rewardCurrentPage <= 1}
                   onClick={() => setRewardPage((p) => Math.max(1, p - 1))}
-                  className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl bg-gray-100 px-4 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
                 >
                   Anterior
                 </button>
-                <div className="text-xs font-semibold text-muted">
+                <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
                   Página {rewardCurrentPage} de {rewardTotalPages}
                 </div>
                 <button
                   type="button"
                   disabled={rewardCurrentPage >= rewardTotalPages}
                   onClick={() => setRewardPage((p) => Math.min(rewardTotalPages, p + 1))}
-                  className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-10 items-center justify-center rounded-2xl bg-gray-100 px-4 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
                 >
                   Siguiente
                 </button>

@@ -340,7 +340,7 @@ export default function SettingsSheetContent() {
       </div>
 
       <div className="mt-8 space-y-4">
-        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1D24]">
           <Row
             icon="user"
             label={t("settings.personalDetails")}
@@ -354,8 +354,8 @@ export default function SettingsSheetContent() {
           />
         </div>
 
-        <div className="cc-glass cc-neon-outline overflow-hidden rounded-2xl">
-          <div className="border-b border-glass-border">
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1D24]">
+          <div className="border-b border-gray-100 dark:border-white/5">
             <Row
               icon="globe"
               label={t("settings.language")}

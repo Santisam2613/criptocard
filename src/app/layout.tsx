@@ -3,7 +3,6 @@ import type { Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeScript from "@/styles/theme/ThemeScript";
-import GravityStarsBackground from "@/components/background/GravityStarsBackground";
 import { I18nProvider } from "@/i18n/i18n";
 import ViewportLock from "@/app/ViewportLock";
 
@@ -49,7 +48,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ViewportLock />
-        <GravityStarsBackground />
         <div className="relative z-10">
           <I18nProvider>{children}</I18nProvider>
         </div>

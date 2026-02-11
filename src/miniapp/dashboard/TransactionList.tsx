@@ -5,18 +5,27 @@ import Skeleton from "@/components/ui/Skeleton";
 import { formatUsdt } from "@/lib/format/number";
 
 function TransactionIcon({ type }: { type: Transaction["type"] }) {
+  const baseClass =
+    "flex h-10 w-10 items-center justify-center rounded-full bg-[#F4F5F7] text-[#111] dark:bg-white/5 dark:text-white";
+
   switch (type) {
     case "topup":
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-500">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className={baseClass}>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M12 5v14M5 12h14" />
           </svg>
         </div>
       );
     case "card_purchase":
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20 text-violet-500">
+        <div className={baseClass}>
           <svg
             viewBox="0 0 24 24"
             className="h-5 w-5"
@@ -34,7 +43,7 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
       );
     case "referral_conversion":
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/20 text-yellow-500">
+        <div className={baseClass}>
           <svg
             viewBox="0 0 24 24"
             className="h-5 w-5"
@@ -53,24 +62,42 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
       );
     case "transfer":
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 text-blue-500">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className={baseClass}>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M7 17l9.2-9.2M17 17V7H7" />
           </svg>
         </div>
       );
     case "withdraw":
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/20 text-red-500">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className={baseClass}>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M12 19V5M5 12l7 7 7-7" />
           </svg>
         </div>
       );
     default:
       return (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-500/20 text-zinc-500">
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className={baseClass}>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="12" cy="12" r="10" />
           </svg>
         </div>
@@ -184,7 +211,7 @@ export default function TransactionList() {
         return (
           <div
             key={tx.id}
-            className="flex items-center justify-between rounded-2xl bg-white/5 p-3 transition-colors hover:bg-white/10"
+            className="flex items-center justify-between rounded-2xl bg-white p-3 transition-colors hover:bg-gray-50 dark:bg-[#1A1D24] dark:hover:bg-[#20242C]"
           >
             <div className="flex items-center gap-3">
               <TransactionIcon type={tx.type} />
@@ -199,7 +226,7 @@ export default function TransactionList() {
             </div>
             <div
               className={`text-sm font-bold ${
-                isPositive ? "text-green-500" : "text-foreground"
+                isPositive ? "text-yellow-500" : "text-foreground"
               }`}
             >
               {isPositive ? "+" : ""}

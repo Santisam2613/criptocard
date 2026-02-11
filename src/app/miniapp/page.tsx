@@ -2,7 +2,40 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import DashboardView from "@/miniapp/dashboard/DashboardView";
+
+function Splash({ phase }: { phase: "enter" | "exit" }) {
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-[#000] ${
+        phase === "exit" ? "pointer-events-none opacity-0 transition-opacity duration-500" : "opacity-100"
+      }`}
+      aria-hidden="true"
+    >
+      <div className="relative flex flex-col items-center gap-6">
+        <Image
+          src="/assets/logo-header.png"
+          alt="CriptoCard"
+          width={180}
+          height={46}
+          priority
+          className="h-auto w-[180px] dark:hidden"
+        />
+        <Image
+          src="/assets/logo-header-blanco.png"
+          alt="CriptoCard"
+          width={180}
+          height={46}
+          priority
+          className="hidden h-auto w-[180px] dark:block"
+        />
+        
+        <div className="h-6 w-6 animate-spin rounded-full border-[2.5px] border-yellow-500/25 border-t-yellow-500" />
+      </div>
+    </div>
+  );
+}
 
 function Spinner({ progress }: { progress: number }) {
   const clamped = Math.max(0, Math.min(1, progress));
@@ -112,16 +145,29 @@ function PullToRefresh({
 
 export default function MiniappPage() {
   const [nonce, setNonce] = useState(0);
+  const [splashPhase, setSplashPhase] = useState<"enter" | "exit" | "done">("enter");
+
+  useEffect(() => {
+    const exitTimer = window.setTimeout(() => setSplashPhase("exit"), 2600);
+    const doneTimer = window.setTimeout(() => setSplashPhase("done"), 3000);
+    return () => {
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(doneTimer);
+    };
+  }, []);
 
   return (
-    <PullToRefresh
-      onRefresh={async () => {
-        // Remonta el dashboard para que sus hooks vuelvan a pedir datos.
-        setNonce((n) => n + 1);
-        await new Promise((r) => window.setTimeout(r, 600));
-      }}
-    >
-      <DashboardView key={nonce} />
-    </PullToRefresh>
+    <>
+      {splashPhase === "done" ? null : <Splash phase={splashPhase} />}
+      <PullToRefresh
+        onRefresh={async () => {
+          // Remonta el dashboard para que sus hooks vuelvan a pedir datos.
+          setNonce((n) => n + 1);
+          await new Promise((r) => window.setTimeout(r, 600));
+        }}
+      >
+        <DashboardView key={nonce} />
+      </PullToRefresh>
+    </>
   );
 }

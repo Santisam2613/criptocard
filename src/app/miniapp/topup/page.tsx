@@ -80,15 +80,15 @@ export default function TopUpPage() {
   if (!approvedGate && user?.verification_status !== "approved") {
     if (state.status === "idle" || state.status === "loading") {
       return (
-        <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+        <main className="relative min-h-screen bg-white px-4 py-10 text-zinc-950 dark:bg-black dark:text-white">
           <div className="mx-auto w-full max-w-[420px]">
             <div className="flex items-center gap-3">
-              <div className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full">
+              <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
                 <Skeleton className="h-4 w-4" rounded="full" />
               </div>
               <Skeleton className="h-7 w-44" rounded="2xl" />
             </div>
-            <div className="mt-6 cc-glass cc-neon-outline rounded-3xl p-5">
+            <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
               <Skeleton className="h-4 w-28" rounded="md" />
               <Skeleton className="mt-3 h-10 w-32" rounded="2xl" />
               <Skeleton className="mt-5 h-12 w-full" rounded="2xl" />
@@ -167,7 +167,7 @@ export default function TopUpPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+    <main className="relative min-h-screen bg-white px-4 py-10 text-zinc-950 dark:bg-black dark:text-white">
       <div className="mx-auto w-full max-w-[420px]">
         <NoticeDialog
           open={noticeOpen}
@@ -186,7 +186,7 @@ export default function TopUpPage() {
           <button
             type="button"
             aria-label="Volver"
-            className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10"
             onClick={() => router.back()}
           >
             <svg
@@ -205,13 +205,17 @@ export default function TopUpPage() {
           <div className="text-2xl font-extrabold tracking-tight">Recargar</div>
         </div>
 
-        <div className="cc-glass cc-neon-outline mt-6 rounded-3xl p-5">
-          <div className="text-xs font-semibold text-muted">Balance actual</div>
+        <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
+          <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+            Balance actual
+          </div>
           <div className="mt-1 text-3xl font-extrabold tracking-tight">
             {isReady ? `$${formatUsdt(displayBalance)}` : "—"}
           </div>
 
-          <div className="mt-5 text-sm font-semibold text-muted">Monto (USDT)</div>
+          <div className="mt-5 text-sm font-semibold text-zinc-500 dark:text-white/60">
+            Monto (USDT)
+          </div>
           <input
             value={amount}
             onChange={(e) =>
@@ -219,9 +223,9 @@ export default function TopUpPage() {
             }
             inputMode="decimal"
             placeholder="0.00"
-            className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+            className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
           />
-          <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
+          <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 dark:bg-white/5 dark:text-white/60">
             El monto mínimo para recargar es {formatUsdt(minTopupUsdt ?? 0)} USDT
           </div>
 
@@ -231,7 +235,7 @@ export default function TopUpPage() {
               disabled={isSubmitting}
               aria-busy={isSubmitting}
               onClick={onTopUp}
-              className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             >
               {isSubmitting ? "Recargando..." : "Recargar"}
             </button>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Button from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { formatUsdt } from "@/lib/format/number";
@@ -96,26 +95,55 @@ function ConfirmDialog(props: {
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onCancel}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="cc-glass-strong cc-neon-outline relative w-full max-w-[380px] rounded-3xl p-6"
+        className="relative w-full max-w-[380px] scale-100 overflow-hidden rounded-[32px] bg-white p-0 shadow-2xl transition-all dark:bg-[#1A1D24]"
       >
-        <div className="text-base font-extrabold tracking-tight text-foreground">
-          {title}
-        </div>
-        <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={onCancel}>
-            {cancelLabel}
-          </Button>
-          <Button variant="lime" onClick={onConfirm}>
-            {confirmLabel}
-          </Button>
+        <div className="relative p-8 text-center">
+          <div className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-full bg-yellow-50 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-8 w-8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+              <path d="M10.3 3.7h3.4L22 18.3a2 2 0 0 1-1.7 3H3.7a2 2 0 0 1-1.7-3L10.3 3.7z" />
+            </svg>
+          </div>
+
+          <div className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            {title}
+          </div>
+          <div className="mt-3 text-base leading-relaxed text-zinc-600 dark:text-white/70">
+            {message}
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gray-100 text-sm font-bold text-zinc-900 transition-transform active:scale-[0.98] dark:bg-white/10 dark:text-white"
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform active:scale-[0.98]"
+            >
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -156,23 +184,44 @@ function NoticeDialog(props: {
       <button
         type="button"
         aria-label="Close"
-        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="cc-glass-strong cc-neon-outline relative w-full max-w-[380px] rounded-3xl p-6"
+        className="relative w-full max-w-[340px] scale-100 overflow-hidden rounded-[32px] bg-white p-0 shadow-2xl transition-all dark:bg-[#1A1D24]"
       >
-        <div className="text-base font-extrabold tracking-tight text-foreground">
-          {title}
-        </div>
-        <div className="mt-2 text-sm leading-relaxed text-muted">{message}</div>
-        <div className="mt-5 flex justify-end">
-          <Button variant="lime" onClick={onClose}>
+        <div className="relative flex flex-col items-center p-8 text-center">
+          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-yellow-50 text-yellow-600 dark:bg-yellow-500/10 dark:text-yellow-400">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-12 w-12"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          </div>
+
+          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            {title}
+          </h2>
+          <p className="mt-3 text-base leading-relaxed text-zinc-500 dark:text-zinc-400">
+            {message}
+          </p>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-8 w-full rounded-2xl bg-yellow-500 py-4 text-base font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform active:scale-[0.98]"
+          >
             {confirmLabel}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
@@ -181,16 +230,16 @@ function NoticeDialog(props: {
 
 function SendPageLoading() {
   return (
-    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+    <main className="relative min-h-screen bg-white px-4 py-10 text-zinc-950 dark:bg-black dark:text-white">
       <div className="mx-auto w-full max-w-[420px]">
         <div className="flex items-center gap-3">
-          <div className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
             <Skeleton className="h-4 w-4" rounded="full" />
           </div>
           <Skeleton className="h-7 w-44" rounded="2xl" />
         </div>
 
-        <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
+        <div className="mt-3 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
           <Skeleton className="h-3 w-20" rounded="md" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-2 w-10" rounded="full" />
@@ -200,7 +249,7 @@ function SendPageLoading() {
 
         <div className="mt-8">
           <Skeleton className="h-5 w-56" rounded="md" />
-          <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
+          <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
             <Skeleton className="h-3 w-40" rounded="md" />
             <Skeleton className="mt-3 h-12 w-full" rounded="2xl" />
             <Skeleton className="mt-4 h-3 w-32" rounded="md" />
@@ -558,13 +607,13 @@ export default function SendPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+    <main className="relative min-h-screen bg-white px-4 py-10 text-zinc-950 dark:bg-black dark:text-white">
       <div className="mx-auto w-full max-w-[420px]">
         <div className="flex items-center gap-3">
           <button
             type="button"
             aria-label="Volver"
-            className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10"
             onClick={() => router.back()}
           >
             <svg
@@ -614,23 +663,25 @@ export default function SendPage() {
           }}
         />
 
-        <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-          <div className="text-xs font-semibold text-muted">Paso {step} de 2</div>
+        <div className="mt-3 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
+          <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+            Paso {step} de 2
+          </div>
           <div className="flex items-center gap-2">
             <div
               className={[
                 "h-2 w-10 rounded-full",
                 step >= 1
-                  ? "bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand))]"
-                  : "bg-white/10",
+                  ? "bg-yellow-500"
+                  : "bg-black/10 dark:bg-white/10",
               ].join(" ")}
             />
             <div
               className={[
                 "h-2 w-10 rounded-full",
                 step >= 2
-                  ? "bg-[linear-gradient(90deg,var(--color-brand),var(--color-neon))]"
-                  : "bg-white/10",
+                  ? "bg-yellow-500"
+                  : "bg-black/10 dark:bg-white/10",
               ].join(" ")}
             />
           </div>
@@ -638,24 +689,37 @@ export default function SendPage() {
 
         {step === 1 ? (
           <div className="mt-8">
-            <div className="text-lg font-bold">PASO 1: Tipo de envío</div>
+            <div className="text-lg font-extrabold tracking-tight">Paso 1: Tipo de envío</div>
+            <div className="mt-1 text-sm font-medium text-zinc-500 dark:text-white/60">
+              Elige cómo quieres transferir tus USDT.
+            </div>
 
             <div className="mt-4 space-y-3">
               <button
                 type="button"
                 onClick={() => setSendType("user")}
                 className={[
-                  "cc-glass cc-neon-outline w-full rounded-3xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+                  "group relative w-full overflow-hidden rounded-3xl bg-white p-0 text-left shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10",
                   sendType === "user"
-                    ? "cc-holo bg-white/10 ring-2 ring-[var(--color-neon)] scale-[1.01]"
+                    ? "ring-2 ring-yellow-500/50 shadow-[0_28px_80px_rgba(234,179,8,0.18)]"
                     : sendType
-                      ? "opacity-50 hover:bg-white/5"
-                      : "hover:bg-white/5",
+                      ? "opacity-60"
+                      : "",
                 ].join(" ")}
               >
-                <div className="text-base font-extrabold">Enviar de usuario a usuario</div>
-                <div className="mt-1 text-sm text-muted">
-                  Busca por telegram_id o username y envía USDT.
+                {sendType === "user" ? (
+                  <>
+                    <div className="absolute inset-0 rounded-3xl">
+                      <div className="absolute -inset-[100%] animate-[spin_3.5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#EAB308_50%,transparent_100%)] opacity-100" />
+                    </div>
+                    <div className="absolute inset-[1px] rounded-[23px] bg-white dark:bg-zinc-900" />
+                  </>
+                ) : null}
+                <div className="relative p-5">
+                  <div className="text-base font-extrabold">Enviar de usuario a usuario</div>
+                  <div className="mt-1 text-sm text-zinc-500 dark:text-white/60">
+                    Busca por telegram_id o username y envía USDT.
+                  </div>
                 </div>
               </button>
 
@@ -663,17 +727,27 @@ export default function SendPage() {
                 type="button"
                 onClick={() => setSendType("wallet")}
                 className={[
-                  "cc-glass cc-neon-outline w-full rounded-3xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0",
+                  "group relative w-full overflow-hidden rounded-3xl bg-white p-0 text-left shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10",
                   sendType === "wallet"
-                    ? "cc-holo bg-white/10 ring-2 ring-[var(--color-neon)] scale-[1.01]"
+                    ? "ring-2 ring-yellow-500/50 shadow-[0_28px_80px_rgba(234,179,8,0.18)]"
                     : sendType
-                      ? "opacity-55 hover:bg-white/5"
-                      : "hover:bg-white/5",
+                      ? "opacity-60"
+                      : "",
                 ].join(" ")}
               >
-                <div className="text-base font-extrabold">Enviar a wallet externa</div>
-                <div className="mt-1 text-sm text-muted">
-                  Ingresa dirección, red y monto. Quedará en espera.
+                {sendType === "wallet" ? (
+                  <>
+                    <div className="absolute inset-0 rounded-3xl">
+                      <div className="absolute -inset-[100%] animate-[spin_3.5s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#EAB308_50%,transparent_100%)] opacity-100" />
+                    </div>
+                    <div className="absolute inset-[1px] rounded-[23px] bg-white dark:bg-zinc-900" />
+                  </>
+                ) : null}
+                <div className="relative p-5">
+                  <div className="text-base font-extrabold">Enviar a wallet externa</div>
+                  <div className="mt-1 text-sm text-zinc-500 dark:text-white/60">
+                    Ingresa dirección, red y monto. Quedará en espera.
+                  </div>
                 </div>
               </button>
             </div>
@@ -684,10 +758,10 @@ export default function SendPage() {
                 aria-disabled={!sendType}
                 onClick={onContinue}
                 className={[
-                  "cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10",
+                  "inline-flex h-14 w-full items-center justify-center rounded-2xl bg-yellow-500 text-base font-bold text-black shadow-lg shadow-yellow-500/25 transition-all",
                   !sendType
                     ? "cursor-not-allowed opacity-70"
-                    : "hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0",
+                    : "hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0",
                 ].join(" ")}
               >
                 Continuar
@@ -697,31 +771,33 @@ export default function SendPage() {
         ) : (
           <div className="mt-8">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-bold">
-                PASO 2: {sendType === "wallet" ? "Enviar a wallet externa" : "Enviar a usuario"}
+              <div className="text-lg font-extrabold tracking-tight">
+                Paso 2: {sendType === "wallet" ? "Enviar a wallet externa" : "Enviar a usuario"}
               </div>
               <button
                 type="button"
                 onClick={onBack}
-                className="text-xs font-semibold text-muted underline decoration-muted/50 underline-offset-4 hover:text-foreground"
+                className="text-xs font-semibold text-zinc-500 underline decoration-zinc-400/40 underline-offset-4 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
               >
                 Cambiar
               </button>
             </div>
 
             {sendType === "user" ? (
-              <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
-                <div className="text-sm font-semibold text-muted">Buscar destinatario</div>
+              <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
+                <div className="text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  Buscar destinatario
+                </div>
                 <div className="mt-2 flex gap-2">
                   <input
                     value={recipientQuery}
                     onChange={(e) => setRecipientQuery(e.target.value)}
                     placeholder="telegram_id o @username"
-                    className="cc-glass cc-neon-outline h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                    className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                   />
                   <button
                     type="button"
-                    className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    className="inline-flex h-12 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0"
                     onClick={onSearchRecipient}
                   >
                     {recipientLoading ? "..." : "Buscar"}
@@ -729,18 +805,24 @@ export default function SendPage() {
                 </div>
 
                 {recipient ? (
-                  <div className="mt-4 rounded-2xl bg-white/5 p-4">
-                    <div className="text-xs font-semibold text-muted">Usuario encontrado</div>
+                  <div className="mt-4 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
+                    <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+                      Usuario encontrado
+                    </div>
                     <div className="mt-1 text-sm font-semibold">{recipientDisplay}</div>
-                    <div className="mt-1 text-xs text-muted">telegram_id: {recipient.telegram_id}</div>
+                    <div className="mt-1 text-xs text-zinc-500 dark:text-white/60">
+                      telegram_id: {recipient.telegram_id}
+                    </div>
                   </div>
                 ) : (
-                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm text-muted">
+                  <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
                     {recipientError ?? "Busca un usuario para continuar."}
                   </div>
                 )}
 
-                <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
+                <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  Monto (USDT)
+                </div>
                 <input
                   value={amountToUser}
                   onChange={(e) =>
@@ -750,11 +832,11 @@ export default function SendPage() {
                   }
                   inputMode="decimal"
                   placeholder="0.00"
-                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
                 {userTransferError ? (
-                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+                  <div className="mt-4 rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-yellow-800 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-200 dark:ring-yellow-500/20">
                     {userTransferError}
                   </div>
                 ) : null}
@@ -764,7 +846,7 @@ export default function SendPage() {
                     type="button"
                     disabled={isCheckingBalance}
                     aria-busy={isCheckingBalance}
-                    className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     onClick={onRequestUserTransferConfirm}
                   >
                     {isCheckingBalance ? "Validando..." : "Enviar"}
@@ -772,39 +854,45 @@ export default function SendPage() {
                 </div>
               </div>
             ) : (
-              <div className="cc-glass cc-neon-outline mt-4 rounded-3xl p-5">
-                <div className="rounded-2xl bg-white/5 p-4 text-sm text-muted">
+              <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
+                <div className="rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
                   El monto mínimo de retiro es{" "}
                   {formatUsdt(minWithdrawalUsdt ?? 0)} USDT. La solicitud quedará en espera y
                   puede tardar hasta 72 horas en ser aprobada
                 </div>
 
                 {pendingShown ? (
-                  <div className="mt-4 rounded-2xl bg-white/5 p-4">
+                  <div className="mt-4 rounded-2xl bg-yellow-50 p-4 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:ring-yellow-500/20">
                     <div className="text-sm font-semibold">En espera</div>
-                    <div className="mt-1 text-xs text-muted">
+                    <div className="mt-1 text-xs text-zinc-500 dark:text-white/60">
                       Solicitud enviada con estado pendiente.
                     </div>
                   </div>
                 ) : null}
 
-                <div className="mt-4 text-sm font-semibold text-muted">Dirección</div>
+                <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  Dirección
+                </div>
                 <input
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
                   placeholder="0x..."
-                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
-                <div className="mt-4 text-sm font-semibold text-muted">Red</div>
+                <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  Red
+                </div>
                 <input
                   value={withdrawNetwork}
                   onChange={(e) => setWithdrawNetwork(e.target.value)}
                   placeholder="TRC20 / ERC20 / ..."
-                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
-                <div className="mt-4 text-sm font-semibold text-muted">Monto (USDT)</div>
+                <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
+                  Monto (USDT)
+                </div>
                 <input
                   value={withdrawAmount}
                   onChange={(e) =>
@@ -814,11 +902,11 @@ export default function SendPage() {
                   }
                   inputMode="decimal"
                   placeholder="0.00"
-                  className="cc-glass cc-neon-outline mt-2 h-12 w-full rounded-2xl px-4 text-sm text-foreground placeholder:text-muted"
+                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
                 {withdrawError ? (
-                  <div className="mt-4 rounded-2xl bg-white/5 p-4 text-sm font-semibold text-muted">
+                  <div className="mt-4 rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-yellow-800 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-200 dark:ring-yellow-500/20">
                     {withdrawError}
                   </div>
                 ) : null}
@@ -828,7 +916,7 @@ export default function SendPage() {
                     type="button"
                     disabled={isCheckingWithdrawBalance}
                     aria-busy={isCheckingWithdrawBalance}
-                    className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     onClick={onRequestWithdrawConfirm}
                   >
                     {isCheckingWithdrawBalance ? "Validando..." : "Enviar"}

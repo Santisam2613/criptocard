@@ -35,12 +35,13 @@ type Sheet =
 import PrivacyPolicyContent from "@/miniapp/dashboard/PrivacyPolicyContent";
 import TermsAndConditionsContent from "@/miniapp/dashboard/TermsAndConditionsContent";
 import TransactionList from "@/miniapp/dashboard/TransactionList";
+import USDTPerformanceChart from "@/components/USDTPerformanceChart";
+import CashbackCarousel from "@/miniapp/dashboard/CashbackCarousel";
 
 export default function DashboardView() {
   const router = useRouter();
-  const [sheet, setSheet] = useState<Sheet>(null);
+  const [sheet, setSheet] = useState<Sheet | "card_selector">(null);
   const [kycOpen, setKycOpen] = useState(false);
-  const [supportLink, setSupportLink] = useState<string | null>(null);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeTitle, setNoticeTitle] = useState("");
@@ -78,6 +79,7 @@ export default function DashboardView() {
   const okLabel = t("dashboard.ok");
   const isPhysicalComingSoon = true;
   const isVirtualAccountsComingSoon = true;
+  const isCashbackComingSoon = true;
   const isApproved = state.status === "ready" && user?.verification_status === "approved";
 
   useEffect(() => {
@@ -203,37 +205,8 @@ export default function DashboardView() {
     }
   }
 
-  useEffect(() => {
-    let canceled = false;
-    async function loadSupport() {
-      try {
-        const res = await fetch("/api/config/support-link", { cache: "no-store" });
-        const json = (await res.json().catch(() => null)) as
-          | { ok: boolean; supportLink?: string | null }
-          | null;
-        if (canceled) return;
-        setSupportLink(json?.ok ? (json.supportLink ?? null) : null);
-      } catch {
-        if (canceled) return;
-        setSupportLink(null);
-      }
-    }
-    void loadSupport();
-    return () => {
-      canceled = true;
-    };
-  }, []);
-
   function openSupport() {
-    if (!supportLink) return;
-    const wa = window.Telegram?.WebApp;
-    if (wa?.openLink) {
-      try {
-        wa.openLink(supportLink);
-        return;
-      } catch {}
-    }
-    window.open(supportLink, "_blank", "noopener,noreferrer");
+    router.push("/soporte");
   }
 
   function notifyComingSoon() {
@@ -295,7 +268,7 @@ export default function DashboardView() {
   }
 
   return (
-    <main className="relative min-h-screen bg-transparent px-4 py-10 text-foreground">
+    <main className="relative min-h-screen bg-[#F4F5F7] px-4 py-10 text-foreground dark:bg-[#0F1115]">
       <div className="mx-auto w-full max-w-[420px]">
         <ConfirmDialog
           open={confirmOpen}
@@ -333,125 +306,150 @@ export default function DashboardView() {
           onClose={() => setKycOpen(false)}
           onCompleted={() => void refresh()}
         />
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full transition-transform hover:-translate-y-0.5 active:translate-y-0"
-            onClick={() => setSheet("settings")}
-            aria-label="Settings"
-          >
-            <div className="relative h-full w-full">
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="h-full w-full rounded-full object-cover"
-                  sizes="40px"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <Image
-                    src="/assets/logo-header.png"
-                    alt="Criptocard"
-                    width={120}
-                    height={24}
-                    className="h-5 w-auto dark:hidden"
-                  />
-                  <Image
-                    src="/assets/logo-header-blanco.png"
-                    alt="Criptocard"
-                    width={120}
-                    height={24}
-                    className="hidden h-5 w-auto dark:block"
-                  />
-                </div>
-              )}
+        <div className="flex flex-col gap-6">
+          <div className="relative w-full overflow-hidden rounded-[32px] border border-black/5 bg-white p-6 transition-colors duration-200 dark:border-white/5 dark:bg-[#1A1D24]">
+            <div className="pointer-events-none absolute -mr-10 -mt-10 right-0 top-0 h-32 w-32 rounded-full bg-[var(--color-neon)]/5 blur-3xl" />
 
-              <div className="cc-glass cc-neon-outline absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full">
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  className="h-3.5 w-3.5 text-brand drop-shadow-[0_0_16px_var(--shadow-brand)]"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <div className="mb-1 flex items-start justify-between">
+              <div className="mt-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
+                Your balance
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="relative p-1 text-gray-400 transition-colors hover:text-foreground dark:text-gray-500 dark:hover:text-white"
+                  aria-label="Support"
+                  onClick={openSupport}
                 >
-                  <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                  <path d="M19.4 15a8.7 8.7 0 0 0 .1-2l2-1.3-2-3.4-2.3.8a8.7 8.7 0 0 0-1.7-1L15.3 4h-4l-.2 2.4a8.7 8.7 0 0 0-1.7 1L7.1 6.6l-2 3.4 2 1.3a8.7 8.7 0 0 0 0 2l-2 1.3 2 3.4 2.3-.8a8.7 8.7 0 0 0 1.7 1L11.3 20h4l.2-2.4a8.7 8.7 0 0 0 1.7-1l2.3.8 2-3.4-2.1-1.3z" />
-                </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-6 w-6"
+                  >
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSheet("settings")}
+                  className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-black/5 dark:ring-white/10"
+                >
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt=""
+                      width={36}
+                      height={36}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-yellow-500 text-xs font-bold text-white">
+                      CC
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
-          </button>
 
-          <div className="text-center">
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
-              {t("dashboard.balanceLabel")}
-            </div>
-          {isProfileLoading ? (
-            <div className="mt-3 flex justify-center">
+            {isProfileLoading ? (
               <Skeleton className="h-12 w-48" rounded="2xl" />
-            </div>
-          ) : (
-            <div className="mt-2 text-5xl font-extrabold tracking-tight">
-              {`$${formatUsdt(user?.balance_usdt ?? 0)}`}
-            </div>
-          )}
+            ) : (
+              <div className="flex items-baseline text-[#111] dark:text-white">
+                <span className="text-5xl font-extrabold tracking-tight tabular-nums">
+                  {`$${formatUsdt(user?.balance_usdt ?? 0).split(".")[0]}`}
+                </span>
+                <span className="ml-0.5 -mt-4 inline-block align-top text-2xl font-bold text-gray-500 dark:text-gray-400">
+                  {`.${formatUsdt(user?.balance_usdt ?? 0).split(".")[1]}`}
+                </span>
+              </div>
+            )}
           </div>
-
-          <button
-            type="button"
-            aria-label="Support"
-            onClick={openSupport}
-            disabled={!supportLink}
-            className="cc-glass cc-neon-outline inline-flex h-10 w-10 items-center justify-center rounded-full transition-transform enabled:hover:-translate-y-0.5 enabled:active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="12" r="4" />
-              <path d="M4.93 4.93 9.17 9.17" />
-              <path d="M14.83 14.83 19.07 19.07" />
-              <path d="M14.83 9.17 19.07 4.93" />
-              <path d="M14.83 9.17 15.66 8.34" />
-              <path d="M4.93 19.07 9.17 14.83" />
-            </svg>
-          </button>
         </div>
 
-        <div className="mt-7 grid grid-cols-2 gap-4">
+        <div className="mt-8 flex items-center justify-between px-2">
           <button
             type="button"
-            className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+            className="group flex flex-col items-center gap-2"
             onClick={() => setSheet("topup")}
           >
-            <span className="text-lg leading-none">+</span>
-            <span>{t("dashboard.topUp")}</span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#111] transition-all duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0 dark:bg-[#1A1D24] dark:text-white">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+              Top up
+            </span>
           </button>
+
           <button
             type="button"
-            className="cc-cta cc-gold-cta inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+            className="group flex flex-col items-center gap-2"
             onClick={() => setSheet("send")}
           >
-            <span className="text-lg leading-none">↑</span>
-            <span>{t("dashboard.send")}</span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#111] transition-all duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0 dark:bg-[#1A1D24] dark:text-white">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+              >
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+              Send
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="group flex flex-col items-center gap-2"
+            onClick={() => notifyComingSoon()}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#111] transition-all duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0 dark:bg-[#1A1D24] dark:text-white">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+              Cuenta virtual
+            </span>
           </button>
         </div>
 
         {user?.verification_status !== "approved" ? (
           isProfileLoading ? (
-            <div className="cc-glass-strong cc-neon-outline mt-5 w-full rounded-3xl p-5">
+            <div className="mt-5 w-full rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-black dark:ring-white/10">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <Skeleton className="mt-0.5 h-10 w-10" rounded="2xl" />
@@ -474,11 +472,11 @@ export default function DashboardView() {
             <button
               type="button"
               onClick={startVerification}
-              className="cc-glass-strong cc-neon-outline cc-holo mt-5 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
+              className="group relative mt-5 w-full overflow-hidden rounded-3xl bg-yellow-500 p-5 text-left shadow-lg shadow-yellow-500/25 ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,var(--color-brand),transparent_60%)] ring-1 ring-black/10">
+                  <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20">
                     <svg
                       viewBox="0 0 24 24"
                       aria-hidden="true"
@@ -495,24 +493,24 @@ export default function DashboardView() {
                   </div>
 
                   <div>
-                    <div className="text-[11px] font-semibold tracking-[0.22em] text-muted">
+                    <div className="text-[11px] font-semibold tracking-[0.22em] text-white/70">
                       {t("dashboard.getCryptoCard")}
                     </div>
-                    <div className="mt-1 text-lg font-extrabold text-foreground">
+                    <div className="mt-1 text-lg font-extrabold text-white">
                       {t("dashboard.verifyTitle")}
                     </div>
-                    <div className="mt-1 text-sm font-medium text-muted">
+                    <div className="mt-1 text-sm font-medium text-white/75">
                       {t("dashboard.verifySubtitle")}
                     </div>
                     {user ? (
-                      <div className="mt-1 text-xs font-semibold text-muted-2">
+                      <div className="mt-1 text-xs font-semibold text-white/80">
                         {t(`verification.${user.verification_status}`)}
                       </div>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-surface ring-1 ring-border">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/20">
                   <svg
                     viewBox="0 0 24 24"
                     aria-hidden="true"
@@ -529,10 +527,10 @@ export default function DashboardView() {
               </div>
 
               <div className="mt-5">
-                <div className="h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
-                  <div className="h-2 w-0 rounded-full bg-[linear-gradient(90deg,var(--color-brand-2),var(--color-brand),var(--color-neon))]" />
+                <div className="h-2 w-full rounded-full bg-white/15">
+                  <div className="h-2 w-0 rounded-full bg-white" />
                 </div>
-                <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-muted">
+                <div className="mt-2 text-[11px] font-semibold tracking-[0.22em] text-white/70">
                   {t("dashboard.stepsDone")}
                 </div>
               </div>
@@ -540,83 +538,63 @@ export default function DashboardView() {
           )
         ) : null}
 
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <CashbackCarousel />
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => setSheet("virtual")}
+            className="group relative overflow-hidden rounded-3xl bg-white p-4 text-left shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0 dark:bg-[#1A1D24] dark:ring-white/10 dark:hover:bg-[#20242C]"
           >
-            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-brand shadow-[0_12px_30px_var(--shadow-brand)] ring-1 ring-black/10">
-              <div className="absolute inset-0 opacity-55 [background-image:repeating-linear-gradient(135deg,rgba(0,0,0,0.20)_0,rgba(0,0,0,0.20)_1px,transparent_1px,transparent_6px)]" />
-              <div className="absolute left-2 top-2 h-3.5 w-5 rounded-md bg-black/20 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)]" />
-              <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-black/20" />
-            </div>
-            <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
-              {t("dashboard.visaVirtual")}
+            <div className="relative flex h-full min-h-[108px] flex-col justify-between">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F4F5F7] text-[#111] ring-1 ring-black/5 dark:bg-white/5 dark:text-white dark:ring-white/10">
+                <div className="h-5 w-7 rounded-md bg-[#F0A100] ring-1 ring-black/10" />
+              </div>
+              <div>
+                <div className="text-sm font-extrabold text-[#111] dark:text-white">Visa Virtual</div>
+              </div>
             </div>
           </button>
+
           <button
             type="button"
-            aria-disabled={isPhysicalComingSoon}
-            className="cc-glass cc-neon-outline rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-not-allowed opacity-70"
-            onClick={() =>
-              isPhysicalComingSoon ? notifyComingSoon() : setSheet("physical")
-            }
+            onClick={() => notifyComingSoon()}
+            className="group relative overflow-hidden rounded-3xl bg-white p-4 text-left shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0 dark:bg-[#1A1D24] dark:ring-white/10 dark:hover:bg-[#20242C]"
           >
-            <div className="relative h-9 w-14 overflow-hidden rounded-xl bg-[linear-gradient(135deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02))] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
-              <div className="absolute inset-0 opacity-60 [background-image:radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.25),transparent_55%)]" />
-              <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(135deg,rgba(0,0,0,0.30)_0,rgba(0,0,0,0.30)_1px,transparent_1px,transparent_7px)] dark:opacity-40" />
-              <div className="absolute left-2 top-2 h-3.5 w-5 rounded-md bg-white/15 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]" />
-              <div className="absolute bottom-2 right-2 h-2 w-6 rounded-full bg-white/15" />
-            </div>
-            <div className="mt-8 text-sm font-semibold text-zinc-950 dark:text-white/90">
-              {t("dashboard.visaPhysical")}
-            </div>
-            {isPhysicalComingSoon ? (
-              <div className="mt-1 text-xs font-semibold tracking-[0.18em] text-muted">
-                {comingSoonLabel}
+            <div className="relative flex h-full min-h-[108px] flex-col justify-between">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F4F5F7] text-[#111] ring-1 ring-black/5 dark:bg-white/5 dark:text-white dark:ring-white/10">
+                <div className="h-5 w-7 rounded-md bg-black/10 ring-1 ring-black/10 dark:bg-white/10 dark:ring-white/10" />
               </div>
-            ) : null}
+              <div>
+                <div className="text-sm font-extrabold text-[#111] dark:text-white">Visa Física</div>
+                <div className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Próximamente disponible
+                </div>
+              </div>
+            </div>
           </button>
         </div>
 
         <button
           type="button"
-          aria-disabled={isVirtualAccountsComingSoon}
-          className="cc-glass cc-neon-outline mt-4 w-full rounded-3xl p-5 text-left transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-not-allowed opacity-70"
-          onClick={() =>
-            isVirtualAccountsComingSoon ? notifyComingSoon() : setSheet("accounts")
-          }
-        >
-          <div className="flex items-center gap-4">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-foreground ring-1 ring-border">
-              <span className="text-lg font-extrabold">$</span>
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
-                {t("dashboard.virtualAccounts")}
-              </div>
-              <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
-                {isVirtualAccountsComingSoon
-                  ? comingSoonLabel
-                  : t("dashboard.notOpened")}
-              </div>
-            </div>
-          </div>
-        </button>
-
-        <button
-          type="button"
           onClick={() => router.push("/miniapp/referral")}
-          className="cc-glass mt-4 w-full rounded-3xl p-5 text-left ring-1 ring-[rgba(205,255,0,0.35)] shadow-[0_0_0_1px_rgba(205,255,0,0.10),0_18px_50px_var(--glass-shadow),0_0_26px_rgba(205,255,0,0.16)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+          className="group relative mt-4 w-full overflow-hidden rounded-3xl bg-white p-0 text-left transition-all active:scale-[0.98] dark:bg-[#1A1D24]"
         >
-          <div className="flex items-center justify-between gap-4">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+            <div className="absolute -inset-[100%] animate-[spin_4s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#EAB308_50%,transparent_100%)] opacity-100" />
+          </div>
+          <div className="absolute inset-[1px] z-0 rounded-[23px] bg-white dark:bg-[#1A1D24]" />
+
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-transparent via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:via-white/5" />
+          
+          <div className="relative z-10 flex items-center justify-between gap-4 p-5">
             <div className="flex items-center gap-4">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_30%,var(--color-neon),transparent_60%)] text-foreground ring-1 ring-border">
+              <div className="relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 text-white shadow-lg shadow-yellow-500/20 ring-1 ring-white/20">
+                <div className="absolute inset-0 animate-pulse rounded-2xl bg-white/20" />
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  className="h-5 w-5"
+                  className="relative h-6 w-6"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -629,10 +607,10 @@ export default function DashboardView() {
                 </svg>
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-950 dark:text-white/90">
+                <div className="text-sm font-bold text-zinc-950 dark:text-white">
                   {t("dashboard.karat")}
                 </div>
-                <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
                   {t("dashboard.inviteFriends")}
                 </div>
               </div>
@@ -646,23 +624,34 @@ export default function DashboardView() {
                 </>
               ) : (
                 <>
-                  <div className="text-sm font-semibold text-foreground">
+                  <div className="text-sm font-bold text-zinc-950 dark:text-white">
                     {formatInteger(referralEligible)}
                   </div>
-                  <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-white/50">
+                  <div className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     {formatUsdt(referralEligible * referralRate)} USDT
                   </div>
                 </>
               )}
             </div>
           </div>
+          
+          <div className="absolute bottom-0 left-0 z-10 h-1 w-full bg-gray-100 dark:bg-white/5">
+            <div 
+              className="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000"
+              style={{ width: `${Math.min(((referralEligible ?? 0) / 100) * 100, 100)}%` }} 
+            />
+          </div>
         </button>
+
+        <div className="mt-4 w-full overflow-hidden rounded-3xl bg-white p-5 dark:bg-[#1A1D24]">
+          <USDTPerformanceChart />
+        </div>
 
         <div className="mt-10">
           <div className="text-xl font-extrabold tracking-tight">
             {t("dashboard.transactions")}
           </div>
-          <div className="cc-glass cc-neon-outline mt-4 overflow-hidden rounded-3xl p-1">
+          <div className="mt-4 overflow-hidden rounded-3xl p-1">
             <TransactionList />
           </div>
         </div>

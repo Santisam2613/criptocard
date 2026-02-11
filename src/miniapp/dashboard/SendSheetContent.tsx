@@ -51,8 +51,8 @@ function CardRow({
       className={[
         "flex items-center justify-between gap-4 rounded-2xl px-5 py-4",
         emphasis
-          ? "bg-white text-black shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
-          : "bg-white text-black shadow-[0_24px_60px_rgba(0,0,0,0.18)] dark:bg-white/10 dark:text-white dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]",
+          ? "bg-white text-black shadow-lg shadow-black/5 dark:bg-white/10 dark:text-white dark:shadow-none"
+          : "bg-white/60 text-black shadow-sm dark:bg-white/5 dark:text-white dark:shadow-none",
       ].join(" ")}
     >
       <div className="flex items-center gap-4">
@@ -60,8 +60,8 @@ function CardRow({
           className={[
             "inline-flex h-10 w-10 items-center justify-center rounded-full",
             emphasis
-              ? "bg-black/5 text-black"
-              : "bg-black/5 text-black dark:bg-black/20 dark:text-white",
+              ? "bg-black/5 text-black dark:bg-white/20 dark:text-white"
+              : "bg-black/5 text-black dark:bg-white/10 dark:text-white",
           ].join(" ")}
         >
           {leftIcon}
@@ -71,7 +71,7 @@ function CardRow({
           <div
             className={[
               "mt-0.5 text-xs font-medium",
-              emphasis ? "text-black/60" : "text-black/60 dark:text-white/50",
+              emphasis ? "text-black/60 dark:text-white/60" : "text-black/50 dark:text-white/50",
             ].join(" ")}
           >
             {subtitle}
@@ -82,7 +82,7 @@ function CardRow({
       <div
         className={[
           "text-lg font-extrabold",
-          emphasis ? "text-black" : "text-black/80 dark:text-white/80",
+          emphasis ? "text-black dark:text-white" : "text-black/80 dark:text-white/80",
         ].join(" ")}
       >
         {amount}
@@ -110,16 +110,16 @@ export default function SendSheetContent() {
   }
   return (
     <div className="px-6 pb-8 pt-6 text-zinc-950 dark:text-white">
-      <div className="cc-glass cc-neon-outline overflow-hidden rounded-3xl">
-        <div className="relative h-72 overflow-hidden rounded-3xl bg-[radial-gradient(100%_80%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] px-6 pt-7 dark:bg-[radial-gradient(100%_80%_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]">
-          <div className="absolute inset-0 bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.10),transparent_60%)] dark:bg-[radial-gradient(70%_80%_at_50%_0%,rgba(0,0,0,0.28),transparent_60%)]" />
+      <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#1A1D24]">
+        <div className="relative h-72 overflow-hidden bg-gray-50 px-6 pt-7 dark:bg-white/5">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5 dark:to-black/20" />
 
           <div className="relative flex flex-col items-center gap-4">
             <div className="flex w-full items-center justify-between">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#2A9DFF] text-white shadow-[0_22px_60px_rgba(42,157,255,0.16)]">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#2A9DFF] text-white shadow-lg shadow-blue-500/20">
                 <TelegramIcon />
               </div>
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#F0A100] text-black shadow-[0_22px_60px_rgba(240,161,0,0.14)]">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#F0A100] text-black shadow-lg shadow-orange-500/20">
                 <BitcoinIcon />
               </div>
             </div>
@@ -143,16 +143,16 @@ export default function SendSheetContent() {
                 subtitle={t("sheets.sendMoney")}
                 amount="$70"
                 leftIcon={
-                  <div className="h-7 w-7 rounded-full bg-white/25 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]" />
+                  <div className="h-7 w-7 rounded-full bg-white/40 shadow-inner" />
                 }
               />
             </div>
 
-            <div className="mt-3 flex w-full items-center justify-between">
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-[0_22px_60px_rgba(255,255,255,0.08)]">
+            <div className="mt-3 flex w-full items-center justify-between opacity-50 blur-[1px]">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-black shadow-sm dark:bg-white/10 dark:text-white">
                 <div className="text-2xl font-black">R</div>
               </div>
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#2E6BFF] text-white shadow-[0_22px_60px_rgba(46,107,255,0.14)]">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#2E6BFF] text-white shadow-lg">
                 <CitiIcon />
               </div>
             </div>
@@ -174,7 +174,7 @@ export default function SendSheetContent() {
               type="button"
               disabled={!isReady}
               aria-busy={!isReady}
-              className="cc-cta cc-gold-cta inline-flex h-14 w-full items-center justify-center rounded-2xl text-base font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:brightness-100 disabled:hover:shadow-none disabled:hover:translate-y-0"
+              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-yellow-500 text-base font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={onPrimaryAction}
             >
               {!isReady ? "Cargando..." : isApproved ? "Continuar" : t("sheets.verifyAccount")}
