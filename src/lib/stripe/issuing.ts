@@ -48,8 +48,8 @@ export const stripeService = {
       try {
         const existing = await stripe.issuing.cardholders.retrieve(user.stripeCardholderId);
         const requirementsDue =
-          (existing.requirements?.past_due?.length ?? 0) > 0 ||
-          (existing.requirements?.currently_due?.length ?? 0) > 0;
+          (existing.requirements?.disabled_reason != null) ||
+          (existing.requirements?.past_due?.length ?? 0) > 0;
 
         // Si no está activo o le faltan datos, actualizarlo
         if (existing.status !== "active" || requirementsDue) {
@@ -79,8 +79,8 @@ export const stripeService = {
 
             const updated = await stripe.issuing.cardholders.retrieve(user.stripeCardholderId);
             const stillDue =
-              (updated.requirements?.past_due?.length ?? 0) > 0 ||
-              (updated.requirements?.currently_due?.length ?? 0) > 0;
+              (updated.requirements?.disabled_reason != null) ||
+              (updated.requirements?.past_due?.length ?? 0) > 0;
             if (stillDue) {
               throw new Error(
                 `Cardholder incompleto: ${JSON.stringify(updated.requirements)}`,
@@ -136,8 +136,8 @@ export const stripeService = {
 
     const created = await stripe.issuing.cardholders.retrieve(cardholder.id);
     const requirementsDue =
-      (created.requirements?.past_due?.length ?? 0) > 0 ||
-      (created.requirements?.currently_due?.length ?? 0) > 0;
+      (created.requirements?.disabled_reason != null) ||
+      (created.requirements?.past_due?.length ?? 0) > 0;
     if (requirementsDue) {
       throw new Error(`Cardholder incompleto: ${JSON.stringify(created.requirements)}`);
     }
