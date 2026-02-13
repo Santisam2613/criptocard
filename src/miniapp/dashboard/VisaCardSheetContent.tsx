@@ -25,8 +25,8 @@ export default function VisaCardSheetContent({
   const { t } = useI18n();
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
-      <div className="relative overflow-hidden rounded-3xl bg-brand p-6 shadow-[0_28px_70px_var(--shadow-brand)]">
-        <div className="absolute inset-0 opacity-70 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.18)_0,rgba(0,0,0,0.18)_1px,transparent_2px,transparent_7px)]" />
+      <div className="relative overflow-hidden rounded-3xl bg-yellow-500 p-6 shadow-lg shadow-yellow-500/25 ring-1 ring-black/10">
+        <div className="absolute inset-0 opacity-15 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.28)_0,rgba(0,0,0,0.28)_1px,transparent_2px,transparent_7px)]" />
         <div className="relative">
           <div className="flex items-start justify-between">
             <Image
@@ -77,7 +77,7 @@ export default function VisaCardSheetContent({
         {tags.map((t) => (
           <span
             key={t}
-            className="inline-flex items-center rounded-full bg-brand px-3 py-1 text-xs font-semibold text-black"
+            className="inline-flex items-center rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-700 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-300 dark:ring-yellow-500/20"
           >
             {t}
           </span>
@@ -103,7 +103,7 @@ export default function VisaCardSheetContent({
       <div className="mt-6">
         <button
           type="button"
-          className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
           onClick={onAction}
         >
           {actionLabel}

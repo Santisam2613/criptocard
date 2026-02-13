@@ -1,14 +1,14 @@
-import type { ReactNode } from "react";
-import Image from "next/image";
+import { useEffect, useState, type ReactNode } from "react";
 
 type VirtualVisaCardOwnedSheetContentProps = {
   header: string;
+  status: "active" | "frozen" | "blocked";
   cardholderName: string;
   last4: string;
   expiryMonth: number;
   expiryYear: number;
   rightBadge?: ReactNode;
-  onUnlock?: () => void;
+  onToggleLock?: () => void;
   onReplace?: () => void;
 };
 
@@ -20,21 +20,88 @@ function formatExpiry(month: number, year: number) {
 
 export default function VirtualVisaCardOwnedSheetContent({
   header,
+  status,
   cardholderName,
   last4,
   expiryMonth,
   expiryYear,
   rightBadge,
-  onUnlock,
+  onToggleLock,
   onReplace,
 }: VirtualVisaCardOwnedSheetContentProps) {
+  const isLocked = status !== "active";
+  const badgeLabel = status === "active" ? "Active" : status === "frozen" ? "Locked" : "Blocked";
+  const badgeDotClass =
+    status === "active"
+      ? "bg-emerald-600 dark:bg-emerald-300"
+      : status === "frozen"
+        ? "bg-yellow-600 dark:bg-yellow-300"
+        : "bg-red-600 dark:bg-red-300";
+  const badgeClass =
+    status === "active"
+      ? "bg-emerald-500/15 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/20"
+      : status === "frozen"
+        ? "bg-yellow-500/15 text-yellow-800 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-200 dark:ring-yellow-500/20"
+        : "bg-red-500/15 text-red-800 ring-red-500/20 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-500/20";
+  const lockButtonLabel = isLocked ? "Unlock Card" : "Lock Card";
+  const lockButtonDisabled = status === "blocked";
+
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [cvvLoading, setCvvLoading] = useState(false);
+  const [cvv, setCvv] = useState<string | null>(null);
+  const [pan, setPan] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!detailsVisible) return;
+    const t = window.setTimeout(() => {
+      setDetailsVisible(false);
+    }, 30_000);
+    return () => window.clearTimeout(t);
+  }, [detailsVisible]);
+
+  function formatPan(value: string) {
+    const digits = value.replace(/\s+/g, "");
+    const groups: string[] = [];
+    for (let i = 0; i < digits.length; i += 4) {
+      groups.push(digits.slice(i, i + 4));
+    }
+    return groups.join(" ");
+  }
+
+  async function ensureDetails() {
+    try {
+      setCvvLoading(true);
+      const res = await fetch("/api/cards/virtual/details", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; cvc?: string | null; number?: string | null; error?: string }
+        | null;
+      if (!json?.ok) return;
+      setCvv(json.cvc ?? null);
+      setPan(json.number ?? null);
+    } finally {
+      setCvvLoading(false);
+    }
+  }
+
+  async function toggleDetails() {
+    if (detailsVisible) {
+      setDetailsVisible(false);
+      return;
+    }
+    if (!cvv || !pan) await ensureDetails();
+    setDetailsVisible(true);
+  }
+
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
-      <div className="relative overflow-hidden rounded-3xl bg-[#E6E6E6] p-6 shadow-[0_28px_70px_rgba(0,0,0,0.25)] dark:bg-white/10">
-        <div className="absolute inset-0 opacity-70 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.14)_0,rgba(0,0,0,0.14)_1px,transparent_2px,transparent_8px)] dark:opacity-40" />
+      <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-lg shadow-black/10 ring-1 ring-black/5 dark:bg-[#1A1D24] dark:shadow-none dark:ring-white/10">
+        <div className="absolute inset-0 opacity-35 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.10)_0,rgba(0,0,0,0.10)_1px,transparent_2px,transparent_8px)] dark:opacity-20" />
         <div className="relative">
           <div className="flex items-start justify-between">
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-black/60 dark:text-white/70">
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-500 dark:text-white/60">
               {header}
             </div>
             {rightBadge ? <div className="shrink-0">{rightBadge}</div> : null}
@@ -42,47 +109,67 @@ export default function VirtualVisaCardOwnedSheetContent({
 
           <div className="mt-10 flex items-end justify-between gap-4">
             <div className="min-w-0">
-              <div className="truncate rounded-full bg-black/10 px-3 py-1 text-xs font-semibold text-black/70 dark:bg-white/10 dark:text-white/70">
+              <div className="truncate rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-700 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-300 dark:ring-yellow-500/20">
                 {cardholderName}
               </div>
-              <div className="mt-3 text-xl font-black tracking-[0.12em] text-black/80 dark:text-white/85">
-                •••• •••• •••• {last4}
+              <div className="mt-3 text-xl font-black tracking-[0.12em] text-zinc-900 dark:text-white">
+                {detailsVisible && pan ? formatPan(pan) : `•••• ${last4}`}
               </div>
-              <div className="mt-2 text-xs font-semibold text-black/60 dark:text-white/70">
+              <div className="mt-2 text-xs font-semibold text-zinc-500 dark:text-white/60">
                 Exp {formatExpiry(expiryMonth, expiryYear)}
               </div>
             </div>
 
-            <div className="text-right">
-              <div className="text-2xl font-black tracking-[0.10em] text-black/80 dark:text-white/85">
-                VISA
-              </div>
-              <div className="-mt-1 text-sm font-semibold text-black/60 dark:text-white/70">
-                Signature
-              </div>
-            </div>
+            <div />
           </div>
 
           <div className="mt-6 flex items-center justify-between">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.10)] dark:bg-white/10 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]">
-              <Image
-                src="/assets/logo-header.png"
-                alt="Criptocard"
-                width={86}
-                height={18}
-                className="h-4 w-auto dark:hidden"
-              />
-              <Image
-                src="/assets/logo-header-blanco.png"
-                alt="Criptocard"
-                width={86}
-                height={18}
-                className="hidden h-4 w-auto dark:block"
-              />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label={detailsVisible ? "Ocultar datos" : "Ver datos"}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
+                onClick={() => void toggleDetails()}
+                disabled={cvvLoading}
+              >
+                {detailsVisible ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M3 3l18 18" />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5"
+                  >
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+              <div className="inline-flex h-10 items-center justify-center rounded-2xl bg-black/5 px-3 text-xs font-black tracking-[0.18em] text-zinc-900 ring-1 ring-black/5 dark:bg-white/10 dark:text-white dark:ring-white/10">
+                {detailsVisible && cvv ? cvv : "•••"}
+              </div>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-black/10 px-3 py-1 text-xs font-semibold text-black/70 dark:bg-white/10 dark:text-white/70">
-              <span className="inline-flex h-2 w-2 rounded-full bg-black/50 dark:bg-white/60" />
-              Locked
+            <div
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${badgeClass}`}
+            >
+              <span className={`inline-flex h-2 w-2 rounded-full ${badgeDotClass}`} />
+              {badgeLabel}
             </div>
           </div>
         </div>
@@ -91,14 +178,15 @@ export default function VirtualVisaCardOwnedSheetContent({
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button
           type="button"
-          className="cc-cta cc-gold-cta inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-black ring-1 ring-black/10 hover:brightness-[1.06] hover:-translate-y-0.5 hover:shadow-[0_26px_72px_var(--shadow-brand-strong)] active:translate-y-0"
-          onClick={onUnlock}
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+          onClick={onToggleLock}
+          disabled={lockButtonDisabled}
         >
-          Unlock Card
+          {lockButtonLabel}
         </button>
         <button
           type="button"
-          className="cc-glass cc-neon-outline inline-flex h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-foreground transition-transform hover:-translate-y-0.5 active:translate-y-0"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gray-100 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
           onClick={onReplace}
         >
           Replace Card
@@ -107,4 +195,3 @@ export default function VirtualVisaCardOwnedSheetContent({
     </div>
   );
 }
-

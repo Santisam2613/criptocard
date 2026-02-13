@@ -205,6 +205,51 @@ export default function DashboardView() {
     }
   }
 
+  async function toggleVirtualCardLock() {
+    if (!virtualCard) return;
+    try {
+      setVirtualCardLoading(true);
+      const action = virtualCard.status === "active" ? "freeze" : "unfreeze";
+      const res = await fetch("/api/cards/virtual/status", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action }),
+      });
+      const json = (await res.json().catch(() => null)) as
+        | { ok: boolean; error?: string }
+        | null;
+      if (!json?.ok) {
+        openNotice({
+          title: "No se pudo actualizar",
+          message: json?.error ?? "Error interno",
+          confirmLabel: "Cerrar",
+        });
+        return;
+      }
+
+      const vr = await fetch("/api/cards/virtual", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      const vj = (await vr.json().catch(() => null)) as
+        | { ok: boolean; priceUsdt?: number; card?: any }
+        | null;
+      if (vj?.ok) {
+        setVirtualCardPrice(Number(vj.priceUsdt ?? 30));
+        setVirtualCard(vj.card ?? null);
+      }
+    } catch {
+      openNotice({
+        title: "No se pudo actualizar",
+        message: "Error interno",
+        confirmLabel: "Cerrar",
+      });
+    } finally {
+      setVirtualCardLoading(false);
+    }
+  }
+
   function openSupport() {
     router.push("/soporte");
   }
@@ -697,11 +742,12 @@ export default function DashboardView() {
         {isApproved && virtualCard ? (
           <VirtualVisaCardOwnedSheetContent
             header={t("dashboard.visaVirtualSheet")}
+            status={(virtualCard.status as any) ?? "active"}
             cardholderName={virtualCard.cardholderName}
             last4={virtualCard.last4 ?? "0000"}
             expiryMonth={virtualCard.expiryMonth ?? 12}
             expiryYear={virtualCard.expiryYear ?? new Date().getFullYear() + 3}
-            onUnlock={() => setComingSoonOpen(true)}
+            onToggleLock={() => void toggleVirtualCardLock()}
             onReplace={() => setComingSoonOpen(true)}
           />
         ) : (

@@ -22,6 +22,11 @@ export type ServerCredentials = {
     levelName?: string;
     webhookSecretKey?: string;
   };
+  stripe?: {
+    secretKey?: string;
+    webhookSecret?: string;
+    issuingProfileId?: string;
+  };
   dev: {
     bypassAuth: boolean;
     telegramId?: string;
@@ -81,6 +86,11 @@ export function getServerCredentials(): ServerCredentials {
       baseUrl: readString("SUMSUB_BASE_URL") ?? "https://api.sumsub.com",
       levelName: readString("SUMSUB_LEVEL_NAME"),
       webhookSecretKey: readString("SUMSUB_WEBHOOK_SECRET_KEY"),
+    },
+    stripe: {
+      secretKey: readString("STRIPE_SECRET_KEY"),
+      webhookSecret: readString("STRIPE_WEBHOOK_SECRET"),
+      issuingProfileId: readString("STRIPE_ISSUING_PROFILE_ID"),
     },
     dev: {
       bypassAuth: readString("DEV_BYPASS_AUTH") === "1",

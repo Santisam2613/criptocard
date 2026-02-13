@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CriptoCard - Tarjeta virtual",
-  description: "Criptocard es una experiencia de tarjeta cripto dentro de Telegram para recargar y gastar en todo el mundo.",
+  description: "Criptocard es una experiencia de tarjeta usd dentro de Telegram para gastar.",
 };
 
 export const viewport: Viewport = {

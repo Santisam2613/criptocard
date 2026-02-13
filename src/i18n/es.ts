@@ -49,7 +49,7 @@ export const es = {
   faq: {
     title: "F.A.Q.",
     q1: "¿Qué es Criptocard?",
-    a1: "Criptocard es una experiencia de tarjeta cripto dentro de Telegram para recargar y gastar en todo el mundo.",
+    a1: "Criptocard es una experiencia de tarjeta usd dentro de Telegram para gastar.",
     q2: "¿Cómo obtengo una tarjeta?",
     a2: "Inicia el bot de Telegram, completa la verificación y emite tu tarjeta virtual o física.",
     q3: "¿Se requiere KYC?",
