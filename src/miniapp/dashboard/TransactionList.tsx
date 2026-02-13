@@ -108,6 +108,9 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
 function getTransactionTitle(tx: Transaction) {
   // 1. Prioridad: Descripción explícita en metadata
   if (tx.metadata?.description) {
+    if (tx.type === "card_purchase") {
+      return tx.metadata.description.replace(/\s*\(Procesando\)\s*$/i, "");
+    }
     return tx.metadata.description;
   }
 
