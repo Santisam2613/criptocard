@@ -17,7 +17,7 @@ if (!secretKey) {
   process.exit(1);
 }
 
-const stripe = new Stripe(secretKey, { apiVersion: "2025-01-27.acacia" });
+const stripe = new Stripe(secretKey, { apiVersion: "2026-01-28.clover" });
 
 async function setupWebhook() {
   console.log(`🔌 Configurando webhook en Stripe hacia: ${webhookUrl}...`);
