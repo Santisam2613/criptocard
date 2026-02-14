@@ -8,6 +8,7 @@ export type TransactionType =
   | "referral_conversion"
   | "card_purchase"
   | "stripe_payment"
+  | "card_authorization"
   | "diamond_conversion";
 
 export type TransactionStatus = "pending" | "completed" | "rejected";
