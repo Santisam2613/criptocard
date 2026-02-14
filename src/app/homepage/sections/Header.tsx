@@ -251,7 +251,7 @@ export default function Header() {
 
           <div className="hidden sm:block">
             <Button
-              href="https://t.me/CriptocardBot"
+              href="https://t.me/CriptoCardApp_bot"
               target="_blank"
               rel="noopener noreferrer"
               variant="lime"
@@ -301,7 +301,7 @@ export default function Header() {
               <LocaleButtons />
             </div>
             <Button
-              href="https://t.me/CriptocardBot"
+              href="https://t.me/CriptoCardApp_bot"
               target="_blank"
               rel="noopener noreferrer"
               variant="lime"

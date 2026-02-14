@@ -44,7 +44,7 @@ export default function HeroSection() {
           </p>
           <div className="mt-10">
             <Button
-              href="https://t.me/CriptocardBot"
+              href="https://t.me/CriptoCardApp_bot"
               target="_blank"
               rel="noopener noreferrer"
               leftIcon={<TelegramIcon />}
