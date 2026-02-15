@@ -128,14 +128,40 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ ok: true, purchase: localCard }, { status: 200 });
     } catch (stripeError) {
-      console.error("Error en Stripe:", stripeError);
+      const err = stripeError as {
+        message?: string;
+        type?: string;
+        code?: string;
+        requestId?: string;
+        raw?: { message?: string; type?: string; code?: string; requestId?: string };
+      };
+      const providerMessage =
+        err?.raw?.message ?? err?.message ?? "Error emitiendo tarjeta en el proveedor";
+      const providerType = err?.raw?.type ?? err?.type ?? null;
+      const providerCode = err?.raw?.code ?? err?.code ?? null;
+      const providerRequestId = err?.raw?.requestId ?? err?.requestId ?? null;
+
+      console.error("Error en Stripe:", {
+        message: providerMessage,
+        type: providerType,
+        code: providerCode,
+        requestId: providerRequestId,
+      });
       // Rollback: Devolver el dinero si falla Stripe
       await supabase.rpc("refund_balance_for_card", {
         p_user_id: user.id,
         p_amount: price,
       });
       return NextResponse.json(
-        { ok: false, error: "Error emitiendo tarjeta en el proveedor" },
+        {
+          ok: false,
+          error: providerMessage,
+          provider: {
+            type: providerType,
+            code: providerCode,
+            requestId: providerRequestId,
+          },
+        },
         { status: 500 },
       );
     }
