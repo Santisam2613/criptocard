@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { getServerCredentials } from "@/config/credentials";
+import { createStripe } from "@/lib/stripe/client";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -28,9 +29,7 @@ export async function POST(req: Request) {
   // 1. Verificar firma (Seguridad Crítica)
   let event: Stripe.Event;
   try {
-    const stripe = new Stripe(creds.stripe.secretKey, {
-      apiVersion: "2026-01-28.clover",
-    });
+    const stripe = createStripe();
     event = stripe.webhooks.constructEvent(
       body,
       signature,

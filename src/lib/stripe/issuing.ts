@@ -1,19 +1,13 @@
 import Stripe from "stripe";
 
-import { getServerCredentials } from "@/config/credentials";
+import { createStripe } from "@/lib/stripe/client";
 
 // Inicialización Lazy del cliente
 let stripeClient: Stripe | null = null;
 
 function getStripe() {
   if (stripeClient) return stripeClient;
-  const creds = getServerCredentials();
-
-  if (!creds.stripe?.secretKey) throw new Error("Stripe no configurado (falta STRIPE_SECRET_KEY)");
-
-  stripeClient = new Stripe(creds.stripe.secretKey, {
-    apiVersion: "2026-01-28.clover",
-  });
+  stripeClient = createStripe();
   return stripeClient;
 }
 

@@ -1,5 +1,7 @@
 import Stripe from "stripe";
 
+import { STRIPE_API_VERSION } from "../src/lib/stripe/config";
+
 const args = process.argv.slice(2);
 const vercelUrl = args[0];
 
@@ -17,7 +19,7 @@ if (!secretKey) {
   process.exit(1);
 }
 
-const stripe = new Stripe(secretKey, { apiVersion: "2026-01-28.clover" });
+const stripe = new Stripe(secretKey, { apiVersion: STRIPE_API_VERSION });
 
 async function setupWebhook() {
   console.log(`🔌 Configurando webhook en Stripe hacia: ${webhookUrl}...`);
@@ -39,8 +41,9 @@ async function setupWebhook() {
     console.log("---------------------------------------------------");
     console.log("⚠️  IMPORTANTE: Copia el 'Signing Secret' de arriba y agrégalo");
     console.log("    a las variables de entorno de Vercel como STRIPE_WEBHOOK_SECRET");
-  } catch (error: any) {
-    console.error("❌ Error creando webhook:", error.message);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("❌ Error creando webhook:", message);
   }
 }
 
