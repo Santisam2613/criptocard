@@ -44,6 +44,9 @@ export async function POST(req: Request) {
 
     if (error) {
       const msg = error.message || "No se pudo crear solicitud";
+      const looksLikeWalletWriteBlocked = msg.includes(
+        "No se permite modificar wallets directamente",
+      );
       const looksLikeMissingRpc =
         msg.toLowerCase().includes("could not find the function") ||
         msg.toLowerCase().includes("schema cache") ||
@@ -54,6 +57,8 @@ export async function POST(req: Request) {
           ok: false,
           error: looksLikeMissingRpc
             ? "RPC create_withdraw_request no está instalada. Ejecuta supabase/sql/002_app_config.sql en tu proyecto Supabase."
+            : looksLikeWalletWriteBlocked
+              ? "RPC create_withdraw_request desactualizada. Re-ejecuta supabase/sql/002_app_config.sql en tu proyecto Supabase para actualizar las funciones."
             : msg,
         },
         { status: 400 },

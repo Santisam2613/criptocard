@@ -215,6 +215,8 @@ begin
     raise exception 'El destinatario debe estar verificado';
   end if;
 
+  perform set_config('app.allow_wallet_write', '1', true);
+
   insert into public.wallets (user_id, usdt_balance)
   values (sender_user_id, 0)
   on conflict (user_id) do nothing;
@@ -324,6 +326,8 @@ begin
   if sender_status != 'approved' then
     raise exception 'Cuenta no verificada';
   end if;
+
+  perform set_config('app.allow_wallet_write', '1', true);
 
   insert into public.wallets (user_id, usdt_balance)
   values (sender_user_id, 0)
@@ -538,6 +542,8 @@ begin
   if v_price is null or v_price <= 0 then
     v_price := 30::numeric(20, 6);
   end if;
+
+  perform set_config('app.allow_wallet_write', '1', true);
 
   insert into public.wallets (user_id, usdt_balance)
   values (v_user_id, 0)
