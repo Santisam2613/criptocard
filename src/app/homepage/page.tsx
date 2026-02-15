@@ -879,7 +879,7 @@ function Footer() {
             onClick={() => setPrivacyOpen(true)}
             className="text-xs font-semibold text-zinc-700 underline decoration-zinc-300 underline-offset-4 hover:text-black dark:text-white/70 dark:decoration-white/20 dark:hover:text-white"
           >
-            Política de privacidad
+            Política de privacidad.
           </button>
           <button
             type="button"
