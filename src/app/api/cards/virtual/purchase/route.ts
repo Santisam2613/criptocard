@@ -179,11 +179,10 @@ export async function POST(req: Request) {
     const testForceCountryRaw = (creds.stripe?.issuingTestForceCountry ?? "").trim();
     const stripeKey = creds.stripe?.secretKey ?? "";
     const isTestKey = stripeKey.startsWith("sk_test_");
-    const isNonProd = process.env.NODE_ENV !== "production";
     const testForceCountry = testForceCountryRaw ? testForceCountryRaw.toUpperCase() : "";
 
     const effectiveCountry =
-      isNonProd && isTestKey && testForceCountry ? testForceCountry : normalizedCountry;
+      isTestKey && testForceCountry ? testForceCountry : normalizedCountry;
 
     const issuingAllowedCountries = creds.stripe?.issuingAllowedCountries ?? ["US"];
     if (!issuingAllowedCountries.includes(effectiveCountry)) {
