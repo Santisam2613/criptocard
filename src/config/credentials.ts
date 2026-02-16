@@ -26,6 +26,8 @@ export type ServerCredentials = {
     secretKey?: string;
     webhookSecret?: string;
     issuingProfileId?: string;
+    issuingAllowedCountries?: string[];
+    issuingTestForceCountry?: string;
   };
   dev: {
     bypassAuth: boolean;
@@ -54,6 +56,16 @@ function readNumber(name: string, fallback: number): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) throw new Error(`Variable inválida ${name}`);
   return n;
+}
+
+function readCsv(name: string): string[] | undefined {
+  const raw = readString(name);
+  if (!raw) return undefined;
+  const items = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return items.length ? items : undefined;
 }
 
 export function getPublicCredentials(): PublicCredentials {
@@ -91,6 +103,8 @@ export function getServerCredentials(): ServerCredentials {
       secretKey: readString("STRIPE_SECRET_KEY"),
       webhookSecret: readString("STRIPE_WEBHOOK_SECRET"),
       issuingProfileId: readString("STRIPE_ISSUING_PROFILE_ID"),
+      issuingAllowedCountries: readCsv("STRIPE_ISSUING_ALLOWED_COUNTRIES"),
+      issuingTestForceCountry: readString("STRIPE_ISSUING_TEST_FORCE_COUNTRY"),
     },
     dev: {
       bypassAuth: readString("DEV_BYPASS_AUTH") === "1",

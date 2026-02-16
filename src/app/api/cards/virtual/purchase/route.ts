@@ -7,6 +7,7 @@ import {
 import { stripeService } from "@/lib/stripe/issuing";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getApplicantDetails } from "@/lib/sumsub/client";
+import { getServerCredentials } from "@/config/credentials";
 
 export const runtime = "nodejs";
 
@@ -174,6 +175,27 @@ export async function POST(req: Request) {
       rawCountry.length === 3 ? (iso3ToIso2[rawCountry] ?? rawCountry) : rawCountry;
     const fallbackPostalCode = normalizedCountry === "US" ? "94111" : "00000";
 
+    const creds = getServerCredentials();
+    const testForceCountryRaw = (creds.stripe?.issuingTestForceCountry ?? "").trim();
+    const stripeKey = creds.stripe?.secretKey ?? "";
+    const isTestKey = stripeKey.startsWith("sk_test_");
+    const isNonProd = process.env.NODE_ENV !== "production";
+    const testForceCountry = testForceCountryRaw ? testForceCountryRaw.toUpperCase() : "";
+
+    const effectiveCountry =
+      isNonProd && isTestKey && testForceCountry ? testForceCountry : normalizedCountry;
+
+    const issuingAllowedCountries = creds.stripe?.issuingAllowedCountries ?? ["US"];
+    if (!issuingAllowedCountries.includes(effectiveCountry)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Por ahora no podemos emitir tarjetas para el país ${effectiveCountry}.`,
+        },
+        { status: 400 },
+      );
+    }
+
     // 3. Verificar saldo y cobrar (RPC atómico)
     const { error: txError } = await supabase.rpc("deduct_balance_for_card", {
       p_user_id: user.id,
@@ -197,10 +219,10 @@ export async function POST(req: Request) {
         lastName: kycLastName,
         termsAcceptance: { ip, date: termsDate },
         billingAddress: {
-          country: normalizedCountry,
+          country: effectiveCountry,
           line1: line1 ?? "KYC Verified",
           city: city ?? "City",
-          state: state ?? (normalizedCountry === "US" ? "CA" : undefined),
+          state: state ?? (effectiveCountry === "US" ? "CA" : undefined),
           postalCode: postalCode ?? fallbackPostalCode,
         },
         dob,
