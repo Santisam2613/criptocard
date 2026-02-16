@@ -108,6 +108,14 @@ export type SumsubApplicant = {
   type?: "individual" | "company";
 };
 
+export type SumsubApplicantDetails = {
+  id: string;
+  externalUserId?: string;
+  type?: "individual" | "company";
+  info?: Record<string, unknown>;
+  fixedInfo?: Record<string, unknown>;
+};
+
 export async function createApplicant(params: {
   externalUserId: string;
   levelName: string;
@@ -132,6 +140,13 @@ export async function getApplicantByExternalUserId(
   return sumsubRequest<SumsubApplicant>({
     method: "GET",
     pathWithQuery: `/resources/applicants/-;externalUserId=${encodeURIComponent(externalUserId)}/one`,
+  });
+}
+
+export async function getApplicantDetails(applicantId: string): Promise<SumsubApplicantDetails> {
+  return sumsubRequest<SumsubApplicantDetails>({
+    method: "GET",
+    pathWithQuery: `/resources/applicants/${encodeURIComponent(applicantId)}/one`,
   });
 }
 

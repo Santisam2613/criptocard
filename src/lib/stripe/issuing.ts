@@ -23,6 +23,14 @@ export const stripeService = {
     lastName?: string;
     stripeCardholderId?: string;
     termsAcceptance?: { ip: string; date: number };
+    billingAddress?: {
+      country: string;
+      line1: string;
+      city: string;
+      state?: string;
+      postalCode: string;
+    };
+    dob?: { day: number; month: number; year: number };
   }) {
     const stripe = getStripe();
 
@@ -37,13 +45,23 @@ export const stripeService = {
         }
       : undefined;
 
+    const billingAddress = user.billingAddress ?? {
+      country: "US",
+      line1: "123 Main St",
+      city: "San Francisco",
+      state: "CA",
+      postalCode: "94111",
+    };
+    const dob = user.dob ?? { day: 1, month: 1, year: 1990 };
+
     // 1. Si ya tiene ID, intentar recuperarlo y actualizarlo si es necesario (modo test)
     if (user.stripeCardholderId) {
       try {
         const existing = await stripe.issuing.cardholders.retrieve(user.stripeCardholderId);
+        const disabledReason = existing.requirements?.disabled_reason ?? null;
+        const pastDueCount = existing.requirements?.past_due?.length ?? 0;
         const requirementsDue =
-          (existing.requirements?.disabled_reason != null) ||
-          (existing.requirements?.past_due?.length ?? 0) > 0;
+          pastDueCount > 0 || (disabledReason != null && disabledReason !== "under_review");
 
         // Si no está activo o le faltan datos, actualizarlo
         if (existing.status !== "active" || requirementsDue) {
@@ -54,27 +72,27 @@ export const stripeService = {
                 first_name: user.firstName || "Criptocard",
                 last_name: user.lastName || "User",
                 dob: {
-                  day: 1,
-                  month: 1,
-                  year: 1990,
+                  day: dob.day,
+                  month: dob.month,
+                  year: dob.year,
                 },
                 ...(termsAcceptance ?? {}),
               },
               billing: {
                 address: {
-                  country: "US",
-                  line1: "123 Main St",
-                  city: "San Francisco",
-                  state: "CA",
-                  postal_code: "94111",
+                  country: billingAddress.country,
+                  line1: billingAddress.line1,
+                  city: billingAddress.city,
+                  state: billingAddress.state,
+                  postal_code: billingAddress.postalCode,
                 },
               },
             });
 
             const updated = await stripe.issuing.cardholders.retrieve(user.stripeCardholderId);
-            const stillDue =
-              (updated.requirements?.disabled_reason != null) ||
-              (updated.requirements?.past_due?.length ?? 0) > 0;
+            const updatedDisabled = updated.requirements?.disabled_reason ?? null;
+            const updatedPastDue = updated.requirements?.past_due?.length ?? 0;
+            const stillDue = updatedPastDue > 0 || (updatedDisabled != null && updatedDisabled !== "under_review");
             if (stillDue) {
               throw new Error(
                 `Cardholder incompleto: ${JSON.stringify(updated.requirements)}`,
@@ -106,20 +124,20 @@ export const stripeService = {
       type: "individual",
       billing: {
         address: {
-          country: "US", // Ajustar según KYC real
-          line1: "123 Main St", // Placeholder, debería venir del KYC
-          city: "San Francisco",
-          state: "CA",
-          postal_code: "94111",
+          country: billingAddress.country,
+          line1: billingAddress.line1,
+          city: billingAddress.city,
+          state: billingAddress.state,
+          postal_code: billingAddress.postalCode,
         },
       },
       individual: {
         first_name: user.firstName || "Criptocard",
         last_name: user.lastName || "User",
         dob: {
-          day: 1,
-          month: 1,
-          year: 1990,
+          day: dob.day,
+          month: dob.month,
+          year: dob.year,
         },
         ...(termsAcceptance ?? {}),
       },
@@ -129,9 +147,10 @@ export const stripeService = {
     });
 
     const created = await stripe.issuing.cardholders.retrieve(cardholder.id);
+    const createdDisabled = created.requirements?.disabled_reason ?? null;
+    const createdPastDue = created.requirements?.past_due?.length ?? 0;
     const requirementsDue =
-      (created.requirements?.disabled_reason != null) ||
-      (created.requirements?.past_due?.length ?? 0) > 0;
+      createdPastDue > 0 || (createdDisabled != null && createdDisabled !== "under_review");
     if (requirementsDue) {
       throw new Error(`Cardholder incompleto: ${JSON.stringify(created.requirements)}`);
     }

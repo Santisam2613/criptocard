@@ -6,6 +6,7 @@ import {
 } from "@/lib/auth/requireTelegramSession";
 import { stripeService } from "@/lib/stripe/issuing";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getApplicantDetails } from "@/lib/sumsub/client";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,13 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { ok: false, error: "Usuario no encontrado" },
         { status: 404 },
+      );
+    }
+
+    if (user.verification_status !== "approved") {
+      return NextResponse.json(
+        { ok: false, error: "Debes completar la verificación para comprar la tarjeta" },
+        { status: 403 },
       );
     }
 
@@ -59,6 +67,113 @@ export async function POST(req: Request) {
     const priceRaw = Number((configRow as { value?: string } | null)?.value);
     const price = Number.isFinite(priceRaw) && priceRaw > 0 ? priceRaw : 30;
 
+    function pickString(obj: Record<string, unknown>, keys: string[]): string | null {
+      for (const key of keys) {
+        const v = obj[key];
+        if (typeof v === "string" && v.trim()) return v.trim();
+      }
+      return null;
+    }
+
+    function pickObject(obj: Record<string, unknown>, keys: string[]): Record<string, unknown> | null {
+      for (const key of keys) {
+        const v = obj[key];
+        if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, unknown>;
+      }
+      return null;
+    }
+
+    function parseDob(dobRaw: string | null): { day: number; month: number; year: number } | null {
+      if (!dobRaw) return null;
+      const s = dobRaw.trim();
+      const parts = s.includes("-") ? s.split("-") : s.includes("/") ? s.split("/") : [];
+      if (parts.length !== 3) return null;
+      const [a, b, c] = parts.map((x) => Number(x));
+      if (![a, b, c].every((n) => Number.isFinite(n))) return null;
+      const year = a > 31 ? a : c;
+      const month = a > 31 ? b : b;
+      const day = a > 31 ? c : a;
+      if (year < 1900 || year > 2100) return null;
+      if (month < 1 || month > 12) return null;
+      if (day < 1 || day > 31) return null;
+      return { day, month, year };
+    }
+
+    // 2.1 Obtener datos reales del KYC (Sumsub)
+    const applicantId = (user.sumsub_applicant_id as string | null) ?? null;
+    if (!applicantId) {
+      return NextResponse.json(
+        { ok: false, error: "KYC no encontrado para el usuario" },
+        { status: 400 },
+      );
+    }
+    const applicant = await getApplicantDetails(applicantId);
+    const info =
+      ((applicant.info ?? applicant.fixedInfo ?? {}) as Record<string, unknown>) ?? {};
+
+    const kycFirstName =
+      pickString(info, ["firstName", "first_name", "givenName", "given_name"]) ??
+      (user.telegram_first_name as string | null) ??
+      "";
+    const kycLastName =
+      pickString(info, ["lastName", "last_name", "familyName", "family_name"]) ??
+      (user.telegram_last_name as string | null) ??
+      "";
+    const dob =
+      parseDob(pickString(info, ["dob", "dateOfBirth", "birthDate", "birth_date"])) ?? null;
+
+    const address =
+      pickObject(info, ["address", "residenceAddress", "residence_address", "registeredAddress"]) ??
+      (() => {
+        const arr = info["addresses"];
+        if (Array.isArray(arr) && arr[0] && typeof arr[0] === "object" && !Array.isArray(arr[0])) {
+          return arr[0] as Record<string, unknown>;
+        }
+        return null;
+      })();
+
+    const country =
+      (address ? pickString(address, ["country", "countryCode", "country_code"]) : null) ??
+      pickString(info, ["country", "nationality", "residenceCountry", "residence_country"]) ??
+      null;
+    const line1 =
+      (address
+        ? pickString(address, ["line1", "street", "streetAddress", "street_address", "addressLine1"])
+        : null) ?? null;
+    const city = (address ? pickString(address, ["city", "town"]) : null) ?? null;
+    const state = (address ? pickString(address, ["state", "region", "province"]) : null) ?? null;
+    const postalCode =
+      (address ? pickString(address, ["postal_code", "postalCode", "postCode", "zip"]) : null) ?? null;
+
+    if (!dob) {
+      return NextResponse.json(
+        { ok: false, error: "KYC incompleto: falta fecha de nacimiento" },
+        { status: 400 },
+      );
+    }
+    if (!country) {
+      return NextResponse.json(
+        { ok: false, error: "KYC incompleto: falta país" },
+        { status: 400 },
+      );
+    }
+
+    const rawCountry = country.toUpperCase();
+    const iso3ToIso2: Record<string, string> = {
+      USA: "US",
+      MEX: "MX",
+      CAN: "CA",
+      COL: "CO",
+      ESP: "ES",
+      ARG: "AR",
+      BRA: "BR",
+      CHL: "CL",
+      PER: "PE",
+    };
+    const normalizedCountry =
+      rawCountry.length === 3 ? (iso3ToIso2[rawCountry] ?? rawCountry) : rawCountry;
+    const fallbackPostalCode = normalizedCountry === "US" ? "94111" : "00000";
+
     // 3. Verificar saldo y cobrar (RPC atómico)
     const { error: txError } = await supabase.rpc("deduct_balance_for_card", {
       p_user_id: user.id,
@@ -78,10 +193,17 @@ export async function POST(req: Request) {
       const cardholderId = await stripeService.getOrCreateCardholder({
         id: user.id,
         stripeCardholderId: user.stripe_cardholder_id,
-        firstName: user.telegram_first_name || "",
-        lastName: user.telegram_last_name || "",
+        firstName: kycFirstName,
+        lastName: kycLastName,
         termsAcceptance: { ip, date: termsDate },
-        // TODO: En producción, usar email/phone reales de la DB o KYC
+        billingAddress: {
+          country: normalizedCountry,
+          line1: line1 ?? "KYC Verified",
+          city: city ?? "City",
+          state: state ?? (normalizedCountry === "US" ? "CA" : undefined),
+          postalCode: postalCode ?? fallbackPostalCode,
+        },
+        dob,
       });
 
       // Guardar cardholder_id si es nuevo o cambió
@@ -98,7 +220,7 @@ export async function POST(req: Request) {
       // Nombre del titular para mostrar en UI
       const cardholderName =
         (stripeCard.metadata?.cardholder_name as string) ||
-        [user.telegram_first_name, user.telegram_last_name].filter(Boolean).join(" ") ||
+        [kycFirstName, kycLastName].filter(Boolean).join(" ") ||
         "Criptocard User";
 
       // 6. Guardar Tarjeta en Supabase
