@@ -348,8 +348,8 @@ export default function SettingsSheetContent() {
               isProfileLoading
                 ? undefined
                 : user && user.verification_status === "approved"
-                  ? "Verificado"
-                  : "No verificado"
+                  ? t("settings.verified")
+                  : t("settings.notVerified")
             }
           />
         </div>

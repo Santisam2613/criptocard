@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { useTransactions, Transaction } from "@/miniapp/hooks/useTransactions";
 import Skeleton from "@/components/ui/Skeleton";
 import { formatUsdt } from "@/lib/format/number";
+import { useI18n } from "@/i18n/i18n";
 
 function TransactionIcon({ type }: { type: Transaction["type"] }) {
   const baseClass =
@@ -125,7 +126,7 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
   }
 }
 
-function getTransactionTitle(tx: Transaction) {
+function getTransactionTitle(tx: Transaction, t: (path: string) => string) {
   // 1. Prioridad: Descripción explícita en metadata
   if (tx.metadata?.description) {
     if (tx.type === "card_purchase") {
@@ -136,49 +137,50 @@ function getTransactionTitle(tx: Transaction) {
 
   // 1.1 Soporte para metadata.reason (ej: "manual_credit")
   if (tx.metadata?.reason === "manual_credit") {
-    return "Crédito manual";
+    return t("tx.title.manualCredit");
   }
   
   // 2. Prioridad: Tipos específicos
   switch (tx.type) {
     case "topup":
-      return "Recarga de saldo";
+      return t("tx.title.topup");
     case "transfer":
       // Si hay un nombre de contraparte en metadata, usarlo
       if (tx.metadata?.counterparty_name) {
-        return `Transferencia a ${tx.metadata.counterparty_name}`;
+        return `${t("tx.title.transferTo")} ${tx.metadata.counterparty_name}`;
       }
-      return "Transferencia enviada";
+      return t("tx.title.transferSent");
     case "withdraw":
-      return "Retiro de fondos";
+      return t("tx.title.withdraw");
     case "referral_conversion":
-      return "Recompensa por referido";
+      return t("tx.title.referralReward");
     case "card_purchase":
-      return "Compra tarjeta virtual";
+      return t("tx.title.cardPurchase");
     case "card_authorization":
     case "stripe_payment": // Backwards compatibility if needed
-      return tx.metadata?.merchant || tx.metadata?.merchant_name || "Pago con tarjeta";
+      return tx.metadata?.merchant || tx.metadata?.merchant_name || t("tx.title.cardPayment");
     case "diamond_conversion":
-      return "Conversión de diamantes";
+      return t("tx.title.diamondConversion");
     default:
-      return "Transacción";
+      return t("tx.title.default");
   }
 }
 
-function getStatusLabel(status: Transaction["status"]) {
+function getStatusLabel(status: Transaction["status"], t: (path: string) => string) {
   switch (status) {
     case "pending":
-      return "En espera";
+      return t("tx.status.pending");
     case "completed":
-      return "Completado";
+      return t("tx.status.completed");
     case "rejected":
-      return "Rechazado";
+      return t("tx.status.rejected");
     default:
       return null;
   }
 }
 
 export default function TransactionList() {
+  const { t } = useI18n();
   const { transactions, isLoading } = useTransactions();
   const pageSize = 8;
   const [page, setPage] = useState(1);
@@ -218,7 +220,7 @@ export default function TransactionList() {
       <div className="flex h-44 flex-col items-center justify-center gap-5 bg-[radial-gradient(100%_90%_at_50%_0%,rgba(0,0,0,0.06),transparent_60%)] dark:bg-[radial-gradient(100%_90%_at_50%_0%,rgba(255,255,255,0.06),transparent_60%)]">
         <div className="text-5xl">🧐</div>
         <div className="text-base font-semibold text-zinc-950 dark:text-white/90">
-          Aún no hay historial
+          {t("tx.empty")}
         </div>
       </div>
     );
@@ -230,7 +232,7 @@ export default function TransactionList() {
         {pageItems.map((tx) => {
         const isPositive = tx.amount_usdt > 0;
         const formattedDate = format(new Date(tx.created_at), "dd MMM, HH:mm");
-        const statusLabel = tx.type === "withdraw" ? getStatusLabel(tx.status) : null;
+        const statusLabel = tx.type === "withdraw" ? getStatusLabel(tx.status, t) : null;
         
         return (
           <div
@@ -241,7 +243,7 @@ export default function TransactionList() {
               <TransactionIcon type={tx.type} />
               <div>
                 <div className="text-sm font-semibold text-foreground">
-                  {getTransactionTitle(tx)}
+                  {getTransactionTitle(tx, t)}
                 </div>
                 <div className="text-xs text-muted">
                   {statusLabel ? `${statusLabel} · ${formattedDate}` : formattedDate}
@@ -269,10 +271,12 @@ export default function TransactionList() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Anterior
+            {t("common.prev")}
           </button>
           <div className="text-xs font-semibold text-muted">
-            Página {currentPage} de {totalPages}
+            {t("common.pagination.pageOf")
+              .replace("{current}", String(currentPage))
+              .replace("{total}", String(totalPages))}
           </div>
           <button
             type="button"
@@ -280,7 +284,7 @@ export default function TransactionList() {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             className="cc-glass cc-neon-outline inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold text-foreground disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Siguiente
+            {t("common.next")}
           </button>
         </div>
       ) : null}

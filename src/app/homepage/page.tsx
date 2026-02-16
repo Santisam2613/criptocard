@@ -394,7 +394,7 @@ function HeroSection() {
               {t("hero.ctaTelegram")}
             </CtaLink>
             <AnchorButton href="#benefits" variant="secondary">
-              Ver beneficios
+              {t("home.hero.viewBenefits")}
             </AnchorButton>
           </div>
         </div>
@@ -483,13 +483,13 @@ function BenefitsSection() {
       <div className="mx-auto max-w-6xl px-6 py-14 sm:py-20 lg:px-10">
         <div className="max-w-2xl">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">
-            Beneficios
+            {t("home.benefits.label")}
           </div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Finanzas cripto, diseño serio.
+            {t("home.benefits.title")}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-zinc-700 dark:text-white/70 sm:text-lg">
-            Todo lo que necesitas para emitir, recargar y gastar con control desde Telegram.
+            {t("home.benefits.subtitle")}
           </p>
         </div>
 
@@ -517,29 +517,22 @@ function BenefitsSection() {
 }
 
 function HowItWorksSection() {
-  const { locale } = useI18n();
-  const steps =
-    locale === "es"
-      ? [
-          { title: "Inicia el bot", body: "Abre CriptoCard en Telegram y crea tu cuenta." },
-          { title: "Verifica tu identidad", body: "Completa verificación para habilitar límites y emisión." },
-          { title: "Recarga y paga", body: "Agrega saldo y compra con tu tarjeta donde acepten Visa." },
-        ]
-      : [
-          { title: "Start the bot", body: "Open CriptoCard in Telegram and create your account." },
-          { title: "Verify identity", body: "Complete verification to unlock full functionality." },
-          { title: "Top up & spend", body: "Add balance and pay anywhere Visa is accepted." },
-        ];
+  const { t } = useI18n();
+  const steps = [
+    { title: t("home.how.steps.0.title"), body: t("home.how.steps.0.body") },
+    { title: t("home.how.steps.1.title"), body: t("home.how.steps.1.body") },
+    { title: t("home.how.steps.2.title"), body: t("home.how.steps.2.body") },
+  ];
 
   return (
     <section id="how" className="bg-white text-zinc-950 dark:bg-zinc-950 dark:text-white">
       <div className="mx-auto max-w-6xl px-6 py-14 sm:py-20 lg:px-10">
         <div className="max-w-2xl">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">
-            {locale === "es" ? "Cómo funciona" : "How it works"}
+            {t("home.how.label")}
           </div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {locale === "es" ? "Tres pasos, sin fricción." : "Three steps. No friction."}
+            {t("home.how.title")}
           </h2>
         </div>
 
@@ -568,34 +561,30 @@ function HowItWorksSection() {
 }
 
 function HighlightSection() {
-  const { locale } = useI18n();
+  const { t } = useI18n();
   return (
     <section className="bg-black text-white">
       <div className="mx-auto max-w-6xl px-6 py-14 sm:py-20 lg:px-10">
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-              {locale === "es" ? "Control total" : "Full control"}
+              {t("home.highlight.label")}
             </div>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              {locale === "es"
-                ? "Tu dinero, tus reglas. Sin comprometer el diseño."
-                : "Your money, your rules. Without compromising design."}
+              {t("home.highlight.title")}
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
-              {locale === "es"
-                ? "Recarga, controla y monitorea tus gastos en un flujo pensado para fintech."
-                : "Top up, control, and track spending with a fintech-grade flow."}
+              {t("home.highlight.subtitle")}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <CtaLink href="https://t.me/CriptoCardApp_bot" variant="primary" className="focus-visible:ring-white/40">
                 <span className="inline-flex h-5 w-5 items-center justify-center">
                   <TelegramIcon />
                 </span>
-                {locale === "es" ? "Abrir en Telegram" : "Open in Telegram"}
+                {t("home.highlight.ctaTelegram")}
               </CtaLink>
               <AnchorButton href="#faq" variant="secondary" className="text-white ring-white/30 hover:bg-white hover:text-black">
-                {locale === "es" ? "Ver preguntas" : "View FAQ"}
+                {t("home.highlight.ctaFaq")}
               </AnchorButton>
             </div>
           </div>
@@ -604,35 +593,33 @@ function HighlightSection() {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-2xl border border-white/10 bg-black px-4 py-4">
                 <div className="text-xs font-semibold text-white/60">
-                  {locale === "es" ? "Saldo" : "Balance"}
+                {t("home.highlight.card.balanceLabel")}
                 </div>
                 <div className="mt-2 text-2xl font-extrabold tracking-tight">$10,240</div>
                 <div className="mt-3 text-xs font-semibold text-white/60">
-                  {locale === "es" ? "Disponible" : "Available"}
+                {t("home.highlight.card.availableLabel")}
                 </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black px-4 py-4">
                 <div className="text-xs font-semibold text-white/60">
-                  {locale === "es" ? "Gasto mensual" : "Monthly spend"}
+                {t("home.highlight.card.monthlySpendLabel")}
                 </div>
                 <div className="mt-2 text-2xl font-extrabold tracking-tight">$1,420</div>
                 <div className="mt-3 text-xs font-semibold text-white/60">
-                  {locale === "es" ? "Resumen" : "Summary"}
+                {t("home.highlight.card.summaryLabel")}
                 </div>
               </div>
             </div>
             <div className="mt-4 rounded-2xl border border-white/10 bg-black px-4 py-4">
               <div className="text-xs font-semibold text-white/60">
-                {locale === "es" ? "Notificaciones" : "Notifications"}
+              {t("home.highlight.card.notificationsLabel")}
               </div>
               <div className="mt-2 text-sm text-white/80">
-                {locale === "es"
-                  ? "Recarga confirmada. Tu saldo está listo para gastar."
-                  : "Top-up confirmed. Your balance is ready to spend."}
+              {t("home.highlight.card.notificationsBody")}
               </div>
               <div className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-white/60">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#FFC300]" />
-                {locale === "es" ? "Tiempo real" : "Real-time"}
+              {t("home.highlight.card.realtimeLabel")}
               </div>
             </div>
           </div>
@@ -688,7 +675,7 @@ function FreeTopUpSection() {
       <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-6 py-14 sm:py-20 lg:grid-cols-2 lg:gap-12 lg:px-10">
         <div className="max-w-xl">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">
-            Top up
+            {t("home.sectionLabels.topUp")}
           </div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
             {t("sections.freeTopUpTitle")}
@@ -739,7 +726,7 @@ function SpendWithFullControlSection() {
 
         <div className="max-w-xl">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500 dark:text-white/50">
-            Seguridad
+            {t("home.sectionLabels.security")}
           </div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
             {t("sections.controlTitle")}

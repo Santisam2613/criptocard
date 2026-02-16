@@ -319,7 +319,7 @@ export default function DashboardView() {
           open={confirmOpen}
           title={confirmTitle}
           message={confirmMessage}
-          cancelLabel="Cancelar"
+          cancelLabel={t("common.cancel")}
           confirmLabel={confirmLabel}
           onCancel={() => {
             setConfirmOpen(false);
@@ -357,13 +357,13 @@ export default function DashboardView() {
 
             <div className="mb-1 flex items-start justify-between">
               <div className="mt-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
-                Your balance
+                {t("dashboard.balanceLabel")}
               </div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   className="relative p-1 text-gray-400 transition-colors hover:text-foreground dark:text-gray-500 dark:hover:text-white"
-                  aria-label="Support"
+                  aria-label={t("dashboard.supportAria")}
                   onClick={openSupport}
                 >
                   <svg
@@ -437,7 +437,7 @@ export default function DashboardView() {
               </svg>
             </div>
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              Top up
+              {t("dashboard.topUp")}
             </span>
           </button>
 
@@ -461,7 +461,7 @@ export default function DashboardView() {
               </svg>
             </div>
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              Send
+              {t("dashboard.send")}
             </span>
           </button>
 
@@ -487,7 +487,7 @@ export default function DashboardView() {
               </svg>
             </div>
             <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              Cuenta virtual
+              {t("dashboard.virtualAccount")}
             </span>
           </button>
         </div>
@@ -596,7 +596,7 @@ export default function DashboardView() {
                 <div className="h-5 w-7 rounded-md bg-[#F0A100] ring-1 ring-black/10" />
               </div>
               <div>
-                <div className="text-sm font-extrabold text-[#111] dark:text-white">Visa Virtual</div>
+                <div className="text-sm font-extrabold text-[#111] dark:text-white">{t("dashboard.visaVirtual")}</div>
               </div>
             </div>
           </button>
@@ -611,9 +611,9 @@ export default function DashboardView() {
                 <div className="h-5 w-7 rounded-md bg-black/10 ring-1 ring-black/10 dark:bg-white/10 dark:ring-white/10" />
               </div>
               <div>
-                <div className="text-sm font-extrabold text-[#111] dark:text-white">Visa Física</div>
+                <div className="text-sm font-extrabold text-[#111] dark:text-white">{t("dashboard.visaPhysical")}</div>
                 <div className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  Próximamente disponible
+                  {t("dashboard.comingSoon")}
                 </div>
               </div>
             </div>
@@ -764,8 +764,8 @@ export default function DashboardView() {
             actionLabel={
               isApproved
                 ? virtualCardLoading
-                  ? "Cargando..."
-                  : `Comprar por ${formatUsdt(virtualCardPrice ?? 30)} USDT`
+                  ? t("common.loading")
+                  : `${t("visaCard.buy.ctaBuyFor")} ${formatUsdt(virtualCardPrice ?? 30)} USDT`
                 : t("sheets.verifyAccount")
             }
             onAction={() => {
@@ -776,9 +776,9 @@ export default function DashboardView() {
               if (virtualCardLoading) return;
               const price = Number(virtualCardPrice ?? 30);
               openConfirm({
-                title: "Confirmar compra",
-                message: `Comprar tarjeta virtual por ${formatUsdt(price)} USDT?`,
-                confirmLabel: "Comprar",
+                title: t("visaCard.buy.confirmTitle"),
+                message: `${t("visaCard.buy.confirmMessagePrefix")} ${formatUsdt(price)} USDT?`,
+                confirmLabel: t("visaCard.buy.confirmCta"),
                 onConfirm: () => void performBuyVirtualCard(),
               });
             }}
@@ -816,14 +816,14 @@ export default function DashboardView() {
 
       <BottomSheet
         open={sheet === "terms"}
-        label="Términos y condiciones"
+        label={t("legal.terms")}
         onClose={() => setSheet(null)}
       >
         <TermsAndConditionsContent />
       </BottomSheet>
 
       <footer className="mt-12 flex flex-col items-center gap-2 pb-6 text-center text-xs text-muted">
-        <p>&copy; 2026 CriptoCard. Todos los derechos reservados.</p>
+        <p>&copy; 2026 CriptoCard. {t("footer.rightsReserved")}</p>
         <div className="flex gap-4">
           <button
             type="button"
@@ -837,7 +837,7 @@ export default function DashboardView() {
             onClick={() => setSheet("terms")}
             className="text-xs text-muted underline decoration-muted/50 underline-offset-4 hover:text-foreground"
           >
-            Términos y condiciones
+            {t("legal.terms")}
           </button>
         </div>
       </footer>

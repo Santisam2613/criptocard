@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import Button from "@/components/ui/Button";
+import { useI18n } from "@/i18n/i18n";
 
 export type NoticeDialogProps = {
   open: boolean;
@@ -11,6 +11,7 @@ export type NoticeDialogProps = {
 };
 
 export default function NoticeDialog(props: NoticeDialogProps) {
+  const { t } = useI18n();
   const { open, title, message, confirmLabel, onClose } = props;
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function NoticeDialog(props: NoticeDialogProps) {
     <div className="fixed inset-0 z-[60] flex items-center justify-center px-5">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("common.closeAria")}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onClose}
       />

@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-const MESSAGES = [
+import { useI18n } from "@/i18n/i18n";
+
+const SLIDES = [
   {
-    title: "Cashback de locura",
-    subtitle: "Próximamente hasta 5% de retorno",
+    key: "cashback",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-current" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -13,8 +14,7 @@ const MESSAGES = [
     ),
   },
   {
-    title: "Recompensas Crypto",
-    subtitle: "Gana USDT en cada compra",
+    key: "rewards",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-current" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -22,8 +22,7 @@ const MESSAGES = [
     ),
   },
   {
-    title: "Nivel VIP",
-    subtitle: "Desbloquea beneficios exclusivos",
+    key: "vip",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-current" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -33,16 +32,17 @@ const MESSAGES = [
 ];
 
 export default function CashbackCarousel({ onClick }: { onClick?: () => void }) {
+  const { t } = useI18n();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % MESSAGES.length);
+      setIndex((prev) => (prev + 1) % SLIDES.length);
     }, 4000); // Cambia cada 4 segundos
     return () => clearInterval(timer);
   }, []);
 
-  const current = MESSAGES[index];
+  const current = SLIDES[index];
 
   return (
     <button
@@ -62,17 +62,17 @@ export default function CashbackCarousel({ onClick }: { onClick?: () => void }) 
         <div className="flex flex-col gap-0.5 overflow-hidden">
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 key={index}">
             <div className="text-sm font-bold text-zinc-900 dark:text-white">
-              {current.title}
+              {t(`dashboard.carousel.${current.key}.title`)}
             </div>
             <div className="truncate text-xs font-medium text-zinc-500 dark:text-zinc-400">
-              {current.subtitle}
+              {t(`dashboard.carousel.${current.key}.subtitle`)}
             </div>
           </div>
         </div>
 
         {/* Indicadores de progreso/puntos */}
         <div className="absolute right-5 top-1/2 flex -translate-y-1/2 flex-col gap-1.5">
-          {MESSAGES.map((_, i) => (
+          {SLIDES.map((_, i) => (
             <div
               key={i}
               className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${

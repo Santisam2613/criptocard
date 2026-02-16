@@ -3,6 +3,172 @@ import { useI18n } from "@/i18n/i18n";
 export default function PrivacyPolicyContent() {
   const { locale } = useI18n();
 
+  if (locale === "es") {
+    return (
+      <div className="space-y-4 px-6 pb-8 pt-4 text-left text-sm text-muted">
+        <h2 className="text-xl font-bold text-foreground">Política de Privacidad Personal de CriptoCard</h2>
+        <p>Fecha de vigencia: 20 de febrero de 2025</p>
+
+        <p>
+          Nosotros ("CriptoCard", "nosotros", "nos" o "nuestro") respetamos tu privacidad y estamos comprometidos con proteger tu información personal. Esta Política de Privacidad explica cómo CriptoCard recopila, utiliza y protege tu información personal cuando usas nuestro sitio web y los productos y servicios relacionados (en conjunto, los "Servicios de CriptoCard").
+        </p>
+
+        <p>
+          Al usar los Servicios de CriptoCard, aceptas la recopilación y el uso de tu información de acuerdo con esta Política de Privacidad.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Información que recopilamos</h3>
+        <p>
+          1. Información personal que proporcionas. Recopilamos información personal que nos proporcionas directamente cuando usas nuestro sitio web o los Servicios de CriptoCard. Esto puede incluir:
+        </p>
+        <ul className="list-disc pl-5">
+          <li>Nombre y apellido;</li>
+          <li>Dirección de correo electrónico;</li>
+          <li>Número de teléfono;</li>
+          <li>Dirección de entrega;</li>
+          <li>Datos de pago (por ejemplo, información de tarjeta) para procesar transacciones;</li>
+          <li>Credenciales de cuenta (usuario y contraseña);</li>
+          <li>Cualquier otra información que decidas proporcionar (por ejemplo, feedback, respuestas a encuestas).</li>
+        </ul>
+
+        <p>
+          2. Información recopilada automáticamente. Cuando visitas nuestro sitio web, podemos recopilar automáticamente información sobre tu dispositivo y el uso del sitio, incluyendo:
+        </p>
+        <ul className="list-disc pl-5">
+          <li>Dirección IP;</li>
+          <li>Tipo de dispositivo e información del navegador;</li>
+          <li>Información de uso (páginas visitadas, acciones realizadas, fecha y hora);</li>
+          <li>Referencias y navegación (sitios visitados antes y después).</li>
+        </ul>
+
+        <h3 className="text-base font-semibold text-foreground">Cómo usamos tu información</h3>
+        <p>Podemos usar la información que recopilamos para:</p>
+        <ul className="list-disc pl-5">
+          <li>Proveer, operar y mantener los Servicios de CriptoCard;</li>
+          <li>Procesar transacciones y administrar tu cuenta;</li>
+          <li>Mejorar la seguridad, prevenir fraude y proteger nuestros derechos;</li>
+          <li>Responder consultas, solicitudes y soporte;</li>
+          <li>Mejorar el producto, analizar rendimiento y realizar investigación;</li>
+          <li>Cumplir obligaciones legales y regulatorias.</li>
+        </ul>
+
+        <h3 className="text-base font-semibold text-foreground">Compartir tu información</h3>
+        <p>Podemos compartir tu información en los siguientes casos:</p>
+        <ul className="list-disc pl-5">
+          <li>Con proveedores de servicios que nos ayudan a operar (por ejemplo, procesamiento de pagos, análisis, soporte);</li>
+          <li>Para cumplir con la ley, procesos legales o solicitudes de autoridades competentes;</li>
+          <li>Para proteger derechos, seguridad y prevenir fraude;</li>
+          <li>En una fusión, adquisición o venta de activos, con las garantías correspondientes.</li>
+        </ul>
+
+        <h3 className="text-base font-semibold text-foreground">Tus derechos y opciones</h3>
+        <p>
+          Puedes tener derechos sobre tu información personal (acceso, rectificación, eliminación y oposición), dependiendo de tu jurisdicción. También puedes actualizar cierta información desde tu cuenta.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Seguridad</h3>
+        <p>
+          Implementamos medidas razonables para proteger tu información. Sin embargo, ningún método de transmisión o almacenamiento electrónico es 100% seguro, por lo que no podemos garantizar seguridad absoluta.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Procesamiento de pagos</h3>
+        <p>
+          Podemos usar proveedores de procesamiento de pagos para gestionar transacciones. Dichos proveedores pueden recopilar y procesar información de pago de acuerdo con sus propias políticas.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Procesamiento de información sujeto al consentimiento del usuario</h3>
+        <p>
+          Cuando el procesamiento requiera tu consentimiento, lo solicitaremos antes de recopilar o usar información para ese fin. Puedes retirar tu consentimiento en cualquier momento, sujeto a limitaciones legales o contractuales.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Divulgación legalmente requerida de información</h3>
+        <p>
+          Podemos divulgar información personal cuando sea requerido por ley, regulación, proceso judicial o solicitud válida de una autoridad.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Otro interés legítimo</h3>
+        <p>
+          Podemos procesar información cuando sea necesario para nuestros intereses legítimos, como operar nuestro negocio, mantener registros, responder quejas, proteger derechos legales, administrar riesgos y proteger los intereses de los usuarios cuando consideremos que tenemos un deber de hacerlo.
+        </p>
+        <p>
+          Seguiremos usando esta información con ese propósito hasta que el interés legítimo ya no exista o dicho uso no sea necesario para lograrlo.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Solicitar, corregir o eliminar información personal</h3>
+        <p>
+          1. Acceso a tu información personal
+          <br />
+          Puedes revisar cierta información desde tu cuenta. Para solicitar una copia de toda la información que mantenemos, contáctanos usando los datos al final de esta Política.
+        </p>
+        <p>
+          2. Eliminación o cambio de información
+          <br />
+          Si deseas eliminar o modificar información personal que nos proporcionaste, contáctanos. Esto puede limitar los servicios que podemos ofrecer.
+        </p>
+        <p>
+          3. Verificación de identidad
+          <br />
+          Para proteger tu información, podemos verificar tu identidad antes de conceder acceso, realizar cambios o eliminar datos.
+        </p>
+        <p>
+          4. Periodo de retención de datos personales
+          <br />
+          Salvo que se indique lo contrario, conservamos tu información solo durante el tiempo necesario para:
+        </p>
+        <ul className="list-disc pl-5">
+          <li>Proporcionar los servicios solicitados o ejecutar nuestro contrato;</li>
+          <li>Mejorar la experiencia de usuario cuando vuelves a nuestro sitio;</li>
+          <li>Cumplir con la ley (por ejemplo, requisitos fiscales); y/o</li>
+          <li>Respaldar una reclamación o defensa en procedimientos legales, regulatorios o administrativos.</li>
+        </ul>
+
+        <h3 className="text-base font-semibold text-foreground">Procesamiento y almacenamiento de datos</h3>
+        <p>
+          La información personal que recopilamos puede almacenarse y procesarse en Estados Unidos o en cualquier otro país donde CriptoCard, sus afiliados o proveedores operen. Si estás en la Unión Europea u otras regiones con leyes diferentes, reconoces que podemos transferir datos a jurisdicciones con marcos de protección distintos a los de tu país.
+        </p>
+        <p>
+          Conservamos la información personal solo el tiempo necesario y aplicamos medios comercialmente razonables para protegerla. Aun así, ningún método es completamente seguro.
+        </p>
+        <p>
+          Cuando solicites la eliminación de tus datos o cuando ya no sean relevantes para nuestras operaciones, los eliminaremos dentro de un plazo razonable.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Uso de cookies</h3>
+        <p>
+          Como muchos sitios web, usamos "cookies". Una cookie es un fragmento pequeño de datos que el navegador almacena en tu dispositivo. Podemos registrar automáticamente información como URL, IP, tipo/idioma del navegador, actividad, páginas vistas, y fecha/hora de visita para analizar tendencias y mejorar el sitio.
+        </p>
+        <p>
+          Nuestro sitio puede usar Google Analytics, que utiliza cookies para ayudarnos a analizar el uso del sitio. Puedes rechazar el uso de cookies desde la configuración de tu navegador; sin embargo, algunas funciones pueden no estar disponibles.
+        </p>
+        <p>
+          Google ofrece un complemento de inhabilitación para evitar el uso de datos por Google Analytics. Puedes obtener más información aquí:{" "}
+          <a
+            href="https://support.google.com/analytics/answer/181881?hl=es"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand hover:underline"
+          >
+            https://support.google.com/analytics/answer/181881?hl=es
+          </a>
+          .
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Cambios a esta Política de Privacidad</h3>
+        <p>
+          Podemos actualizar esta Política de Privacidad periódicamente. Publicaremos la versión actualizada en esta página. El uso continuo de nuestros servicios después de los cambios constituye tu aceptación de la nueva Política.
+        </p>
+
+        <h3 className="text-base font-semibold text-foreground">Contáctanos</h3>
+        <p>
+          Tienes derecho a ser informado sobre cómo se recopilan y usan tus datos, a conocer qué datos recopilamos y cómo se procesan, a corregirlos y solicitar su eliminación. También puedes restringir u oponerte a nuestro uso de tus datos según corresponda.
+        </p>
+        <p>
+          Si tienes preguntas o inquietudes sobre esta Política de Privacidad o nuestras prácticas, contáctanos en support@criptocard.io.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 px-6 pb-8 pt-4 text-left text-sm text-muted">
       <h2 className="text-xl font-bold text-foreground">

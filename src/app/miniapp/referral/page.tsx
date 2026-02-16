@@ -6,11 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
+import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { useTelegram } from "@/telegram/TelegramContext";
 import { formatInteger, formatUsdt } from "@/lib/format/number";
 
 function PullSpinner({ progress }: { progress: number }) {
+  const { t } = useI18n();
   const clamped = Math.max(0, Math.min(1, progress));
   const opacity = 0.2 + clamped * 0.8;
   const translateY = clamped * 10;
@@ -32,7 +34,7 @@ function PullSpinner({ progress }: { progress: number }) {
         >
           <path d="M21 12a9 9 0 1 1-9-9" />
         </svg>
-        Actualizando…
+        {t("common.updating")}
       </div>
     </div>
   );
@@ -179,10 +181,10 @@ type ReferralSummary = {
     | null;
 };
 
-function statusLabel(status: ReferralStatus) {
-  if (status === "eligible") return "Listo para reclamar";
-  if (status === "claimed") return "Reclamado";
-  return "En espera";
+function statusLabel(status: ReferralStatus, t: (path: string) => string) {
+  if (status === "eligible") return t("referral.readyToClaim");
+  if (status === "claimed") return t("referral.claimed");
+  return t("tx.status.pending");
 }
 
 function formatRate(rate: number) {
@@ -212,6 +214,7 @@ function ConfirmDialog(props: {
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useI18n();
   const { open, title, message, cancelLabel, confirmLabel, onCancel, onConfirm } = props;
 
   useEffect(() => {
@@ -238,7 +241,7 @@ function ConfirmDialog(props: {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("common.closeAria")}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onCancel}
       />
@@ -296,6 +299,7 @@ function ConfirmDialog(props: {
 
 export default function ReferralPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const telegram = useTelegram();
   const { state, user, refresh } = useBackendUser();
   const [copied, setCopied] = useState(false);
@@ -316,7 +320,7 @@ export default function ReferralPage() {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
-  const [noticeLabel, setNoticeLabel] = useState("Cerrar");
+  const [noticeLabel, setNoticeLabel] = useState("OK");
   const [noticeAction, setNoticeAction] = useState<(() => void) | null>(null);
 
   const referralId = useMemo(() => {
@@ -353,7 +357,7 @@ export default function ReferralPage() {
         | null;
       if (!json?.ok || !json.summary) {
         setSummary(null);
-        setSummaryError(json?.error ?? "No se pudo cargar referidos");
+        setSummaryError(json?.error ?? t("referral.errors.loadFailed"));
         return;
       }
       setSummary(json.summary);
@@ -382,7 +386,7 @@ export default function ReferralPage() {
           }
         | null;
       if (!json?.ok) {
-        const msg = json?.error ?? "No se pudo validar";
+        const msg = json?.error ?? t("referral.errors.validateFailed");
         setInviterStatus(msg);
         if (msg.toLowerCase().includes("ya existe")) {
           await fetchSummary();
@@ -392,8 +396,8 @@ export default function ReferralPage() {
       const st = json.referral?.status ?? "pending";
       setInviterStatus(
         st === "eligible"
-          ? "Validado. Diamante listo para reclamar."
-          : "Validado. Queda en espera hasta que el invitador recargue.",
+          ? t("referral.inviter.validatedEligible")
+          : t("referral.inviter.validatedPending"),
       );
       await fetchSummary();
     } finally {
@@ -429,10 +433,9 @@ export default function ReferralPage() {
     const input = inviterId.trim();
     if (!input) return;
     openConfirm({
-      title: "Confirmar invitador",
+      title: t("referral.confirmInviter.title"),
       message:
-        `Vas a asociar tu cuenta con el invitador: ${input}\n\n` +
-        "Esta acción es única y no podrás cambiar el invitador después.",
+        `${t("referral.confirmInviter.messagePrefix")} ${input}\n\n${t("referral.confirmInviter.bodyFinal")}`,
       onConfirm: () => void onValidateInviter(),
     });
   }
@@ -443,8 +446,8 @@ export default function ReferralPage() {
     if (readyToClaim <= 0) return;
 
     openConfirm({
-      title: "Canjear diamantes",
-      message: `Canjear ${formatInteger(readyToClaim)} diamante(s) por ${formatUsdt(readyToClaim * rate)} USDT?`,
+      title: t("referral.claim.title"),
+      message: `${t("referral.claim.confirmPrefix")} ${formatInteger(readyToClaim)} ${t("referral.claim.diamonds")} ${t("referral.claim.confirmMid")} ${formatUsdt(readyToClaim * rate)} USDT?`,
       onConfirm: async () => {
         setIsClaiming(true);
         try {
@@ -472,9 +475,9 @@ export default function ReferralPage() {
 
           if (!json?.ok) {
             openNotice({
-              title: "No se pudo canjear",
-              message: json?.error ?? "Error interno",
-              confirmLabel: "Cerrar",
+              title: t("referral.errors.claimFailed.title"),
+              message: json?.error ?? t("errors.internal"),
+              confirmLabel: t("common.close"),
             });
             return;
           }
@@ -482,15 +485,15 @@ export default function ReferralPage() {
           const claimedCount = Number(json.claim?.claimed_count ?? 0);
           const totalUsdt = Number(json.claim?.total_usdt ?? 0);
           const from = (json.claim?.claimed_from ?? []).map(personLabel);
-          const suffix = from.length ? `\n\nProviene de: ${from.join(", ")}` : "";
+          const suffix = from.length ? `\n\n${t("referral.claim.fromPrefix")} ${from.join(", ")}` : "";
 
           await fetchSummary();
           await refresh().catch(() => undefined);
 
           openNotice({
-            title: "Canje realizado",
-            message: `Se agregaron ${formatUsdt(totalUsdt)} USDT a tu cuenta.${suffix}`,
-            confirmLabel: "Cerrar",
+            title: t("referral.claim.successTitle"),
+            message: `${t("referral.claim.successPrefix")} ${formatUsdt(totalUsdt)} USDT ${t("referral.claim.successSuffix")}${suffix}`,
+            confirmLabel: t("common.close"),
           });
         } finally {
           setIsClaiming(false);
@@ -536,8 +539,8 @@ export default function ReferralPage() {
             open={confirmOpen}
             title={confirmTitle}
             message={confirmMessage}
-            cancelLabel="Cancelar"
-            confirmLabel="Confirmar"
+            cancelLabel={t("common.cancel")}
+            confirmLabel={t("common.confirm")}
             onCancel={() => {
               setConfirmOpen(false);
               setConfirmAction(null);
@@ -566,7 +569,7 @@ export default function ReferralPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              aria-label="Volver"
+              aria-label={t("common.backAria")}
               className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-[#1A1D24] dark:ring-white/10"
               onClick={() => router.back()}
             >
@@ -583,12 +586,12 @@ export default function ReferralPage() {
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>
-            <div className="text-2xl font-extrabold tracking-tight">Club de amigos</div>
+            <div className="text-2xl font-extrabold tracking-tight">{t("referral.title")}</div>
           </div>
 
           <div className="mt-6 overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
             <div className="text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
-              Listo para reclamar
+              {t("referral.readyToClaim")}
             </div>
             <div className="mt-3 flex items-center justify-center gap-2">
               {summaryLoading ? (
@@ -608,7 +611,7 @@ export default function ReferralPage() {
               </div>
             ) : (
               <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
-                1 DIAMANTE = {formatRate(rate)} USDT
+                {t("referral.rateLabel").replace("{rate}", formatRate(rate))}
               </div>
             )}
 
@@ -621,7 +624,7 @@ export default function ReferralPage() {
                 className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 <CoinIcon />
-                {isClaiming ? "Canjeando..." : "Reclamar"}
+                {isClaiming ? t("referral.claim.claiming") : t("referral.claim.cta")}
               </button>
             </div>
 
@@ -641,18 +644,20 @@ export default function ReferralPage() {
               </svg>
               {summaryLoading ? (
                 <div className="flex items-center gap-2">
-                  <span>Diamantes pendientes:</span>
+                  <span>{t("referral.pendingDiamonds")}</span>
                   <Skeleton className="h-4 w-8" rounded="md" />
                 </div>
               ) : (
-                <>Diamantes pendientes: {formatInteger(pendingDiamonds)}</>
+                <>
+                  {t("referral.pendingDiamonds")} {formatInteger(pendingDiamonds)}
+                </>
               )}
             </div>
           </div>
 
           <div className="mt-4 overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
             <div className="text-sm font-semibold text-zinc-500 dark:text-white/60">
-              Copiar ID de referido
+              {t("referral.copyId.title")}
             </div>
           <div className="mt-2 flex items-center gap-2">
             <div className="flex h-12 w-full items-center rounded-2xl bg-gray-50 px-4 text-sm font-semibold text-zinc-950 ring-1 ring-black/5 dark:bg-white/5 dark:text-white dark:ring-white/10">
@@ -668,26 +673,26 @@ export default function ReferralPage() {
               disabled={!referralId}
               className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
             >
-              {copied ? "Copiado" : "Copiar"}
+              {copied ? t("common.copied") : t("common.copy")}
             </button>
           </div>
 
             <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
-              ID del referido que te invitó
+              {t("referral.inviter.sectionTitle")}
             </div>
           {myReferrer ? (
             <div className="mt-3 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
               <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
-                Invitador
+                {t("referral.inviter.label")}
               </div>
               <div className="mt-1 text-sm font-semibold text-zinc-950 dark:text-white">
                 {myReferrerName ?? "—"}
               </div>
               <div className="mt-1 text-xs font-semibold text-zinc-500 dark:text-white/60">
-                {statusLabel(myReferrer.status)}
+                {statusLabel(myReferrer.status, t)}
               </div>
               <div className="mt-3 text-xs text-zinc-500 dark:text-white/60">
-                Tu cuenta ya quedó asociada a un invitador. No puedes cambiarlo.
+                {t("referral.inviter.lockedNotice")}
               </div>
             </div>
           ) : summaryLoading ? (
@@ -697,7 +702,7 @@ export default function ReferralPage() {
             </div>
           ) : hasTopup ? (
             <div className="mt-3 rounded-2xl bg-gray-50 p-4 text-sm font-semibold text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
-              Solo puedes ingresar el ID de tu invitador antes de realizar tu primera recarga.
+              {t("referral.inviter.onlyBeforeTopup")}
             </div>
           ) : (
             <>
@@ -707,7 +712,7 @@ export default function ReferralPage() {
                   onChange={(e) =>
                     setInviterId(e.target.value.replace(/[^0-9a-zA-Z_@]/g, ""))
                   }
-                  placeholder="@username o telegram_id"
+                  placeholder={t("referral.inviter.placeholder")}
                   className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
                 <button
@@ -717,7 +722,7 @@ export default function ReferralPage() {
                   onClick={onRequestValidateInviter}
                   className="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {isValidatingInviter ? "Validando..." : "Validar"}
+                  {isValidatingInviter ? t("common.validating") : t("common.validate")}
                 </button>
               </div>
               {isValidatingInviter ? (
@@ -738,7 +743,7 @@ export default function ReferralPage() {
               <div className="flex items-center gap-3">
                 <div className="text-2xl">👥</div>
                 <div className="text-sm font-semibold text-zinc-950 dark:text-white">
-                  Amigos invitados
+                  {t("referral.invitedFriends")}
                 </div>
               </div>
               <div className="text-sm font-semibold text-zinc-950 dark:text-white">
@@ -751,7 +756,7 @@ export default function ReferralPage() {
             </div>
           </div>
 
-          <div className="mt-8 text-xl font-extrabold tracking-tight">Recompensas</div>
+          <div className="mt-8 text-xl font-extrabold tracking-tight">{t("referral.rewards")}</div>
         {summaryError ? (
           <div className="mt-4 overflow-hidden rounded-3xl bg-white p-5 text-sm font-semibold text-zinc-500 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:text-white/60 dark:ring-white/10">
             {summaryError}
@@ -765,7 +770,7 @@ export default function ReferralPage() {
             </div>
             <div className="mt-6 text-center text-2xl font-extrabold tracking-tight">…</div>
             <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
-              Cargando
+              {t("common.loading")}
             </div>
           </div>
         ) : rewardItems.length === 0 ? (
@@ -776,10 +781,10 @@ export default function ReferralPage() {
               </div>
             </div>
             <div className="mt-6 text-center text-2xl font-extrabold tracking-tight">
-              Aún no hay diamantes
+              {t("referral.empty.title")}
             </div>
             <div className="mt-2 text-center text-sm font-semibold text-zinc-500 dark:text-white/60">
-              Empieza invitando amigos para ganar
+              {t("referral.empty.subtitle")}
             </div>
           </div>
         ) : (
@@ -796,7 +801,7 @@ export default function ReferralPage() {
                           .trim()}`
                       : r.referred?.telegram_id
                         ? `ID: ${r.referred.telegram_id}`
-                        : "Usuario";
+                        : t("common.user");
                 return (
                   <div
                     key={r.id}
@@ -811,7 +816,7 @@ export default function ReferralPage() {
                           {name}
                         </div>
                         <div className="text-xs text-zinc-500 dark:text-white/60">
-                          {statusLabel(r.status)}
+                          {statusLabel(r.status, t)}
                         </div>
                       </div>
                     </div>
@@ -830,10 +835,12 @@ export default function ReferralPage() {
                   onClick={() => setRewardPage((p) => Math.max(1, p - 1))}
                   className="inline-flex h-10 items-center justify-center rounded-2xl bg-gray-100 px-4 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
                 >
-                  Anterior
+                  {t("common.prev")}
                 </button>
                 <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
-                  Página {rewardCurrentPage} de {rewardTotalPages}
+                  {t("common.pagination.pageOf")
+                    .replace("{current}", String(rewardCurrentPage))
+                    .replace("{total}", String(rewardTotalPages))}
                 </div>
                 <button
                   type="button"
@@ -841,7 +848,7 @@ export default function ReferralPage() {
                   onClick={() => setRewardPage((p) => Math.min(rewardTotalPages, p + 1))}
                   className="inline-flex h-10 items-center justify-center rounded-2xl bg-gray-100 px-4 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
                 >
-                  Siguiente
+                  {t("common.next")}
                 </button>
               </div>
             ) : null}

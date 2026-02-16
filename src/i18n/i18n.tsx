@@ -49,12 +49,12 @@ function getByPath(obj: unknown, path: string): unknown {
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("es");
 
   useEffect(() => {
     const t = window.setTimeout(() => {
       const stored = readStoredLocale();
-      setLocaleState(stored ?? detectBrowserLocale());
+      setLocaleState(stored ?? "es");
     }, 0);
     return () => window.clearTimeout(t);
   }, []);

@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import DashboardView from "@/miniapp/dashboard/DashboardView";
+import { useI18n } from "@/i18n/i18n";
 
 function Splash({ phase }: { phase: "enter" | "exit" }) {
+  const { t } = useI18n();
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-[#000] ${
@@ -16,7 +18,7 @@ function Splash({ phase }: { phase: "enter" | "exit" }) {
       <div className="relative flex flex-col items-center gap-6">
         <Image
           src="/assets/logo-header.png"
-          alt="CriptoCard"
+          alt={t("common.logoAlt")}
           width={180}
           height={46}
           priority
@@ -24,7 +26,7 @@ function Splash({ phase }: { phase: "enter" | "exit" }) {
         />
         <Image
           src="/assets/logo-header-blanco.png"
-          alt="CriptoCard"
+          alt={t("common.logoAlt")}
           width={180}
           height={46}
           priority
@@ -38,6 +40,7 @@ function Splash({ phase }: { phase: "enter" | "exit" }) {
 }
 
 function Spinner({ progress }: { progress: number }) {
+  const { t } = useI18n();
   const clamped = Math.max(0, Math.min(1, progress));
   const opacity = 0.25 + clamped * 0.75;
   const scale = 0.9 + clamped * 0.1;
@@ -59,7 +62,7 @@ function Spinner({ progress }: { progress: number }) {
         >
           <path d="M21 12a9 9 0 1 1-9-9" />
         </svg>
-        Actualizando…
+        {t("common.updating")}
       </div>
     </div>
   );

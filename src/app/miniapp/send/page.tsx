@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Skeleton from "@/components/ui/Skeleton";
+import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { formatUsdt } from "@/lib/format/number";
 
@@ -67,6 +68,7 @@ function ConfirmDialog(props: {
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useI18n();
   const { open, title, message, cancelLabel, confirmLabel, onCancel, onConfirm } =
     props;
 
@@ -94,7 +96,7 @@ function ConfirmDialog(props: {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("common.closeAria")}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onCancel}
       />
@@ -157,6 +159,7 @@ function NoticeDialog(props: {
   confirmLabel: string;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const { open, title, message, confirmLabel, onClose } = props;
 
   useEffect(() => {
@@ -183,7 +186,7 @@ function NoticeDialog(props: {
     <div className="fixed inset-0 z-50 flex items-center justify-center px-5">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("common.closeAria")}
         className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-300"
         onClick={onClose}
       />
@@ -264,6 +267,7 @@ function SendPageLoading() {
 
 export default function SendPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const { state, user, refresh } = useBackendUser();
   const [step, setStep] = useState<1 | 2>(1);
   const [sendType, setSendType] = useState<SendType | null>(null);
@@ -274,7 +278,7 @@ export default function SendPage() {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeMessage, setNoticeMessage] = useState("");
-  const [noticeConfirmLabel, setNoticeConfirmLabel] = useState("Aceptar");
+  const [noticeConfirmLabel, setNoticeConfirmLabel] = useState("OK");
   const [noticeAction, setNoticeAction] = useState<(() => void) | null>(null);
   const [pendingShown, setPendingShown] = useState(false);
   const [userTransferError, setUserTransferError] = useState<string | null>(null);
@@ -388,13 +392,13 @@ export default function SendPage() {
     setUserTransferError(null);
 
     if (!recipient) {
-      setUserTransferError("Selecciona un destinatario antes de enviar.");
+      setUserTransferError(t("send.errors.noRecipient"));
       return;
     }
 
     const amount = parseUsdLikeAmount(amountToUser);
     if (!Number.isFinite(amount) || amount <= 0) {
-      setUserTransferError("Ingresa un monto válido en USDT.");
+      setUserTransferError(t("send.errors.invalidAmount"));
       return;
     }
 
@@ -408,14 +412,14 @@ export default function SendPage() {
 
       if (!Number.isFinite(available) || available < amount) {
         setUserTransferError(
-          `Saldo insuficiente. Balance disponible: ${formatUsdt(available)} USDT.`,
+          `${t("send.errors.insufficientBalancePrefix")} ${formatUsdt(available)} USDT.`,
         );
         return;
       }
 
       openConfirm({
-        title: "Confirmar envío",
-        message: `Enviar ${formatUsdt(amount)} USDT a ${recipientDisplay ?? "destinatario"}?`,
+        title: t("send.confirm.userTransfer.title"),
+        message: `${t("send.confirm.userTransfer.messagePrefix")} ${formatUsdt(amount)} USDT ${t("send.confirm.userTransfer.messageTo")} ${recipientDisplay ?? t("send.confirm.userTransfer.fallbackRecipient")}?`,
         onConfirm: () => void performSendToUser(),
       });
     } finally {
@@ -428,16 +432,16 @@ export default function SendPage() {
 
     const amount = parseUsdLikeAmount(withdrawAmount);
     if (!withdrawAddress.trim() || !withdrawNetwork.trim()) {
-      setWithdrawError("Completa dirección y red antes de enviar.");
+      setWithdrawError(t("send.errors.missingWithdrawFields"));
       return;
     }
     if (!Number.isFinite(amount) || amount <= 0) {
-      setWithdrawError("Ingresa un monto válido en USDT.");
+      setWithdrawError(t("send.errors.invalidAmount"));
       return;
     }
     if (minWithdrawalUsdt !== null && amount < minWithdrawalUsdt) {
       setWithdrawError(
-        `El monto mínimo de retiro es ${formatUsdt(minWithdrawalUsdt)} USDT.`,
+        `${t("send.errors.minWithdrawalPrefix")} ${formatUsdt(minWithdrawalUsdt)} USDT.`,
       );
       return;
     }
@@ -452,14 +456,14 @@ export default function SendPage() {
 
       if (!Number.isFinite(available) || available < amount) {
         setWithdrawError(
-          `Saldo insuficiente. Balance disponible: ${formatUsdt(available)} USDT.`,
+          `${t("send.errors.insufficientBalancePrefix")} ${formatUsdt(available)} USDT.`,
         );
         return;
       }
 
       openConfirm({
-        title: "Confirmar solicitud",
-        message: `Solicitar retiro de ${formatUsdt(amount)} USDT a wallet externa?`,
+        title: t("send.confirm.withdraw.title"),
+        message: `${t("send.confirm.withdraw.messagePrefix")} ${formatUsdt(amount)} USDT ${t("send.confirm.withdraw.messageSuffix")}`,
         onConfirm: () => void performWithdraw(),
       });
     } finally {
@@ -479,7 +483,7 @@ export default function SendPage() {
       (selfUsername && normalized.toLowerCase() === selfUsername)
     ) {
       setRecipient(null);
-      setRecipientError("No puedes enviarte a ti mismo.");
+      setRecipientError(t("send.errors.selfTransfer"));
       return;
     }
 
@@ -501,7 +505,7 @@ export default function SendPage() {
       }
 
       if (!res.ok) {
-        setRecipientError("No se pudo buscar el usuario.");
+        setRecipientError(t("send.errors.searchFailed"));
         return;
       }
 
@@ -509,12 +513,12 @@ export default function SendPage() {
         | { ok: boolean; users?: SearchUser[]; error?: string }
         | null;
       if (!json?.ok) {
-        setRecipientError(json?.error ?? "No se pudo buscar el usuario.");
+        setRecipientError(json?.error ?? t("send.errors.searchFailed"));
         return;
       }
 
       if (!json.users?.length) {
-        setRecipientError("No encontramos un usuario con ese dato.");
+        setRecipientError(t("send.errors.userNotFound"));
         return;
       }
 
@@ -543,9 +547,9 @@ export default function SendPage() {
       | null;
     if (!json?.ok) {
       openNotice({
-        title: "No se pudo transferir",
-        message: json?.error ?? "Error interno",
-        confirmLabel: "Cerrar",
+        title: t("send.errors.transferFailed.title"),
+        message: json?.error ?? t("errors.internal"),
+        confirmLabel: t("common.close"),
       });
       return;
     }
@@ -557,9 +561,9 @@ export default function SendPage() {
     await refresh().catch(() => undefined);
 
     openNotice({
-      title: "Transferencia exitosa",
-      message: `Se envió ${formatUsdt(amount)} USDT correctamente.`,
-      confirmLabel: "Ir al inicio",
+      title: t("send.success.transfer.title"),
+      message: `${t("send.success.transfer.bodyPrefix")} ${formatUsdt(amount)} USDT ${t("send.success.transfer.bodySuffix")}`,
+      confirmLabel: t("common.goHome"),
       onClose: () => router.push("/miniapp"),
     });
   }
@@ -584,9 +588,9 @@ export default function SendPage() {
       | null;
     if (!json?.ok) {
       openNotice({
-        title: "No se pudo enviar",
-        message: json?.error ?? "Error interno",
-        confirmLabel: "Cerrar",
+        title: t("send.errors.withdrawFailed.title"),
+        message: json?.error ?? t("errors.internal"),
+        confirmLabel: t("common.close"),
       });
       return;
     }
@@ -598,10 +602,9 @@ export default function SendPage() {
     await refresh().catch(() => undefined);
 
     openNotice({
-      title: "Solicitud enviada",
-      message:
-        "La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada.",
-      confirmLabel: "Ir al inicio",
+      title: t("send.success.withdraw.title"),
+      message: t("send.success.withdraw.body"),
+      confirmLabel: t("common.goHome"),
       onClose: () => router.push("/miniapp"),
     });
   }
@@ -612,7 +615,7 @@ export default function SendPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            aria-label="Volver"
+            aria-label={t("common.backAria")}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10"
             onClick={() => router.back()}
           >
@@ -629,15 +632,15 @@ export default function SendPage() {
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <div className="text-2xl font-extrabold tracking-tight">Transferencias</div>
+          <div className="text-2xl font-extrabold tracking-tight">{t("send.title")}</div>
         </div>
 
         <ConfirmDialog
           open={confirmOpen}
           title={confirmTitle}
           message={confirmMessage}
-          cancelLabel="Cancelar"
-          confirmLabel="Confirmar"
+          cancelLabel={t("common.cancel")}
+          confirmLabel={t("common.confirm")}
           onCancel={() => {
             setConfirmOpen(false);
             setConfirmAction(null);
@@ -665,7 +668,7 @@ export default function SendPage() {
 
         <div className="mt-3 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
           <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
-            Paso {step} de 2
+            {t("send.stepIndicator").replace("{current}", String(step)).replace("{total}", "2")}
           </div>
           <div className="flex items-center gap-2">
             <div
@@ -689,9 +692,9 @@ export default function SendPage() {
 
         {step === 1 ? (
           <div className="mt-8">
-            <div className="text-lg font-extrabold tracking-tight">Paso 1: Tipo de envío</div>
+            <div className="text-lg font-extrabold tracking-tight">{t("send.step1.title")}</div>
             <div className="mt-1 text-sm font-medium text-zinc-500 dark:text-white/60">
-              Elige cómo quieres transferir tus USDT.
+              {t("send.step1.subtitle")}
             </div>
 
             <div className="mt-4 space-y-3">
@@ -716,9 +719,9 @@ export default function SendPage() {
                   </>
                 ) : null}
                 <div className="relative p-5">
-                  <div className="text-base font-extrabold">Enviar de usuario a usuario</div>
+                  <div className="text-base font-extrabold">{t("send.type.user.title")}</div>
                   <div className="mt-1 text-sm text-zinc-500 dark:text-white/60">
-                    Busca por telegram_id o username y envía USDT.
+                    {t("send.type.user.body")}
                   </div>
                 </div>
               </button>
@@ -744,9 +747,9 @@ export default function SendPage() {
                   </>
                 ) : null}
                 <div className="relative p-5">
-                  <div className="text-base font-extrabold">Enviar a wallet externa</div>
+                  <div className="text-base font-extrabold">{t("send.type.wallet.title")}</div>
                   <div className="mt-1 text-sm text-zinc-500 dark:text-white/60">
-                    Ingresa dirección, red y monto. Quedará en espera.
+                    {t("send.type.wallet.body")}
                   </div>
                 </div>
               </button>
@@ -764,7 +767,7 @@ export default function SendPage() {
                     : "hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0",
                 ].join(" ")}
               >
-                Continuar
+                {t("common.continue")}
               </button>
             </div>
           </div>
@@ -772,27 +775,28 @@ export default function SendPage() {
           <div className="mt-8">
             <div className="flex items-center justify-between">
               <div className="text-lg font-extrabold tracking-tight">
-                Paso 2: {sendType === "wallet" ? "Enviar a wallet externa" : "Enviar a usuario"}
+                {t("send.step2.titlePrefix")}{" "}
+                {sendType === "wallet" ? t("send.step2.wallet") : t("send.step2.user")}
               </div>
               <button
                 type="button"
                 onClick={onBack}
                 className="text-xs font-semibold text-zinc-500 underline decoration-zinc-400/40 underline-offset-4 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white"
               >
-                Cambiar
+                {t("common.change")}
               </button>
             </div>
 
             {sendType === "user" ? (
               <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
                 <div className="text-sm font-semibold text-zinc-500 dark:text-white/60">
-                  Buscar destinatario
+                  {t("send.recipient.searchTitle")}
                 </div>
                 <div className="mt-2 flex gap-2">
                   <input
                     value={recipientQuery}
                     onChange={(e) => setRecipientQuery(e.target.value)}
-                    placeholder="telegram_id o @username"
+                    placeholder={t("send.recipient.placeholder")}
                     className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                   />
                   <button
@@ -800,28 +804,28 @@ export default function SendPage() {
                     className="inline-flex h-12 items-center justify-center rounded-2xl bg-yellow-500 px-4 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0"
                     onClick={onSearchRecipient}
                   >
-                    {recipientLoading ? "..." : "Buscar"}
+                    {recipientLoading ? t("common.loadingDots") : t("common.search")}
                   </button>
                 </div>
 
                 {recipient ? (
                   <div className="mt-4 rounded-2xl bg-gray-50 p-4 ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
                     <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
-                      Usuario encontrado
+                      {t("send.recipient.found")}
                     </div>
                     <div className="mt-1 text-sm font-semibold">{recipientDisplay}</div>
                     <div className="mt-1 text-xs text-zinc-500 dark:text-white/60">
-                      telegram_id: {recipient.telegram_id}
+                      {t("send.recipient.telegramId")}: {recipient.telegram_id}
                     </div>
                   </div>
                 ) : (
                   <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
-                    {recipientError ?? "Busca un usuario para continuar."}
+                    {recipientError ?? t("send.recipient.emptyState")}
                   </div>
                 )}
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                  Monto (USDT)
+                  {t("send.amountLabel")}
                 </div>
                 <input
                   value={amountToUser}
@@ -849,49 +853,48 @@ export default function SendPage() {
                     className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     onClick={onRequestUserTransferConfirm}
                   >
-                    {isCheckingBalance ? "Validando..." : "Enviar"}
+                    {isCheckingBalance ? t("common.validating") : t("common.send")}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="mt-4 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
                 <div className="rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
-                  El monto mínimo de retiro es{" "}
-                  {formatUsdt(minWithdrawalUsdt ?? 0)} USDT. La solicitud quedará en espera y
-                  puede tardar hasta 72 horas en ser aprobada
+                  {t("send.withdraw.notePrefix")} {formatUsdt(minWithdrawalUsdt ?? 0)} USDT.{" "}
+                  {t("send.withdraw.noteSuffix")}
                 </div>
 
                 {pendingShown ? (
                   <div className="mt-4 rounded-2xl bg-yellow-50 p-4 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:ring-yellow-500/20">
-                    <div className="text-sm font-semibold">En espera</div>
+                    <div className="text-sm font-semibold">{t("tx.status.pending")}</div>
                     <div className="mt-1 text-xs text-zinc-500 dark:text-white/60">
-                      Solicitud enviada con estado pendiente.
+                      {t("send.withdraw.pendingNotice")}
                     </div>
                   </div>
                 ) : null}
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                  Dirección
+                  {t("send.withdraw.addressLabel")}
                 </div>
                 <input
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
-                  placeholder="0x..."
+                  placeholder={t("send.withdraw.addressPlaceholder")}
                   className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                  Red
+                  {t("send.withdraw.networkLabel")}
                 </div>
                 <input
                   value={withdrawNetwork}
                   onChange={(e) => setWithdrawNetwork(e.target.value)}
-                  placeholder="TRC20 / ERC20 / ..."
+                  placeholder={t("send.withdraw.networkPlaceholder")}
                   className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                  Monto (USDT)
+                  {t("send.amountLabel")}
                 </div>
                 <input
                   value={withdrawAmount}
@@ -919,7 +922,7 @@ export default function SendPage() {
                     className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     onClick={onRequestWithdrawConfirm}
                   >
-                    {isCheckingWithdrawBalance ? "Validando..." : "Enviar"}
+                    {isCheckingWithdrawBalance ? t("common.validating") : t("common.send")}
                   </button>
                 </div>
               </div>

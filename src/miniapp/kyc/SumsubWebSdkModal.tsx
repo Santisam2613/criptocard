@@ -25,7 +25,7 @@ function loadSumsubWebSdkScript(): Promise<void> {
     script.src = "https://static.sumsub.com/idensic/static/sns-websdk-builder.js";
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("No se pudo cargar el WebSDK de Sumsub"));
+    script.onerror = () => reject(new Error("KYC_WEBSKD_LOAD_FAILED"));
     document.head.appendChild(script);
   });
 
@@ -41,7 +41,7 @@ async function fetchSdkToken(): Promise<{ token: string; userId: string }> {
     | { ok: boolean; error?: string; token?: { token: string; userId: string } }
     | null;
   if (!json?.ok || !json.token) {
-    const msg = json?.error ?? "No se pudo obtener token de verificación";
+    const msg = json?.error ?? "KYC_TOKEN_FAILED";
     throw new Error(msg);
   }
   return json.token;
@@ -122,7 +122,7 @@ export default function SumsubWebSdkModal(props: {
 
         const sdk = (window as unknown as { snsWebSdk?: SnsWebSdk }).snsWebSdk;
 
-        if (!sdk?.init) throw new Error("WebSDK no disponible");
+        if (!sdk?.init) throw new Error("KYC_WEBSKD_UNAVAILABLE");
 
         const selector = `#${containerId}`;
 
@@ -155,7 +155,17 @@ export default function SumsubWebSdkModal(props: {
 
         setStatus({ state: "ready" });
       } catch (e) {
-        const message = e instanceof Error ? e.message : "No se pudo iniciar verificación";
+        const raw = e instanceof Error ? e.message : "KYC_START_FAILED";
+        const message =
+          raw === "KYC_WEBSKD_LOAD_FAILED"
+            ? t("kyc.errors.websdkLoad")
+            : raw === "KYC_TOKEN_FAILED"
+              ? t("kyc.errors.token")
+              : raw === "KYC_WEBSKD_UNAVAILABLE"
+                ? t("kyc.errors.websdkUnavailable")
+                : raw === "KYC_START_FAILED"
+                  ? t("kyc.errors.startFailed")
+                  : raw;
         setStatus({ state: "error", message });
       }
     };
@@ -184,7 +194,7 @@ export default function SumsubWebSdkModal(props: {
               type="button"
               className="cc-glass cc-neon-outline inline-flex h-9 w-9 items-center justify-center rounded-full"
               onClick={props.onClose}
-              aria-label="Close"
+              aria-label={t("common.closeAria")}
             >
               <svg
                 viewBox="0 0 24 24"

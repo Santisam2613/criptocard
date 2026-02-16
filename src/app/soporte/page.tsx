@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import NoticeDialog from "@/components/ui/NoticeDialog";
+import { useI18n } from "@/i18n/i18n";
 
 type TabKey = "home" | "messages";
 
@@ -182,6 +183,7 @@ async function fetchSupportLink(): Promise<string | null> {
 
 export default function SupportPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [tab, setTab] = useState<TabKey>("home");
   const [expandedId, setExpandedId] = useState<string | null>("balance");
   const [query, setQuery] = useState("");
@@ -194,30 +196,30 @@ export default function SupportPage() {
     () => [
       {
         id: "balance",
-        question: "In which currency is my balance stored?",
+        question: t("support.faq.balance.q"),
         answer:
-          "Your balance is shown in USDT. When you top up or receive funds, the amount is credited to your USDT balance.",
+          t("support.faq.balance.a"),
       },
       {
         id: "fees",
-        question: "Are there any fees for topping up?",
+        question: t("support.faq.fees.q"),
         answer:
-          "We aim to keep fees transparent. If a top-up method includes network or provider fees, you'll see it before confirming.",
+          t("support.faq.fees.a"),
       },
       {
         id: "send",
-        question: "How do I send funds?",
+        question: t("support.faq.send.q"),
         answer:
-          "Go to Transfers, choose whether you want to send to a user or to an external wallet, then enter the recipient details and amount. You'll be asked to confirm before submitting.",
+          t("support.faq.send.a"),
       },
       {
         id: "topup-time",
-        question: "How long do top-ups take?",
+        question: t("support.faq.time.q"),
         answer:
-          "Top-ups are usually credited quickly. Depending on the method and network conditions, it can take a few minutes. If it takes longer than expected, please contact an advisor.",
+          t("support.faq.time.a"),
       },
     ],
-    [],
+    [t],
   );
 
   const filteredFaqs = useMemo(() => {
@@ -246,9 +248,9 @@ export default function SupportPage() {
     const link = await fetchSupportLink().catch(() => null);
     if (!link) {
       openNotice({
-        title: "Support unavailable",
-        message: "The support link is not configured yet. Please try again later.",
-        confirmLabel: "Close",
+        title: t("support.unavailable.title"),
+        message: t("support.unavailable.body"),
+        confirmLabel: t("common.close"),
       });
       return;
     }
@@ -285,14 +287,14 @@ export default function SupportPage() {
 
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-2xl font-extrabold tracking-tight">Hello 👋</div>
+            <div className="text-2xl font-extrabold tracking-tight">{t("support.hero.greeting")}</div>
             <div className="mt-1 text-4xl font-extrabold tracking-tight">
-              How can we help you?
+              {t("support.hero.title")}
             </div>
           </div>
           <button
             type="button"
-            aria-label="Close"
+            aria-label={t("common.closeAria")}
             className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-[#1A1D24] dark:ring-white/10"
             onClick={onClose}
           >
@@ -304,13 +306,13 @@ export default function SupportPage() {
           <div className="mt-7 space-y-4">
             <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
               <div className="text-sm font-semibold text-zinc-950 dark:text-white">
-                Search help
+                {t("support.search.title")}
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Type a keyword (e.g. fees, top up, send)"
+                  placeholder={t("support.search.placeholder")}
                   className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
                 />
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500 text-black ring-1 ring-black/10">
@@ -332,7 +334,7 @@ export default function SupportPage() {
             </div>
 
             <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-              <div className="text-sm font-semibold text-zinc-950 dark:text-white">FAQ</div>
+              <div className="text-sm font-semibold text-zinc-950 dark:text-white">{t("support.faq.title")}</div>
 
               <div className="mt-4 space-y-3">
                 {filteredFaqs.length ? (
@@ -346,7 +348,7 @@ export default function SupportPage() {
                   ))
                 ) : (
                   <div className="rounded-2xl bg-gray-50 p-4 text-sm font-semibold text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
-                    No results. Try another search.
+                    {t("support.search.noResults")}
                   </div>
                 )}
               </div>
@@ -355,9 +357,9 @@ export default function SupportPage() {
         ) : (
           <div className="mt-7">
             <div className="overflow-hidden rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-              <div className="text-lg font-extrabold tracking-tight">Messages</div>
+              <div className="text-lg font-extrabold tracking-tight">{t("support.messages.title")}</div>
               <div className="mt-2 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                Coming soon.
+                {t("common.comingSoon")}
               </div>
             </div>
           </div>
@@ -369,26 +371,26 @@ export default function SupportPage() {
           <div className="rounded-3xl bg-white p-2 shadow-lg shadow-black/10 ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
             <div className="grid grid-cols-3 gap-2">
               <TabButton
-                label="Home"
+                label={t("support.tabs.home")}
                 icon={<HomeIcon active={tab === "home"} />}
                 active={tab === "home"}
                 onClick={() => setTab("home")}
               />
               <TabButton
-                label="Messages"
+                label={t("support.tabs.messages")}
                 icon={<MessagesIcon active={tab === "messages"} />}
                 active={tab === "messages"}
                 onClick={() => setTab("messages")}
               />
               <TabButton
-                label="Contact advisor"
+                label={t("support.tabs.contact")}
                 icon={<HeadsetIcon active={false} />}
                 active={false}
                 onClick={onContactAdvisor}
               />
             </div>
             <div className="mt-1 text-center text-[11px] font-semibold text-zinc-500 dark:text-white/60">
-              Contact Brenda (human advisor)
+              {t("support.contact.caption")}
             </div>
           </div>
         </div>
@@ -396,4 +398,3 @@ export default function SupportPage() {
     </main>
   );
 }
-

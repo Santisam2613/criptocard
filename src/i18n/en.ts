@@ -1,6 +1,42 @@
 export const en = {
   common: {
     appName: "Criptocard",
+    logoAlt: "CriptoCard",
+    loading: "Loading…",
+    loadingDots: "…",
+    updating: "Updating…",
+    comingSoon: "Coming soon.",
+    close: "Close",
+    closeAria: "Close",
+    ok: "OK",
+    confirm: "Confirm",
+    cancel: "Cancel",
+    backAria: "Back",
+    continue: "Continue",
+    change: "Change",
+    search: "Search",
+    validate: "Validate",
+    validating: "Validating…",
+    send: "Send",
+    goHome: "Go home",
+    copy: "Copy",
+    copied: "Copied",
+    prev: "Previous",
+    next: "Next",
+    user: "User",
+    pagination: {
+      pageOf: "Page {current} of {total}",
+    },
+  },
+  errors: {
+    internal: "Internal error",
+    network: "Network error",
+  },
+  legal: {
+    terms: "Terms & conditions",
+  },
+  footer: {
+    rightsReserved: "All rights reserved.",
   },
   nav: {
     personal: "Personal",
@@ -54,6 +90,7 @@ export const en = {
   },
   dashboard: {
     balanceLabel: "CRIPTOCARD BALANCE (USDT)",
+    supportAria: "Support",
     topUp: "Top up",
     send: "Send",
     getCryptoCard: "GET YOUR CRYPTO CARD",
@@ -62,6 +99,7 @@ export const en = {
     stepsDone: "0 of 3 STEPS DONE",
     visaVirtual: "Visa Virtual",
     visaPhysical: "Visa Physical",
+    virtualAccount: "Virtual account",
     virtualAccounts: "Virtual accounts",
     notOpened: "Not Opened",
     comingSoon: "Coming soon",
@@ -77,6 +115,20 @@ export const en = {
     virtualAccountsSheet: "Virtual Accounts",
     visaVirtualSheet: "Visa Signature® Virtual Card",
     visaPhysicalSheet: "Visa Physical (Metal)",
+    carousel: {
+      cashback: {
+        title: "Crazy cashback",
+        subtitle: "Up to 5% back (soon)",
+      },
+      rewards: {
+        title: "Crypto rewards",
+        subtitle: "Earn USDT on every purchase",
+      },
+      vip: {
+        title: "VIP level",
+        subtitle: "Unlock exclusive benefits",
+      },
+    },
   },
   visaCard: {
     titleSignature: "Visa Signature® Card",
@@ -88,6 +140,12 @@ export const en = {
     tagAppleGoogle: "Apple & Google Pay",
     tagNoLimits: "No Spending Limits",
     tagVisaBenefits: "10+ Visa Benefits",
+    buy: {
+      ctaBuyFor: "Buy for",
+      confirmTitle: "Confirm purchase",
+      confirmMessagePrefix: "Buy virtual card for",
+      confirmCta: "Buy",
+    },
   },
   sheets: {
     verifyAccount: "Verify Account",
@@ -117,6 +175,7 @@ export const en = {
     placeholderName: "None None",
     kycLevel: "KYC level: 0",
     personalDetails: "Personal Details",
+    verified: "Verified",
     notVerified: "Not verified",
     language: "Language",
     appearance: "Appearance",
@@ -136,5 +195,271 @@ export const en = {
     pending: "Verification in progress",
     approved: "Verified user",
     rejected: "Verification rejected",
+  },
+  tx: {
+    empty: "No history yet",
+    title: {
+      manualCredit: "Manual credit",
+      topup: "Balance top-up",
+      transferTo: "Transfer to",
+      transferSent: "Transfer sent",
+      withdraw: "Withdrawal",
+      referralReward: "Referral reward",
+      cardPurchase: "Virtual card purchase",
+      cardPayment: "Card payment",
+      diamondConversion: "Diamond conversion",
+      default: "Transaction",
+    },
+    status: {
+      pending: "Pending",
+      completed: "Completed",
+      rejected: "Rejected",
+    },
+  },
+  topup: {
+    title: "Top up",
+    currentBalance: "Current balance",
+    amountLabel: "Amount (USDT)",
+    minNoticePrefix: "Minimum top-up amount is",
+    submitting: "Topping up...",
+    errors: {
+      invalidAmount: {
+        title: "Invalid amount",
+        body: "Enter a valid amount in USDT.",
+      },
+      minAmount: {
+        title: "Minimum amount",
+        bodyPrefix: "Minimum top-up amount is",
+      },
+      failed: {
+        title: "Top-up failed",
+      },
+    },
+    success: {
+      title: "Top-up successful",
+      bodyPrefix: "Credited",
+      bodySuffix: "to your account.",
+    },
+  },
+  send: {
+    title: "Transfers",
+    stepIndicator: "Step {current} of {total}",
+    step1: {
+      title: "Step 1: Transfer type",
+      subtitle: "Choose how you want to send your USDT.",
+    },
+    type: {
+      user: {
+        title: "User to user",
+        body: "Search by telegram_id or username and send USDT.",
+      },
+      wallet: {
+        title: "External wallet",
+        body: "Enter address, network and amount. It will stay pending.",
+      },
+    },
+    step2: {
+      titlePrefix: "Step 2:",
+      wallet: "External wallet",
+      user: "Send to user",
+    },
+    amountLabel: "Amount (USDT)",
+    recipient: {
+      searchTitle: "Find recipient",
+      placeholder: "telegram_id or @username",
+      found: "User found",
+      telegramId: "telegram_id",
+      emptyState: "Search a user to continue.",
+    },
+    withdraw: {
+      notePrefix: "Minimum withdrawal amount is",
+      noteSuffix: "The request will remain pending and can take up to 72 hours to be approved.",
+      pendingNotice: "Request sent with pending status.",
+      addressLabel: "Address",
+      networkLabel: "Network",
+      addressPlaceholder: "0x...",
+      networkPlaceholder: "TRC20 / ERC20 / ...",
+    },
+    errors: {
+      noRecipient: "Select a recipient before sending.",
+      invalidAmount: "Enter a valid amount in USDT.",
+      insufficientBalancePrefix: "Insufficient balance. Available:",
+      missingWithdrawFields: "Complete address and network before sending.",
+      minWithdrawalPrefix: "Minimum withdrawal amount is",
+      selfTransfer: "You can't send to yourself.",
+      searchFailed: "Could not search user.",
+      userNotFound: "We couldn't find a user with that value.",
+      transferFailed: {
+        title: "Transfer failed",
+      },
+      withdrawFailed: {
+        title: "Request failed",
+      },
+    },
+    confirm: {
+      userTransfer: {
+        title: "Confirm transfer",
+        messagePrefix: "Send",
+        messageTo: "USDT to",
+        fallbackRecipient: "recipient",
+      },
+      withdraw: {
+        title: "Confirm request",
+        messagePrefix: "Request withdrawal of",
+        messageSuffix: "to external wallet?",
+      },
+    },
+    success: {
+      transfer: {
+        title: "Transfer successful",
+        bodyPrefix: "Sent",
+        bodySuffix: "successfully.",
+      },
+      withdraw: {
+        title: "Request sent",
+        body: "The request will remain pending and can take up to 72 hours to be approved.",
+      },
+    },
+  },
+  referral: {
+    title: "Friends club",
+    invitedFriends: "Invited friends",
+    rewards: "Rewards",
+    readyToClaim: "Ready to claim",
+    claimed: "Claimed",
+    pendingDiamonds: "Pending diamonds:",
+    rateLabel: "1 DIAMOND = {rate} USDT",
+    copyId: {
+      title: "Copy referral ID",
+    },
+    inviter: {
+      sectionTitle: "Referral ID that invited you",
+      label: "Inviter",
+      placeholder: "@username or telegram_id",
+      onlyBeforeTopup: "You can only set your inviter ID before your first top-up.",
+      lockedNotice: "Your account is already linked to an inviter. You can't change it.",
+      validatedEligible: "Validated. Diamond ready to claim.",
+      validatedPending: "Validated. Pending until the inviter tops up.",
+    },
+    confirmInviter: {
+      title: "Confirm inviter",
+      messagePrefix: "You are about to link your account to:",
+      bodyFinal: "This action is one-time and you won't be able to change the inviter later.",
+    },
+    claim: {
+      title: "Redeem diamonds",
+      confirmPrefix: "Redeem",
+      diamonds: "diamond(s)",
+      confirmMid: "for",
+      cta: "Redeem",
+      claiming: "Redeeming...",
+      successTitle: "Redeemed",
+      successPrefix: "Added",
+      successSuffix: "to your account.",
+      fromPrefix: "From:",
+    },
+    errors: {
+      loadFailed: "Could not load referrals",
+      validateFailed: "Could not validate",
+      claimFailed: {
+        title: "Redeem failed",
+      },
+    },
+    empty: {
+      title: "No diamonds yet",
+      subtitle: "Start inviting friends to earn",
+    },
+  },
+  kyc: {
+    errors: {
+      websdkLoad: "Could not load Sumsub WebSDK",
+      token: "Could not obtain verification token",
+      websdkUnavailable: "WebSDK unavailable",
+      startFailed: "Could not start verification",
+    },
+  },
+  support: {
+    hero: {
+      greeting: "Hello 👋",
+      title: "How can we help you?",
+    },
+    search: {
+      title: "Search help",
+      placeholder: "Type a keyword (e.g. fees, top up, send)",
+      noResults: "No results. Try another search.",
+    },
+    faq: {
+      title: "FAQ",
+      balance: {
+        q: "In which currency is my balance stored?",
+        a: "Your balance is shown in USDT. When you top up or receive funds, the amount is credited to your USDT balance.",
+      },
+      fees: {
+        q: "Are there any fees for topping up?",
+        a: "We aim to keep fees transparent. If a top-up method includes network or provider fees, you'll see it before confirming.",
+      },
+      send: {
+        q: "How do I send funds?",
+        a: "Go to Transfers, choose whether you want to send to a user or to an external wallet, then enter the recipient details and amount. You'll be asked to confirm before submitting.",
+      },
+      time: {
+        q: "How long do top-ups take?",
+        a: "Top-ups are usually credited quickly. Depending on the method and network conditions, it can take a few minutes. If it takes longer than expected, please contact an advisor.",
+      },
+    },
+    messages: {
+      title: "Messages",
+    },
+    tabs: {
+      home: "Home",
+      messages: "Messages",
+      contact: "Contact advisor",
+    },
+    contact: {
+      caption: "Contact Brenda (human advisor)",
+    },
+    unavailable: {
+      title: "Support unavailable",
+      body: "The support link is not configured yet. Please try again later.",
+    },
+  },
+  home: {
+    hero: {
+      viewBenefits: "View benefits",
+    },
+    sectionLabels: {
+      topUp: "Top up",
+      security: "Security",
+    },
+    benefits: {
+      label: "Benefits",
+      title: "Crypto finance, serious design.",
+      subtitle: "Everything you need to issue, top up and spend with control from Telegram.",
+    },
+    how: {
+      label: "How it works",
+      title: "Three steps. No friction.",
+      steps: [
+        { title: "Start the bot", body: "Open CriptoCard in Telegram and create your account." },
+        { title: "Verify your identity", body: "Complete verification to enable issuance and limits." },
+        { title: "Top up & pay", body: "Add balance and pay anywhere Visa is accepted." },
+      ],
+    },
+    highlight: {
+      label: "Full control",
+      title: "Your money, your rules. Without compromising design.",
+      subtitle: "Top up, control, and track spending with a fintech-grade flow.",
+      ctaTelegram: "Open in Telegram",
+      ctaFaq: "View FAQ",
+      card: {
+        balanceLabel: "Balance",
+        availableLabel: "Available",
+        monthlySpendLabel: "Monthly spend",
+        summaryLabel: "Summary",
+        notificationsLabel: "Notifications",
+        notificationsBody: "Top-up confirmed. Your balance is ready to spend.",
+        realtimeLabel: "Real-time",
+      },
+    },
   },
 } as const;

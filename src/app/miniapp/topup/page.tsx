@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
+import { useI18n } from "@/i18n/i18n";
 import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 import { formatUsdt } from "@/lib/format/number";
 
@@ -32,6 +33,7 @@ function parseUsdLikeAmount(input: string) {
 
 export default function TopUpPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const { state, user, refresh } = useBackendUser();
   const [approvedGate, setApprovedGate] = useState(false);
   const [amount, setAmount] = useState("");
@@ -118,17 +120,17 @@ export default function TopUpPage() {
     const value = parseUsdLikeAmount(amount);
     if (!Number.isFinite(value) || value <= 0) {
       openNotice({
-        title: "Monto inválido",
-        message: "Ingresa un monto válido en USDT.",
-        confirmLabel: "Cerrar",
+        title: t("topup.errors.invalidAmount.title"),
+        message: t("topup.errors.invalidAmount.body"),
+        confirmLabel: t("common.close"),
       });
       return;
     }
     if (minTopupUsdt !== null && value < minTopupUsdt) {
       openNotice({
-        title: "Monto mínimo",
-        message: `El monto mínimo para recargar es ${formatUsdt(minTopupUsdt)} USDT.`,
-        confirmLabel: "Cerrar",
+        title: t("topup.errors.minAmount.title"),
+        message: `${t("topup.errors.minAmount.bodyPrefix")} ${formatUsdt(minTopupUsdt)} USDT.`,
+        confirmLabel: t("common.close"),
       });
       return;
     }
@@ -146,9 +148,9 @@ export default function TopUpPage() {
         | null;
       if (!json?.ok) {
         openNotice({
-          title: "No se pudo recargar",
-          message: json?.error ?? "Error interno",
-          confirmLabel: "Cerrar",
+          title: t("topup.errors.failed.title"),
+          message: json?.error ?? t("errors.internal"),
+          confirmLabel: t("common.close"),
         });
         return;
       }
@@ -156,9 +158,9 @@ export default function TopUpPage() {
       setAmount("");
       await refresh().catch(() => undefined);
       openNotice({
-        title: "Recarga exitosa",
-        message: `Se acreditó ${formatUsdt(value)} USDT a tu cuenta.`,
-        confirmLabel: "Ir al inicio",
+        title: t("topup.success.title"),
+        message: `${t("topup.success.bodyPrefix")} ${formatUsdt(value)} USDT ${t("topup.success.bodySuffix")}`,
+        confirmLabel: t("common.goHome"),
         onClose: () => router.push("/miniapp"),
       });
     } finally {
@@ -185,7 +187,7 @@ export default function TopUpPage() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            aria-label="Volver"
+            aria-label={t("common.backAria")}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10"
             onClick={() => router.back()}
           >
@@ -202,19 +204,19 @@ export default function TopUpPage() {
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <div className="text-2xl font-extrabold tracking-tight">Recargar</div>
+          <div className="text-2xl font-extrabold tracking-tight">{t("topup.title")}</div>
         </div>
 
         <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
           <div className="text-xs font-semibold text-zinc-500 dark:text-white/60">
-            Balance actual
+            {t("topup.currentBalance")}
           </div>
           <div className="mt-1 text-3xl font-extrabold tracking-tight">
             {isReady ? `$${formatUsdt(displayBalance)}` : "—"}
           </div>
 
           <div className="mt-5 text-sm font-semibold text-zinc-500 dark:text-white/60">
-            Monto (USDT)
+            {t("topup.amountLabel")}
           </div>
           <input
             value={amount}
@@ -226,7 +228,7 @@ export default function TopUpPage() {
             className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
           />
           <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 dark:bg-white/5 dark:text-white/60">
-            El monto mínimo para recargar es {formatUsdt(minTopupUsdt ?? 0)} USDT
+            {t("topup.minNoticePrefix")} {formatUsdt(minTopupUsdt ?? 0)} USDT
           </div>
 
           <div className="mt-4">
@@ -237,7 +239,7 @@ export default function TopUpPage() {
               onClick={onTopUp}
               className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             >
-              {isSubmitting ? "Recargando..." : "Recargar"}
+              {isSubmitting ? t("topup.submitting") : t("topup.title")}
             </button>
           </div>
         </div>

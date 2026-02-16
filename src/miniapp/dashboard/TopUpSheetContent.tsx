@@ -184,7 +184,7 @@ export default function TopUpSheetContent() {
               }}
               className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-yellow-500 text-base font-bold text-black shadow-lg shadow-yellow-500/25 transition-all hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {!isReady ? "Cargando..." : isApproved ? "Continuar" : t("sheets.verifyAccount")}
+              {!isReady ? t("common.loading") : isApproved ? t("common.continue") : t("sheets.verifyAccount")}
             </button>
           </div>
         </div>

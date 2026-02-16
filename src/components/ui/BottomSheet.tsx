@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { useI18n } from "@/i18n/i18n";
+
 type BottomSheetProps = {
   open: boolean;
   label: string;
@@ -16,6 +18,7 @@ export default function BottomSheet({
   children,
   onClose,
 }: BottomSheetProps) {
+  const { t } = useI18n();
   const labelId = useId();
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const startYRef = useRef<number | null>(null);
@@ -113,7 +116,7 @@ export default function BottomSheet({
     <div className="fixed inset-0 z-50">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={t("common.closeAria")}
         className="absolute inset-0 bg-black/30 backdrop-blur-[2px] dark:bg-black/70 animate-[ccOverlayIn_220ms_ease-out]"
         onClick={onClose}
       />

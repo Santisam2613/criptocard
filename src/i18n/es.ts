@@ -1,6 +1,42 @@
 export const es = {
   common: {
     appName: "Criptocard",
+    logoAlt: "CriptoCard",
+    loading: "Cargando…",
+    loadingDots: "…",
+    updating: "Actualizando…",
+    comingSoon: "Próximamente.",
+    close: "Cerrar",
+    closeAria: "Cerrar",
+    ok: "OK",
+    confirm: "Confirmar",
+    cancel: "Cancelar",
+    backAria: "Volver",
+    continue: "Continuar",
+    change: "Cambiar",
+    search: "Buscar",
+    validate: "Validar",
+    validating: "Validando…",
+    send: "Enviar",
+    goHome: "Ir al inicio",
+    copy: "Copiar",
+    copied: "Copiado",
+    prev: "Anterior",
+    next: "Siguiente",
+    user: "Usuario",
+    pagination: {
+      pageOf: "Página {current} de {total}",
+    },
+  },
+  errors: {
+    internal: "Error interno",
+    network: "Error de conexión",
+  },
+  legal: {
+    terms: "Términos y condiciones",
+  },
+  footer: {
+    rightsReserved: "Todos los derechos reservados.",
   },
   nav: {
     personal: "Personal",
@@ -59,6 +95,7 @@ export const es = {
   },
   dashboard: {
     balanceLabel: "SALDO CRIPTOCARD (USDT)",
+    supportAria: "Soporte",
     topUp: "Recargar",
     send: "Enviar",
     getCryptoCard: "OBTÉN TU TARJETA CRIPTO",
@@ -67,6 +104,7 @@ export const es = {
     stepsDone: "0 de 3 PASOS COMPLETADOS",
     visaVirtual: "Visa Virtual",
     visaPhysical: "Visa Física",
+    virtualAccount: "Cuenta virtual",
     virtualAccounts: "Cuentas virtuales",
     notOpened: "No activadas",
     comingSoon: "Próximamente disponible",
@@ -82,6 +120,20 @@ export const es = {
     virtualAccountsSheet: "Cuentas virtuales",
     visaVirtualSheet: "Visa Signature® Virtual",
     visaPhysicalSheet: "Visa Física (Metal)",
+    carousel: {
+      cashback: {
+        title: "Cashback de locura",
+        subtitle: "Próximamente hasta 5% de retorno",
+      },
+      rewards: {
+        title: "Recompensas Crypto",
+        subtitle: "Gana USDT en cada compra",
+      },
+      vip: {
+        title: "Nivel VIP",
+        subtitle: "Desbloquea beneficios exclusivos",
+      },
+    },
   },
   visaCard: {
     titleSignature: "Tarjeta Visa Signature®",
@@ -93,6 +145,12 @@ export const es = {
     tagAppleGoogle: "Apple y Google Pay",
     tagNoLimits: "Sin límites de gasto",
     tagVisaBenefits: "10+ beneficios Visa",
+    buy: {
+      ctaBuyFor: "Comprar por",
+      confirmTitle: "Confirmar compra",
+      confirmMessagePrefix: "Comprar tarjeta virtual por",
+      confirmCta: "Comprar",
+    },
   },
   sheets: {
     verifyAccount: "Verificar cuenta",
@@ -122,6 +180,7 @@ export const es = {
     placeholderName: "Sin nombre",
     kycLevel: "Nivel KYC: 0",
     personalDetails: "Datos personales",
+    verified: "Verificado",
     notVerified: "No verificado",
     language: "Idioma",
     appearance: "Apariencia",
@@ -141,5 +200,271 @@ export const es = {
     pending: "Verificación en proceso",
     approved: "Usuario verificado",
     rejected: "Verificación rechazada",
+  },
+  tx: {
+    empty: "Aún no hay historial",
+    title: {
+      manualCredit: "Crédito manual",
+      topup: "Recarga de saldo",
+      transferTo: "Transferencia a",
+      transferSent: "Transferencia enviada",
+      withdraw: "Retiro de fondos",
+      referralReward: "Recompensa por referido",
+      cardPurchase: "Compra tarjeta virtual",
+      cardPayment: "Pago con tarjeta",
+      diamondConversion: "Conversión de diamantes",
+      default: "Transacción",
+    },
+    status: {
+      pending: "En espera",
+      completed: "Completado",
+      rejected: "Rechazado",
+    },
+  },
+  topup: {
+    title: "Recargar",
+    currentBalance: "Balance actual",
+    amountLabel: "Monto (USDT)",
+    minNoticePrefix: "El monto mínimo para recargar es",
+    submitting: "Recargando...",
+    errors: {
+      invalidAmount: {
+        title: "Monto inválido",
+        body: "Ingresa un monto válido en USDT.",
+      },
+      minAmount: {
+        title: "Monto mínimo",
+        bodyPrefix: "El monto mínimo para recargar es",
+      },
+      failed: {
+        title: "No se pudo recargar",
+      },
+    },
+    success: {
+      title: "Recarga exitosa",
+      bodyPrefix: "Se acreditó",
+      bodySuffix: "a tu cuenta.",
+    },
+  },
+  send: {
+    title: "Transferencias",
+    stepIndicator: "Paso {current} de {total}",
+    step1: {
+      title: "Paso 1: Tipo de envío",
+      subtitle: "Elige cómo quieres transferir tus USDT.",
+    },
+    type: {
+      user: {
+        title: "Enviar de usuario a usuario",
+        body: "Busca por telegram_id o username y envía USDT.",
+      },
+      wallet: {
+        title: "Enviar a wallet externa",
+        body: "Ingresa dirección, red y monto. Quedará en espera.",
+      },
+    },
+    step2: {
+      titlePrefix: "Paso 2:",
+      wallet: "Enviar a wallet externa",
+      user: "Enviar a usuario",
+    },
+    amountLabel: "Monto (USDT)",
+    recipient: {
+      searchTitle: "Buscar destinatario",
+      placeholder: "telegram_id o @username",
+      found: "Usuario encontrado",
+      telegramId: "telegram_id",
+      emptyState: "Busca un usuario para continuar.",
+    },
+    withdraw: {
+      notePrefix: "El monto mínimo de retiro es",
+      noteSuffix: "La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada.",
+      pendingNotice: "Solicitud enviada con estado pendiente.",
+      addressLabel: "Dirección",
+      networkLabel: "Red",
+      addressPlaceholder: "0x...",
+      networkPlaceholder: "TRC20 / ERC20 / ...",
+    },
+    errors: {
+      noRecipient: "Selecciona un destinatario antes de enviar.",
+      invalidAmount: "Ingresa un monto válido en USDT.",
+      insufficientBalancePrefix: "Saldo insuficiente. Balance disponible:",
+      missingWithdrawFields: "Completa dirección y red antes de enviar.",
+      minWithdrawalPrefix: "El monto mínimo de retiro es",
+      selfTransfer: "No puedes enviarte a ti mismo.",
+      searchFailed: "No se pudo buscar el usuario.",
+      userNotFound: "No encontramos un usuario con ese dato.",
+      transferFailed: {
+        title: "No se pudo transferir",
+      },
+      withdrawFailed: {
+        title: "No se pudo enviar",
+      },
+    },
+    confirm: {
+      userTransfer: {
+        title: "Confirmar envío",
+        messagePrefix: "Enviar",
+        messageTo: "USDT a",
+        fallbackRecipient: "destinatario",
+      },
+      withdraw: {
+        title: "Confirmar solicitud",
+        messagePrefix: "Solicitar retiro de",
+        messageSuffix: "a wallet externa?",
+      },
+    },
+    success: {
+      transfer: {
+        title: "Transferencia exitosa",
+        bodyPrefix: "Se envió",
+        bodySuffix: "correctamente.",
+      },
+      withdraw: {
+        title: "Solicitud enviada",
+        body: "La solicitud quedará en espera y puede tardar hasta 72 horas en ser aprobada.",
+      },
+    },
+  },
+  referral: {
+    title: "Club de amigos",
+    invitedFriends: "Amigos invitados",
+    rewards: "Recompensas",
+    readyToClaim: "Listo para reclamar",
+    claimed: "Reclamado",
+    pendingDiamonds: "Diamantes pendientes:",
+    rateLabel: "1 DIAMANTE = {rate} USDT",
+    copyId: {
+      title: "Copiar ID de referido",
+    },
+    inviter: {
+      sectionTitle: "ID del referido que te invitó",
+      label: "Invitador",
+      placeholder: "@username o telegram_id",
+      onlyBeforeTopup: "Solo puedes ingresar el ID de tu invitador antes de realizar tu primera recarga.",
+      lockedNotice: "Tu cuenta ya quedó asociada a un invitador. No puedes cambiarlo.",
+      validatedEligible: "Validado. Diamante listo para reclamar.",
+      validatedPending: "Validado. Queda en espera hasta que el invitador recargue.",
+    },
+    confirmInviter: {
+      title: "Confirmar invitador",
+      messagePrefix: "Vas a asociar tu cuenta con el invitador:",
+      bodyFinal: "Esta acción es única y no podrás cambiar el invitador después.",
+    },
+    claim: {
+      title: "Canjear diamantes",
+      confirmPrefix: "Canjear",
+      diamonds: "diamante(s)",
+      confirmMid: "por",
+      cta: "Canjear",
+      claiming: "Canjeando...",
+      successTitle: "Canje realizado",
+      successPrefix: "Se agregaron",
+      successSuffix: "a tu cuenta.",
+      fromPrefix: "Proviene de:",
+    },
+    errors: {
+      loadFailed: "No se pudo cargar referidos",
+      validateFailed: "No se pudo validar",
+      claimFailed: {
+        title: "No se pudo canjear",
+      },
+    },
+    empty: {
+      title: "Aún no hay diamantes",
+      subtitle: "Empieza invitando amigos para ganar",
+    },
+  },
+  kyc: {
+    errors: {
+      websdkLoad: "No se pudo cargar el WebSDK de Sumsub",
+      token: "No se pudo obtener token de verificación",
+      websdkUnavailable: "WebSDK no disponible",
+      startFailed: "No se pudo iniciar verificación",
+    },
+  },
+  support: {
+    hero: {
+      greeting: "Hola 👋",
+      title: "¿En qué podemos ayudarte?",
+    },
+    search: {
+      title: "Buscar ayuda",
+      placeholder: "Escribe una palabra (ej. comisiones, recarga, enviar)",
+      noResults: "Sin resultados. Prueba otra búsqueda.",
+    },
+    faq: {
+      title: "Preguntas frecuentes",
+      balance: {
+        q: "¿En qué moneda se guarda mi saldo?",
+        a: "Tu saldo se muestra en USDT. Cuando recargas o recibes fondos, el monto se acredita a tu saldo en USDT.",
+      },
+      fees: {
+        q: "¿Hay comisiones por recargar?",
+        a: "Buscamos que las comisiones sean transparentes. Si un método de recarga incluye comisiones de red o del proveedor, lo verás antes de confirmar.",
+      },
+      send: {
+        q: "¿Cómo envío fondos?",
+        a: "Ve a Transferencias, elige si enviar a un usuario o a una wallet externa, ingresa los datos y el monto. Se te pedirá confirmar antes de enviar.",
+      },
+      time: {
+        q: "¿Cuánto tardan las recargas?",
+        a: "Normalmente se acreditan rápido. Dependiendo del método y la red, puede tardar algunos minutos. Si tarda más de lo esperado, contacta a un asesor.",
+      },
+    },
+    messages: {
+      title: "Mensajes",
+    },
+    tabs: {
+      home: "Inicio",
+      messages: "Mensajes",
+      contact: "Contactar asesor",
+    },
+    contact: {
+      caption: "Contactar a Brenda (asesora humana)",
+    },
+    unavailable: {
+      title: "Soporte no disponible",
+      body: "El enlace de soporte aún no está configurado. Inténtalo más tarde.",
+    },
+  },
+  home: {
+    hero: {
+      viewBenefits: "Ver beneficios",
+    },
+    sectionLabels: {
+      topUp: "Recarga",
+      security: "Seguridad",
+    },
+    benefits: {
+      label: "Beneficios",
+      title: "Finanzas cripto, diseño serio.",
+      subtitle: "Todo lo que necesitas para emitir, recargar y gastar con control desde Telegram.",
+    },
+    how: {
+      label: "Cómo funciona",
+      title: "Tres pasos, sin fricción.",
+      steps: [
+        { title: "Inicia el bot", body: "Abre CriptoCard en Telegram y crea tu cuenta." },
+        { title: "Verifica tu identidad", body: "Completa verificación para habilitar límites y emisión." },
+        { title: "Recarga y paga", body: "Agrega saldo y compra con tu tarjeta donde acepten Visa." },
+      ],
+    },
+    highlight: {
+      label: "Control total",
+      title: "Tu dinero, tus reglas. Sin comprometer el diseño.",
+      subtitle: "Recarga, controla y monitorea tus gastos en un flujo pensado para fintech.",
+      ctaTelegram: "Abrir en Telegram",
+      ctaFaq: "Ver preguntas",
+      card: {
+        balanceLabel: "Saldo",
+        availableLabel: "Disponible",
+        monthlySpendLabel: "Gasto mensual",
+        summaryLabel: "Resumen",
+        notificationsLabel: "Notificaciones",
+        notificationsBody: "Recarga confirmada. Tu saldo está listo para gastar.",
+        realtimeLabel: "Tiempo real",
+      },
+    },
   },
 } as const;
