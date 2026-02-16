@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Obtener precio de la configuración (o default 30 USDT)
+    // 2. Obtener precio de la configuración (o default 30 USDT) 
     const { data: configRow } = await supabase
       .from("config")
       .select("value")
