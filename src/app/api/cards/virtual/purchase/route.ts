@@ -189,7 +189,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: `Por ahora no podemos emitir tarjetas para el país ${effectiveCountry}.`,
+          error: `Por ahora no podemos emitir tarjetas para el país  ${effectiveCountry}.`,
         },
         { status: 400 },
       );
