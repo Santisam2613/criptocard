@@ -97,30 +97,94 @@ export default function VirtualVisaCardOwnedSheetContent({
 
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
-      <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-lg shadow-black/10 ring-1 ring-black/5 dark:bg-[#1A1D24] dark:shadow-none dark:ring-white/10">
-        <div className="absolute inset-0 opacity-35 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.10)_0,rgba(0,0,0,0.10)_1px,transparent_2px,transparent_8px)] dark:opacity-20" />
+      <div className="relative overflow-hidden rounded-3xl bg-yellow-500 p-6 shadow-lg shadow-yellow-500/25 ring-1 ring-black/10">
+        {/* Watermark pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(/favicon.ico)",
+              backgroundSize: "60px 60px",
+              backgroundRepeat: "repeat",
+              transform: "rotate(-15deg) scale(1.5)",
+              filter: "grayscale(100%) brightness(200%)",
+            }}
+          />
+        </div>
+
         <div className="relative">
           <div className="flex items-start justify-between">
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-500 dark:text-white/60">
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-black/80">
               {header}
             </div>
             {rightBadge ? <div className="shrink-0">{rightBadge}</div> : null}
           </div>
 
-          <div className="mt-10 flex items-end justify-between gap-4">
-            <div className="min-w-0">
-              <div className="truncate rounded-full bg-yellow-500/15 px-3 py-1 text-xs font-semibold text-yellow-700 ring-1 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-300 dark:ring-yellow-500/20">
-                {cardholderName}
+          <div className="mt-6 flex items-center justify-between">
+            <div className="text-2xl font-bold tracking-tight text-black">
+              Criptocard
+            </div>
+            <div className="flex flex-col items-end">
+              <div className="text-2xl font-black italic tracking-wider text-black drop-shadow-sm">
+                VISA
               </div>
-              <div className="mt-3 text-xl font-black tracking-[0.12em] text-zinc-900 dark:text-white">
-                {detailsVisible && pan ? formatPan(pan) : `•••• ${last4}`}
-              </div>
-              <div className="mt-2 text-xs font-semibold text-zinc-500 dark:text-white/60">
-                Exp {formatExpiry(expiryMonth, expiryYear)}
+              <div className="text-[10px] font-bold uppercase tracking-wider text-black/80">
+                Signature
               </div>
             </div>
+          </div>
 
-            <div />
+          <div className="mt-8 flex items-end justify-between gap-4">
+            <div className="min-w-0 w-full">
+              {/* Chip & Contactless */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-9 w-11 rounded-md bg-yellow-100/80 ring-1 ring-yellow-600/20 flex items-center justify-center">
+                  <div className="grid grid-cols-2 gap-[1px] opacity-40">
+                    <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+                    <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+                    <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+                    <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+                  </div>
+                </div>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-8 w-8 text-black/80 rotate-90"
+                >
+                  <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                  <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                  <line x1="12" y1="20" x2="12.01" y2="20" />
+                </svg>
+              </div>
+
+              <div className="mt-3 text-xl font-mono font-bold tracking-[0.15em] text-black shadow-black drop-shadow-md">
+                {detailsVisible && pan ? formatPan(pan) : `•••• •••• •••• ${last4}`}
+              </div>
+              
+              <div className="mt-4 flex justify-between items-end">
+                <div>
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-black/60 mb-0.5">
+                    CARDHOLDER
+                  </div>
+                  <div className="font-bold tracking-wider text-black uppercase text-sm truncate max-w-[180px]">
+                    {cardholderName}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[9px] font-bold uppercase tracking-wider text-black/60 mb-0.5">
+                    EXPIRES
+                  </div>
+                  <div className="font-mono font-bold tracking-wider text-black text-sm">
+                    {formatExpiry(expiryMonth, expiryYear)}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 flex items-center justify-between">

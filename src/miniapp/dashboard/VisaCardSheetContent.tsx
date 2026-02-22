@@ -26,48 +26,56 @@ export default function VisaCardSheetContent({
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
       <div className="relative overflow-hidden rounded-3xl bg-yellow-500 p-6 shadow-lg shadow-yellow-500/25 ring-1 ring-black/10">
-        <div className="absolute inset-0 opacity-15 [background-image:repeating-radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.28)_0,rgba(0,0,0,0.28)_1px,transparent_2px,transparent_7px)]" />
-        <div className="relative">
-          <div className="flex items-start justify-between">
-            <Image
-              src="/assets/logo-header.png"
-              alt="Criptocard"
-              width={300}
-              height={60}
-              className="h-9 w-auto dark:hidden"
-            />
-            <Image
-              src="/assets/logo-header-blanco.png"
-              alt="Criptocard"
-              width={300}
-              height={60}
-              className="hidden h-9 w-auto dark:block"
-            />
-            <div className="text-right">
-              <div className="text-2xl font-black tracking-[0.10em] text-black">
-                VISA
-              </div>
-              <div className="-mt-1 text-sm font-semibold text-black/70">
-                {t("visaCard.signatureLabel")}
-              </div>
+        {/* Watermark pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(/favicon.ico)",
+              backgroundSize: "60px 60px",
+              backgroundRepeat: "repeat",
+              transform: "rotate(-15deg) scale(1.5)",
+              filter: "grayscale(100%) brightness(200%)",
+            }}
+          />
+        </div>
+
+        {/* Chip & Contactless */}
+        <div className="relative mb-8 flex items-center gap-4">
+          <div className="h-9 w-11 rounded-md bg-yellow-100/80 ring-1 ring-yellow-600/20 flex items-center justify-center">
+            <div className="grid grid-cols-2 gap-[1px] opacity-40">
+              <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+              <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+              <div className="h-3 w-2 rounded-sm border border-yellow-700" />
+              <div className="h-3 w-2 rounded-sm border border-yellow-700" />
             </div>
           </div>
-          <div className="mt-16 flex justify-center">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]">
-              <Image
-                src="/assets/logo-header.png"
-                alt="Criptocard"
-                width={86}
-                height={18}
-                className="h-4 w-auto dark:hidden"
-              />
-              <Image
-                src="/assets/logo-header-blanco.png"
-                alt="Criptocard"
-                width={86}
-                height={18}
-                className="hidden h-4 w-auto dark:block"
-              />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-8 w-8 text-black/80 rotate-90"
+          >
+            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+            <line x1="12" y1="20" x2="12.01" y2="20" />
+          </svg>
+        </div>
+
+        <div className="relative flex items-end justify-between">
+          <div className="text-2xl font-bold tracking-tight text-black">
+            Criptocard
+          </div>
+          <div className="flex flex-col items-end">
+            <div className="text-2xl font-black italic tracking-wider text-black drop-shadow-sm">
+              VISA
+            </div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-black/80">
+              Signature
             </div>
           </div>
         </div>
