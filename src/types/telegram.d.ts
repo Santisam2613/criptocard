@@ -74,6 +74,7 @@ declare global {
         ready: () => void;
         expand: () => void;
         close: () => void;
+        disableVerticalSwipes: () => void;
         showPopup: (params: {
           title?: string;
           message: string;
