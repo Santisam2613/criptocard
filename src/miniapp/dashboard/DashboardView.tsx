@@ -362,7 +362,7 @@ export default function DashboardView() {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  className="relative p-1 text-gray-400 transition-colors hover:text-foreground dark:text-gray-500 dark:hover:text-white"
+                  className="relative p-1 text-yellow-500 transition-colors hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300"
                   aria-label={t("dashboard.supportAria")}
                   onClick={openSupport}
                 >
@@ -375,8 +375,7 @@ export default function DashboardView() {
                     strokeLinejoin="round"
                     className="h-6 w-6"
                   >
-                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                    <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8z" />
                   </svg>
                 </button>
                 <button

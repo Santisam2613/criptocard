@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import { useI18n } from "@/i18n/i18n";
 
-type TabKey = "home" | "messages";
+type TabKey = "home";
 
 type FaqItem = {
   id: string;
@@ -65,23 +65,6 @@ function HomeIcon({ active }: { active: boolean }) {
       strokeLinejoin="round"
     >
       <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5z" />
-    </svg>
-  );
-}
-
-function MessagesIcon({ active }: { active: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={["h-6 w-6", active ? "text-black dark:text-white" : ""].join(" ").trim()}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8z" />
     </svg>
   );
 }
@@ -302,74 +285,63 @@ export default function SupportPage() {
           </button>
         </div>
 
-        {tab === "home" ? (
-          <div className="mt-7 space-y-4">
-            <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-              <div className="text-sm font-semibold text-zinc-950 dark:text-white">
-                {t("support.search.title")}
+        <div className="mt-7 space-y-4">
+          <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="text-sm font-semibold text-zinc-950 dark:text-white">
+              {t("support.search.title")}
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("support.search.placeholder")}
+                className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
+              />
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500 text-black ring-1 ring-black/10">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-4.3-4.3" />
+                </svg>
               </div>
-              <div className="mt-3 flex items-center gap-3">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t("support.search.placeholder")}
-                  className="h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
-                />
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500 text-black ring-1 ring-black/10">
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M21 21l-4.3-4.3" />
-                  </svg>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
+            <div className="text-sm font-semibold text-zinc-950 dark:text-white">{t("support.faq.title")}</div>
+
+            <div className="mt-4 space-y-3">
+              {filteredFaqs.length ? (
+                filteredFaqs.map((f) => (
+                  <FaqRow
+                    key={f.id}
+                    item={f}
+                    open={expandedId === f.id}
+                    onToggle={() => setExpandedId((prev) => (prev === f.id ? null : f.id))}
+                  />
+                ))
+              ) : (
+                <div className="rounded-2xl bg-gray-50 p-4 text-sm font-semibold text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
+                  {t("support.search.noResults")}
                 </div>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-              <div className="text-sm font-semibold text-zinc-950 dark:text-white">{t("support.faq.title")}</div>
-
-              <div className="mt-4 space-y-3">
-                {filteredFaqs.length ? (
-                  filteredFaqs.map((f) => (
-                    <FaqRow
-                      key={f.id}
-                      item={f}
-                      open={expandedId === f.id}
-                      onToggle={() => setExpandedId((prev) => (prev === f.id ? null : f.id))}
-                    />
-                  ))
-                ) : (
-                  <div className="rounded-2xl bg-gray-50 p-4 text-sm font-semibold text-zinc-500 ring-1 ring-black/5 dark:bg-white/5 dark:text-white/60 dark:ring-white/10">
-                    {t("support.search.noResults")}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        ) : (
-          <div className="mt-7">
-            <div className="overflow-hidden rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-              <div className="text-lg font-extrabold tracking-tight">{t("support.messages.title")}</div>
-              <div className="mt-2 text-sm font-semibold text-zinc-500 dark:text-white/60">
-                {t("common.comingSoon")}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4">
         <div className="mx-auto w-full max-w-[420px]">
           <div className="rounded-3xl bg-white p-2 shadow-lg shadow-black/10 ring-1 ring-black/5 dark:bg-[#1A1D24] dark:ring-white/10">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <TabButton
                 label={t("support.tabs.home")}
                 icon={<HomeIcon active={tab === "home"} />}
@@ -377,20 +349,11 @@ export default function SupportPage() {
                 onClick={() => setTab("home")}
               />
               <TabButton
-                label={t("support.tabs.messages")}
-                icon={<MessagesIcon active={tab === "messages"} />}
-                active={tab === "messages"}
-                onClick={() => setTab("messages")}
-              />
-              <TabButton
                 label={t("support.tabs.contact")}
                 icon={<HeadsetIcon active={false} />}
                 active={false}
                 onClick={onContactAdvisor}
               />
-            </div>
-            <div className="mt-1 text-center text-[11px] font-semibold text-zinc-500 dark:text-white/60">
-              {t("support.contact.caption")}
             </div>
           </div>
         </div>

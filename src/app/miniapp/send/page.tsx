@@ -265,6 +265,21 @@ function SendPageLoading() {
   );
 }
 
+const networks = [
+  { id: "BSC", label: "BSC BNB Smart Chain (BEP20)" },
+  { id: "OPBNB", label: "OPBNB opBNB" },
+  { id: "TRX", label: "TRX Tron (TRC20)" },
+  { id: "APT", label: "APT Aptos" },
+  { id: "ETH", label: "ETH Ethereum (ERC20)" },
+  { id: "PLASMA", label: "PLASMA Plasma" },
+  { id: "POL", label: "POL Polygon POS" },
+  { id: "SOL", label: "SOL Solana" },
+  { id: "ARBITRUM", label: "ARBITRUM Arbitrum One" },
+  { id: "TON", label: "TON The Open Network (TON)" },
+  { id: "AVAXC", label: "AVAXC AVAX C-Chain" },
+  { id: "CELO", label: "CELO CELO" },
+];
+
 export default function SendPage() {
   const router = useRouter();
   const { t } = useI18n();
@@ -463,7 +478,8 @@ export default function SendPage() {
 
       openConfirm({
         title: t("send.confirm.withdraw.title"),
-        message: `${t("send.confirm.withdraw.messagePrefix")} ${formatUsdt(amount)} USDT ${t("send.confirm.withdraw.messageSuffix")}`,
+        message:
+          "Asegúrate de que la red coincida con la dirección de retiro y de la plataforma de depósito la admita. De lo contrario, puedes perder tus fondos. Criptocard no se hace responsable por datos mal diligenciados.",
         onConfirm: () => void performWithdraw(),
       });
     } finally {
@@ -876,22 +892,93 @@ export default function SendPage() {
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
                   {t("send.withdraw.addressLabel")}
                 </div>
-                <input
-                  value={withdrawAddress}
-                  onChange={(e) => setWithdrawAddress(e.target.value)}
-                  placeholder={t("send.withdraw.addressPlaceholder")}
-                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
-                />
+                <div className="relative">
+                  <input
+                    value={withdrawAddress}
+                    onChange={(e) => setWithdrawAddress(e.target.value)}
+                    placeholder={t("send.withdraw.addressPlaceholder")}
+                    className="mt-2 h-12 w-full rounded-2xl bg-gray-50 pl-4 pr-12 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
+                  />
+                  <button
+                    type="button"
+                    className="absolute bottom-1 right-1 top-3 flex h-10 w-10 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-black/5 hover:text-zinc-600 dark:hover:bg-white/10 dark:hover:text-white"
+                    onClick={() => {
+                      const wa = window.Telegram?.WebApp;
+                      if (
+                        wa?.showScanQrPopup &&
+                        wa.isVersionAtLeast &&
+                        wa.isVersionAtLeast("6.4")
+                      ) {
+                        wa.showScanQrPopup(
+                          { text: "Scan Wallet Address" },
+                          (text) => {
+                            if (text) {
+                              setWithdrawAddress(text);
+                              return true;
+                            }
+                            return false;
+                          },
+                        );
+                      } else {
+                        openNotice({
+                          title: "Not Supported",
+                          message:
+                            "QR scanning is not supported in this version of Telegram. Please update the app.",
+                          confirmLabel: "OK",
+                        });
+                      }
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5"
+                    >
+                      <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                      <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                      <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                      <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                      <rect width="5" height="5" x="7" y="7" rx="1" />
+                    </svg>
+                  </button>
+                </div>
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
                   {t("send.withdraw.networkLabel")}
                 </div>
-                <input
-                  value={withdrawNetwork}
-                  onChange={(e) => setWithdrawNetwork(e.target.value)}
-                  placeholder={t("send.withdraw.networkPlaceholder")}
-                  className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
-                />
+                <div className="relative mt-2">
+                  <select
+                    value={withdrawNetwork}
+                    onChange={(e) => setWithdrawNetwork(e.target.value)}
+                    className="h-12 w-full appearance-none rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10"
+                  >
+                    <option value="" disabled>
+                      {t("send.withdraw.networkPlaceholder")}
+                    </option>
+                    {networks.map((net) => (
+                      <option key={net.id} value={net.id}>
+                        {net.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-white/60">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
 
                 <div className="mt-4 text-sm font-semibold text-zinc-500 dark:text-white/60">
                   {t("send.amountLabel")}
