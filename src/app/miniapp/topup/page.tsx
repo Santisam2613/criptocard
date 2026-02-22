@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import QRCode from "react-qr-code";
 
 import NoticeDialog from "@/components/ui/NoticeDialog";
 import Skeleton from "@/components/ui/Skeleton";
@@ -45,11 +46,23 @@ export default function TopUpPage() {
   const [noticeLabel, setNoticeLabel] = useState("Aceptar");
   const [noticeAction, setNoticeAction] = useState<(() => void) | null>(null);
 
+  const [checkoutData, setCheckoutData] = useState<{
+    hosted_url: string;
+    code: string;
+    amount: number;
+    serviceFee: number;
+    totalToPay: number;
+  } | null>(null);
+
   const isReady = state.status === "ready";
   const isApproved = isReady && user?.verification_status === "approved";
   const displayBalance = useMemo(() => {
     return Number(user?.balance_usdt ?? 0);
   }, [user?.balance_usdt]);
+
+  const amountVal = parseUsdLikeAmount(amount);
+  const estFee = amountVal > 0 ? amountVal * 0.01 : 0;
+  const estTotal = amountVal + estFee;
 
   useEffect(() => {
     if (user?.verification_status === "approved") setApprovedGate(true);
@@ -103,6 +116,77 @@ export default function TopUpPage() {
     return <div />;
   }
 
+  if (checkoutData) {
+    return (
+      <main className="relative min-h-screen bg-white px-4 py-10 text-zinc-950 dark:bg-black dark:text-white">
+        <div className="mx-auto w-full max-w-[420px]">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 dark:bg-zinc-900 dark:ring-white/10"
+              onClick={() => setCheckoutData(null)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <div className="text-2xl font-extrabold tracking-tight">Checkout</div>
+          </div>
+
+          <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
+            <div className="mb-6 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-500 dark:text-zinc-400">Monto solicitado</span>
+                <span className="font-medium">{formatUsdt(checkoutData.amount)} USDT</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-500 dark:text-zinc-400">Comisión estimada</span>
+                <span className="font-medium">{formatUsdt(checkoutData.serviceFee)} USDT</span>
+              </div>
+              <div className="flex justify-between border-t border-gray-100 pt-2 text-lg font-bold dark:border-white/10">
+                <span>Total a pagar</span>
+                <span>{formatUsdt(checkoutData.totalToPay)} USD</span>
+              </div>
+            </div>
+
+            <div className="mb-6 flex justify-center rounded-xl bg-white p-4 ring-1 ring-black/5">
+              <QRCode value={checkoutData.hosted_url} size={200} />
+            </div>
+
+            <a
+              href={checkoutData.hosted_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-lg transition-all hover:bg-blue-500 active:translate-y-0"
+            >
+              Pagar ahora (Coinbase)
+            </a>
+
+            <button
+              onClick={() => setCheckoutData(null)}
+              className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gray-100 text-sm font-bold text-zinc-900 hover:bg-gray-200 dark:bg-white/10 dark:text-white"
+            >
+              Cancelar
+            </button>
+
+            <p className="mt-4 text-center text-xs text-zinc-400">
+              El saldo se acreditará automáticamente una vez confirmado el pago.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   function openNotice(params: {
     title: string;
     message: string;
@@ -137,31 +221,35 @@ export default function TopUpPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/topup", {
+      const res = await fetch("/api/topup/coinbase/create", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount_usdt: value }),
       });
-      const json = (await res.json().catch(() => null)) as
-        | { ok: boolean; error?: string }
-        | null;
-      if (!json?.ok) {
+      const json = await res.json();
+      
+      if (!json.ok) {
         openNotice({
           title: t("topup.errors.failed.title"),
-          message: json?.error ?? t("errors.internal"),
+          message: json.error ?? t("errors.internal"),
           confirmLabel: t("common.close"),
         });
         return;
       }
 
-      setAmount("");
-      await refresh().catch(() => undefined);
+      setCheckoutData({
+        hosted_url: json.hosted_url,
+        code: json.code,
+        amount: json.details.amount,
+        serviceFee: json.details.serviceFee,
+        totalToPay: json.details.totalToPay
+      });
+    } catch (e) {
       openNotice({
-        title: t("topup.success.title"),
-        message: `${t("topup.success.bodyPrefix")} ${formatUsdt(value)} USDT ${t("topup.success.bodySuffix")}`,
-        confirmLabel: t("common.goHome"),
-        onClose: () => router.push("/miniapp"),
+        title: t("topup.errors.failed.title"),
+        message: "Error de conexión",
+        confirmLabel: t("common.close"),
       });
     } finally {
       setIsSubmitting(false);
@@ -227,6 +315,14 @@ export default function TopUpPage() {
             placeholder="0.00"
             className="mt-2 h-12 w-full rounded-2xl bg-gray-50 px-4 text-sm text-zinc-950 ring-1 ring-black/5 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/30 dark:bg-white/5 dark:text-white dark:ring-white/10 dark:placeholder:text-white/35"
           />
+
+          {amountVal > 0 && (
+            <div className="mt-2 flex justify-between px-1 text-xs text-zinc-500 dark:text-white/60">
+              <span>Comisión: {formatUsdt(estFee)}</span>
+              <span>Total: {formatUsdt(estTotal)}</span>
+            </div>
+          )}
+
           <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-zinc-500 dark:bg-white/5 dark:text-white/60">
             {t("topup.minNoticePrefix")} {formatUsdt(minTopupUsdt ?? 0)} USDT
           </div>
