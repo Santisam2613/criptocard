@@ -21,6 +21,7 @@ export type BackendUser = {
   verification_completed: boolean;
   verified_at: string | null;
   balance_usdt: number;
+  role: "client" | "admin";
 };
 
 type BackendUserState =

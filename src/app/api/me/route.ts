@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     const { data: user, error: userError } = await supabase
       .from("users")
       .select(
-        "id, telegram_id, telegram_username, telegram_first_name, telegram_last_name, telegram_photo_url, sumsub_applicant_id, verification_status, verification_completed, verified_at",
+        "id, telegram_id, telegram_username, telegram_first_name, telegram_last_name, telegram_photo_url, sumsub_applicant_id, verification_status, verification_completed, verified_at, role",
       )
       .eq("telegram_id", telegramId.toString())
       .maybeSingle();

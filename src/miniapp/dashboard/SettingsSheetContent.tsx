@@ -370,6 +370,19 @@ export default function SettingsSheetContent() {
             onClick={cycleAppearance}
           />
         </div>
+
+        {user?.role === "admin" && (
+          <div className="overflow-hidden rounded-2xl bg-white dark:bg-[#1A1D24]">
+            <Row
+              icon="limits"
+              label="Admin Panel"
+              value="Access"
+              onClick={() => {
+                window.location.href = "/admin";
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <BottomSheet
