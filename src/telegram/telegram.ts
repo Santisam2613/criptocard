@@ -20,14 +20,13 @@ export type TelegramWebApp = {
   expand?: () => void;
   disableVerticalSwipes?: () => void;
   openLink?: (url: string) => void;
+  showScanQrPopup?: (
+    params: { text?: string },
+    callback?: (text: string) => boolean | void,
+  ) => void;
+  isVersionAtLeast?: (ver: string) => boolean;
 };
 
 export type TelegramGlobal = {
   WebApp?: TelegramWebApp;
 };
-
-declare global {
-  interface Window {
-    Telegram?: TelegramGlobal;
-  }
-}
