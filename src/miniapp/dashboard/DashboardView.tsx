@@ -421,7 +421,7 @@ export default function DashboardView() {
             className="group flex flex-col items-center gap-2"
             onClick={() => setSheet("topup")}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#111] transition-all duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0 dark:bg-[#1A1D24] dark:text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500 text-black shadow-lg shadow-yellow-500/25 ring-1 ring-black/10 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-yellow-400 group-active:translate-y-0 dark:bg-yellow-500 dark:text-black">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -445,7 +445,7 @@ export default function DashboardView() {
             className="group flex flex-col items-center gap-2"
             onClick={() => setSheet("send")}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#111] transition-all duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0 dark:bg-[#1A1D24] dark:text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-500 text-black shadow-lg shadow-yellow-500/25 ring-1 ring-black/10 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:bg-yellow-400 group-active:translate-y-0 dark:bg-yellow-500 dark:text-black">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
