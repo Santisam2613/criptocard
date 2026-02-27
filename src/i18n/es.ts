@@ -65,7 +65,7 @@ export const es = {
     getCardBody:
       "Emite una tarjeta Visa virtual o metálica en minutos y empieza a gastar en todo el mundo.",
     freeTopUpTitle: "RECARGA CRIPTO Y FIAT GRATIS",
-    freeTopUpBody: ["Recarga fácil, procesamiento rápido.", "0% comisión."],
+    freeTopUpBody: ["Recarga fácil, procesamiento rápido.", "0% comisión"],
     controlTitle: "GASTA CON CONTROL TOTAL",
     controlBody: [
       "Compra online, en tiendas o en el extranjero",
