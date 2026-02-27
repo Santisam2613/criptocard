@@ -43,6 +43,7 @@ export default function RootLayout({
         <meta name="x5-orientation" content="portrait" />
         <meta name="x5-fullscreen" content="true" />
         <meta name="x5-page-mode" content="app" />
+        <meta name="cryptomus" content="d47baa82" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
