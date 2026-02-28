@@ -54,7 +54,7 @@ export const es = {
     menuClose: "Cerrar menú",
   },
   hero: {
-    badge: "UI cripto de nueva generación",
+    badge: "UI cripto de nueva generación.",
     title: ["TARJETA VIRTUAL", "DENTRO DE", "TELEGRAM"],
     subtitle: ["Recarga con cripto.", "¡Gasta en cualquier lugar!"],
     ctaTelegram: "Obtener con Telegram",
