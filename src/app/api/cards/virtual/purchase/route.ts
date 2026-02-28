@@ -178,7 +178,7 @@ export async function POST(req: Request) {
     const creds = getServerCredentials();
     const testForceCountryRaw = (creds.stripe?.issuingTestForceCountry ?? "").trim();
     const stripeKey = creds.stripe?.secretKey ?? "";
-    const isTestKey = stripeKey.startsWith("sk_test_");
+    const isTestKey = stripeKey.startsWith("sk_live");
     const testForceCountry = testForceCountryRaw ? testForceCountryRaw.toUpperCase() : "";
 
     const effectiveCountry =
