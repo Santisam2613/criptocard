@@ -47,9 +47,11 @@ export default function TopUpPage() {
   const [noticeAction, setNoticeAction] = useState<(() => void) | null>(null);
 
   const [checkoutData, setCheckoutData] = useState<{
-    payment_url: string;
+    hosted_url: string;
+    code: string;
     amount: number;
-    currency: string;
+    serviceFee: number;
+    totalToPay: number;
   } | null>(null);
 
   const isReady = state.status === "ready";
@@ -58,7 +60,6 @@ export default function TopUpPage() {
   }, [user?.balance_usdt]);
 
   const amountVal = parseUsdLikeAmount(amount);
-  // Estimación visual de comisión (1%)
   const estFee = amountVal > 0 ? amountVal * 0.01 : 0;
   const estTotal = amountVal + estFee;
 
@@ -80,9 +81,7 @@ export default function TopUpPage() {
         if (!json?.ok) return;
         if (canceled) return;
         setMinTopupUsdt(
-          Number.isFinite(Number(json.minTopupUsdt))
-            ? Number(json.minTopupUsdt)
-            : 0,
+          Number.isFinite(Number(json.minTopupUsdt)) ? Number(json.minTopupUsdt) : 0,
         );
       } catch {}
     }
@@ -145,32 +144,30 @@ export default function TopUpPage() {
           <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
             <div className="mb-6 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-500 dark:text-zinc-400">
-                  Monto a pagar
-                </span>
-                <span className="font-medium">
-                  {formatUsdt(checkoutData.amount)} {checkoutData.currency}
-                </span>
+                <span className="text-zinc-500 dark:text-zinc-400">Monto solicitado</span>
+                <span className="font-medium">{formatUsdt(checkoutData.amount)} USDT</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-zinc-500 dark:text-zinc-400">Comisión estimada</span>
+                <span className="font-medium">{formatUsdt(checkoutData.serviceFee)} USDT</span>
               </div>
               <div className="flex justify-between border-t border-gray-100 pt-2 text-lg font-bold dark:border-white/10">
-                <span>Total</span>
-                <span>
-                  {formatUsdt(checkoutData.amount)} {checkoutData.currency}
-                </span>
+                <span>Total a pagar</span>
+                <span>{formatUsdt(checkoutData.totalToPay)} USD</span>
               </div>
             </div>
 
             <div className="mb-6 flex justify-center rounded-xl bg-white p-4 ring-1 ring-black/5">
-              <QRCode value={checkoutData.payment_url} size={200} />
+              <QRCode value={checkoutData.hosted_url} size={200} />
             </div>
 
             <a
-              href={checkoutData.payment_url}
+              href={checkoutData.hosted_url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-lg transition-all hover:bg-blue-500 active:translate-y-0"
             >
-              Pagar ahora (Cryptomus)
+              Pagar ahora (Coinbase)
             </a>
 
             <button
@@ -215,9 +212,7 @@ export default function TopUpPage() {
     if (minTopupUsdt !== null && value < minTopupUsdt) {
       openNotice({
         title: t("topup.errors.minAmount.title"),
-        message: `${t("topup.errors.minAmount.bodyPrefix")} ${formatUsdt(
-          minTopupUsdt,
-        )} USDT.`,
+        message: `${t("topup.errors.minAmount.bodyPrefix")} ${formatUsdt(minTopupUsdt)} USDT.`,
         confirmLabel: t("common.close"),
       });
       return;
@@ -225,14 +220,14 @@ export default function TopUpPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/topup/cryptomus/create", {
+      const res = await fetch("/api/topup/coinbase/create", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount_usdt: value }),
       });
       const json = await res.json();
-
+      
       if (!json.ok) {
         openNotice({
           title: t("topup.errors.failed.title"),
@@ -243,9 +238,11 @@ export default function TopUpPage() {
       }
 
       setCheckoutData({
-        payment_url: json.payment_url,
-        amount: Number(json.amount),
-        currency: json.currency,
+        hosted_url: json.hosted_url,
+        code: json.code,
+        amount: json.details.amount,
+        serviceFee: json.details.serviceFee,
+        totalToPay: json.details.totalToPay
       });
     } catch (e) {
       openNotice({
@@ -294,9 +291,7 @@ export default function TopUpPage() {
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
-          <div className="text-2xl font-extrabold tracking-tight">
-            {t("topup.title")}
-          </div>
+          <div className="text-2xl font-extrabold tracking-tight">{t("topup.title")}</div>
         </div>
 
         <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
@@ -313,9 +308,7 @@ export default function TopUpPage() {
           <input
             value={amount}
             onChange={(e) =>
-              setAmount(
-                formatUsdLikeAmountFromDigits(extractDigits(e.target.value)),
-              )
+              setAmount(formatUsdLikeAmountFromDigits(extractDigits(e.target.value)))
             }
             inputMode="decimal"
             placeholder="0.00"
@@ -324,8 +317,8 @@ export default function TopUpPage() {
 
           {amountVal > 0 && (
             <div className="mt-2 flex justify-between px-1 text-xs text-zinc-500 dark:text-white/60">
-              <span>Comisión estimada: {formatUsdt(estFee)}</span>
-              <span>Total estimado: {formatUsdt(estTotal)}</span>
+              <span>Comisión: {formatUsdt(estFee)}</span>
+              <span>Total: {formatUsdt(estTotal)}</span>
             </div>
           )}
 
