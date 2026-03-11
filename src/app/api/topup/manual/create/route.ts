@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     const supabase = getSupabaseAdminClient();
 
-    // 1. Obtener usuario
+    // 1. Obtener usuario (by telegramId)
     const { data: user } = await supabase
       .from("users")
       .select("id")
@@ -51,14 +51,16 @@ export async function POST(req: Request) {
 
     // 2. Crear transacción pendiente en Ledger
     // Tipo 'topup_manual' para diferenciar de Coinbase
+    // Intentamos insert directo, si falla por RLS, usamos RPC o Service Role (que ya usamos)
     const { error: txError } = await supabase.from("transactions").insert({
       user_id: user.id,
-      type: "topup_manual", // Nuevo tipo sugerido, o usar 'topup' con metadata distintiva
+      type: "topup_manual", // Usamos topup_manual ya que lo agregamos al enum
       amount_usdt: amount,
       status: "pending",
       metadata: {
         network,
         currency,
+        tx_hash: body?.tx_hash,
         description: `Recarga Manual ${currency} (${network})`,
         user_confirmed: true,
         confirmed_at: new Date().toISOString(),
@@ -68,7 +70,7 @@ export async function POST(req: Request) {
     if (txError) {
       console.error("Error creando solicitud de recarga manual:", txError);
       return NextResponse.json(
-        { ok: false, error: "Error registrando solicitud" },
+        { ok: false, error: "Error registrando solicitud: " + txError.message },
         { status: 500 },
       );
     }

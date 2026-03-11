@@ -52,7 +52,8 @@ create type public.transaction_type as enum (
   'referral_conversion',
   'stripe_payment',
   'diamond_conversion',
-  'card_purchase'
+  'card_purchase',
+  'topup_manual'
 );
 
 create type public.transaction_status as enum (
