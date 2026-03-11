@@ -48,13 +48,13 @@ export async function GET(req: Request) {
 
     const balance_usdt = wallet?.usdt_balance ?? 0;
 
-    // 3. Verificar si tiene recargas (topup) completadas
+    // 3. Verificar si tiene recargas registradas
     const { count: topupCount } = await supabase
       .from("transactions")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .eq("type", "topup")
-      .eq("status", "completed");
+      .in("type", ["topup", "topup_manual"])
+      .in("status", ["pending", "completed"]);
 
     // 4. Verificar si tiene tarjetas virtuales
     const { count: cardCount } = await supabase

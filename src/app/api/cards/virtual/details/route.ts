@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
     const { data: card } = await supabase
       .from("cards")
-      .select("id, status, provider_card_id")
+      .select("id, status, provider_card_id, metadata, expiry_month, expiry_year, last_4")
       .eq("user_id", user.id)
       .eq("type", "virtual")
       .order("created_at", { ascending: false })
@@ -51,6 +51,20 @@ export async function GET(req: Request) {
     }
 
     if (!card.provider_card_id) {
+      const metadata = (card.metadata ?? {}) as { card_number?: string; cvc?: string };
+      if (metadata.card_number && metadata.cvc) {
+        return NextResponse.json(
+          {
+            ok: true,
+            number: metadata.card_number,
+            cvc: metadata.cvc,
+            expMonth: card.expiry_month,
+            expYear: card.expiry_year,
+            last4: card.last_4,
+          },
+          { status: 200, headers: { "cache-control": "no-store" } },
+        );
+      }
       return NextResponse.json(
         { ok: false, error: "Tarjeta no sincronizada con proveedor" },
         { status: 409, headers: { "cache-control": "no-store" } },

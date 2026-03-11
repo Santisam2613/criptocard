@@ -25,11 +25,32 @@ type Transaction = {
   };
 };
 
+type AdminCard = {
+  id: string;
+  status: "active" | "frozen" | "blocked";
+  last_4: string | null;
+  expiry_month: number | null;
+  expiry_year: number | null;
+  brand: string | null;
+  metadata?: {
+    cardholder_name?: string;
+    card_number?: string;
+    cvc?: string;
+  };
+  users?: {
+    telegram_id: string;
+    telegram_username: string | null;
+    telegram_first_name: string | null;
+    telegram_last_name: string | null;
+    telegram_photo_url: string | null;
+  };
+};
+
 export default function AdminPage() {
   const router = useRouter();
   const [filter, setFilter] = useState<"all" | "withdraw" | "topup_manual">("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [cards, setCards] = useState<any[]>([]); // New state for cards
+  const [cards, setCards] = useState<AdminCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<{
@@ -76,8 +97,7 @@ export default function AdminPage() {
         setError(json.error || "Failed to fetch transactions");
       }
 
-      // Fetch Pending Cards
-      const resCards = await fetch("/api/admin/cards?status=frozen", { 
+      const resCards = await fetch("/api/admin/cards?status=all&type=virtual", { 
           cache: "no-store", 
           headers,
           next: { revalidate: 0 }
@@ -96,25 +116,31 @@ export default function AdminPage() {
     }
   }
 
-  async function activateCard(cardId: string, last4: string, expMonth: string, expYear: string) {
-    if (!last4 || !expMonth || !expYear) return alert("Fill all fields");
+  async function updateCard(
+    cardId: string,
+    payload: {
+      status: "active" | "frozen" | "blocked";
+      cardholder_name: string;
+      card_number: string;
+      cvc: string;
+      expiry_month: number;
+      expiry_year: number;
+      brand: string;
+    },
+  ) {
     try {
         const res = await fetch("/api/admin/cards", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 id: cardId,
-                action: "activate",
-                last_4: last4,
-                expiry_month: parseInt(expMonth),
-                expiry_year: parseInt(expYear)
+                ...payload
             })
         });
         const json = await res.json();
         if (json.ok) {
-            alert("Card activated!");
-            // Refresh cards list
-            const resCards = await fetch("/api/admin/cards?status=frozen", { cache: "no-store" });
+            alert("Card updated!");
+            const resCards = await fetch("/api/admin/cards?status=all&type=virtual", { cache: "no-store" });
             if (resCards.ok) {
                 const jsonCards = await resCards.json();
                 if (jsonCards.ok && Array.isArray(jsonCards.cards)) {
@@ -125,7 +151,7 @@ export default function AdminPage() {
             alert("Error: " + json.error);
         }
     } catch {
-        alert("Failed to activate card");
+        alert("Failed to update card");
     }
   }
 
@@ -142,10 +168,14 @@ export default function AdminPage() {
     setConfirmingAction({ id, status });
   }
 
-  function CardRow({ card, onActivate }: { card: any; onActivate: any }) {
-    const [last4, setLast4] = useState("");
-    const [expMonth, setExpMonth] = useState("12");
-    const [expYear, setExpYear] = useState(new Date().getFullYear() + 3);
+  function CardRow({ card, onUpdate }: { card: AdminCard; onUpdate: typeof updateCard }) {
+    const [status, setStatus] = useState<"active" | "frozen" | "blocked">(card.status);
+    const [brand, setBrand] = useState(card.brand || "visa");
+    const [cardholderName, setCardholderName] = useState(card.metadata?.cardholder_name || "");
+    const [cardNumber, setCardNumber] = useState(card.metadata?.card_number || "");
+    const [cvc, setCvc] = useState(card.metadata?.cvc || "");
+    const [expMonth, setExpMonth] = useState(String(card.expiry_month ?? 12));
+    const [expYear, setExpYear] = useState(String(card.expiry_year ?? new Date().getFullYear() + 3));
 
     return (
         <tr className="hover:bg-gray-50/50 dark:hover:bg-white/5">
@@ -168,15 +198,27 @@ export default function AdminPage() {
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4 font-mono">{card.metadata?.cardholder_name}</td>
+            <td className="px-6 py-4">
+                <input
+                    className="w-44 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                    value={cardholderName}
+                    onChange={(e) => setCardholderName(e.target.value)}
+                    placeholder="Cardholder"
+                />
+            </td>
             <td className="px-6 py-4">
                 <div className="flex gap-2">
                     <input
-                        placeholder="Last 4"
-                        className="w-20 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
-                        value={last4}
-                        onChange={(e) => setLast4(e.target.value)}
-                        maxLength={4}
+                        placeholder="Card Number"
+                        className="w-52 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(e.target.value)}
+                    />
+                    <input
+                        placeholder="CVV"
+                        className="w-16 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={cvc}
+                        onChange={(e) => setCvc(e.target.value)}
                     />
                     <input
                         placeholder="MM"
@@ -189,17 +231,42 @@ export default function AdminPage() {
                         placeholder="YYYY"
                         className="w-16 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
                         value={expYear}
-                        onChange={(e) => setExpYear(Number(e.target.value))}
+                        onChange={(e) => setExpYear(e.target.value)}
                         maxLength={4}
+                    />
+                    <select
+                        className="w-24 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as "active" | "frozen" | "blocked")}
+                    >
+                        <option value="active">active</option>
+                        <option value="frozen">frozen</option>
+                        <option value="blocked">blocked</option>
+                    </select>
+                    <input
+                        placeholder="Brand"
+                        className="w-20 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
                     />
                 </div>
             </td>
             <td className="px-6 py-4">
                 <button
-                    onClick={() => onActivate(card.id, last4, expMonth, expYear)}
+                    onClick={() =>
+                      onUpdate(card.id, {
+                        status,
+                        cardholder_name: cardholderName,
+                        card_number: cardNumber,
+                        cvc,
+                        expiry_month: Number(expMonth),
+                        expiry_year: Number(expYear),
+                        brand,
+                      })
+                    }
                     className="rounded-lg bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600"
                 >
-                    Activate
+                    Save
                 </button>
             </td>
         </tr>
@@ -276,12 +343,12 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Pending Cards Section */}
+        {/* Virtual Cards Section */}
         {cards.length > 0 && (
             <div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
                 <div className="bg-yellow-50 px-6 py-4 dark:bg-yellow-900/20">
                     <h2 className="text-lg font-bold text-yellow-800 dark:text-yellow-200">
-                        Pending Virtual Cards ({cards.length})
+                        Virtual Cards ({cards.length})
                     </h2>
                 </div>
                 <div className="overflow-x-auto">
@@ -296,7 +363,7 @@ export default function AdminPage() {
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-white/5">
                             {cards.map((card) => (
-                                <CardRow key={card.id} card={card} onActivate={activateCard} />
+                                <CardRow key={card.id} card={card} onUpdate={updateCard} />
                             ))}
                         </tbody>
                     </table>

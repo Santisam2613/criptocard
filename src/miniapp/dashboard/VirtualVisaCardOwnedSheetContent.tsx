@@ -26,10 +26,7 @@ export default function VirtualVisaCardOwnedSheetContent({
   expiryMonth,
   expiryYear,
   rightBadge,
-  onToggleLock,
-  onReplace,
 }: VirtualVisaCardOwnedSheetContentProps) {
-  const isLocked = status !== "active";
   const badgeLabel = status === "active" ? "Active" : status === "frozen" ? "Locked" : "Blocked";
   const badgeDotClass =
     status === "active"
@@ -37,28 +34,14 @@ export default function VirtualVisaCardOwnedSheetContent({
       : status === "frozen"
         ? "bg-yellow-600 dark:bg-yellow-300"
         : "bg-red-600 dark:bg-red-300";
-  const badgeClass =
-    status === "active"
-      ? "bg-emerald-500/15 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/20"
-      : status === "frozen"
-        ? "bg-yellow-500/15 text-yellow-800 ring-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-200 dark:ring-yellow-500/20"
-        : "bg-red-500/15 text-red-800 ring-red-500/20 dark:bg-red-500/10 dark:text-red-200 dark:ring-red-500/20";
-  const lockButtonLabel = isLocked ? "Unlock Card" : "Lock Card";
-  const lockButtonDisabled = status === "blocked";
 
   const [isFlipped, setIsFlipped] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [cvvLoading, setCvvLoading] = useState(false);
   const [cvv, setCvv] = useState<string | null>(null);
   const [pan, setPan] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!detailsVisible) return;
-    const t = window.setTimeout(() => {
-      setDetailsVisible(false);
-    }, 30_000);
-    return () => window.clearTimeout(t);
-  }, [detailsVisible]);
+  const [detailsExpMonth, setDetailsExpMonth] = useState<number | null>(null);
+  const [detailsExpYear, setDetailsExpYear] = useState<number | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -88,11 +71,13 @@ export default function VirtualVisaCardOwnedSheetContent({
         cache: "no-store",
       });
       const json = (await res.json().catch(() => null)) as
-        | { ok: boolean; cvc?: string | null; number?: string | null; error?: string }
+        | { ok: boolean; cvc?: string | null; number?: string | null; expMonth?: number | null; expYear?: number | null; error?: string }
         | null;
       if (!json?.ok) return;
       setCvv(json.cvc ?? null);
       setPan(json.number ?? null);
+      setDetailsExpMonth(json.expMonth ?? null);
+      setDetailsExpYear(json.expYear ?? null);
     } finally {
       setCvvLoading(false);
     }
@@ -106,6 +91,9 @@ export default function VirtualVisaCardOwnedSheetContent({
     if (!cvv || !pan) await ensureDetails();
     setDetailsVisible(true);
   }
+
+  const displayExpiryMonth = detailsExpMonth ?? expiryMonth;
+  const displayExpiryYear = detailsExpYear ?? expiryYear;
 
   return (
     <div className="px-6 pt-4 pb-7 text-zinc-950 dark:text-white">
@@ -196,13 +184,21 @@ export default function VirtualVisaCardOwnedSheetContent({
               <div className="absolute left-0 top-6 h-10 w-full bg-zinc-900" />
 
               <div className="mt-16 flex h-full flex-col">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 h-8 bg-white/40 rounded flex items-center justify-end px-3">
                     <span className="font-mono text-sm font-bold text-black italic">
-                      {detailsVisible && cvv ? cvv : "•••"}
+                      {detailsVisible ? (cvvLoading ? "..." : cvv || "•••") : "•••"}
                     </span>
                   </div>
-                  <div className="text-[8px] font-bold uppercase text-black/60">CVV</div>
+                  <div className="text-right">
+                    <div className="text-[8px] font-bold uppercase text-black/60">CVV</div>
+                    <div className="mt-1 text-[8px] font-bold uppercase tracking-wider text-black/50">
+                      Expires
+                    </div>
+                    <div className="font-mono font-bold text-black text-xs">
+                      {formatExpiry(displayExpiryMonth, displayExpiryYear)}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-auto">
@@ -260,7 +256,7 @@ export default function VirtualVisaCardOwnedSheetContent({
                         Expires
                       </div>
                       <div className="font-mono font-bold text-black text-sm">
-                        {formatExpiry(expiryMonth, expiryYear)}
+                        {formatExpiry(displayExpiryMonth, displayExpiryYear)}
                       </div>
                     </div>
                   </div>
@@ -282,23 +278,6 @@ export default function VirtualVisaCardOwnedSheetContent({
         {rightBadge}
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-yellow-500 text-sm font-bold text-black shadow-lg shadow-yellow-500/25 transition-transform hover:-translate-y-0.5 hover:bg-yellow-400 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
-          onClick={onToggleLock}
-          disabled={lockButtonDisabled}
-        >
-          {lockButtonLabel}
-        </button>
-        <button
-          type="button"
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-gray-100 text-sm font-bold text-zinc-900 ring-1 ring-black/5 transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:bg-white/10 dark:text-white dark:ring-white/10"
-          onClick={onReplace}
-        >
-          Replace Card
-        </button>
-      </div>
     </div>
   );
 }

@@ -245,7 +245,7 @@ export default function TopUpPage() {
 
       openNotice({
         title: "Solicitud Recibida",
-        message: "Hemos registrado tu solicitud de recarga. Un administrador verificará tu transferencia y acreditará el saldo en breve.",
+        message: "Tu recarga y activación de la tarjeta virtual está en proceso. Te notificaremos cuando todo esté hecho.",
         confirmLabel: "Entendido",
         onClose: () => {
           setManualStep(null);
