@@ -72,20 +72,21 @@ export async function processFirstTopup(
     const expiryMonth = 12;
     const expiryYear = new Date().getFullYear() + 3;
 
-    // Insert Card
+    // Insert Card (Frozen/Inactive for manual review)
     const { error: cardError } = await supabase.from("cards").insert({
       id: cardId,
       user_id: userId,
       type: "virtual",
-      status: "active",
-      last_4: last4,
-      expiry_month: expiryMonth,
-      expiry_year: expiryYear,
+      status: "frozen", // Wait for admin manual review
+      last_4: null, // No data yet
+      expiry_month: null,
+      expiry_year: null,
       brand: "visa",
       currency: "USD",
       metadata: {
         cardholder_name: cardholderName,
         auto_purchased: true,
+        pending_admin_review: true,
       },
     });
 

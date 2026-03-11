@@ -29,6 +29,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [filter, setFilter] = useState<"all" | "withdrawal" | "topup_manual">("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [cards, setCards] = useState<any[]>([]); // New state for cards
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<{
@@ -44,27 +45,72 @@ export default function AdminPage() {
     try {
       setLoading(true);
       setError(null);
+      
+      // Fetch Transactions
       const url = filter === "all" 
         ? "/api/admin/transactions" 
         : `/api/admin/transactions?type=${filter}`;
-        
       const res = await fetch(url, { cache: "no-store" });
       
       if (res.status === 401) {
-        setError("Unauthorized: Please access via Telegram or check your credentials.");
-        return;
+         setError("Unauthorized: Please access via Telegram or check your credentials.");
+         setLoading(false);
+         return;
       }
 
       const json = await res.json();
       if (json.ok) {
         setTransactions(json.transactions);
       } else {
-        setError(json.error || "Failed to fetch");
+        setError(json.error || "Failed to fetch transactions");
       }
+
+      // Fetch Pending Cards
+      const resCards = await fetch("/api/admin/cards?status=frozen", { cache: "no-store" });
+      if (resCards.ok) {
+          const jsonCards = await resCards.json();
+          if (jsonCards.ok && Array.isArray(jsonCards.cards)) {
+              setCards(jsonCards.cards);
+          }
+      }
+
     } catch (e) {
       setError("Error fetching data");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function activateCard(cardId: string, last4: string, expMonth: string, expYear: string) {
+    if (!last4 || !expMonth || !expYear) return alert("Fill all fields");
+    try {
+        const res = await fetch("/api/admin/cards", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: cardId,
+                action: "activate",
+                last_4: last4,
+                expiry_month: parseInt(expMonth),
+                expiry_year: parseInt(expYear)
+            })
+        });
+        const json = await res.json();
+        if (json.ok) {
+            alert("Card activated!");
+            // Refresh cards list
+            const resCards = await fetch("/api/admin/cards?status=frozen", { cache: "no-store" });
+            if (resCards.ok) {
+                const jsonCards = await resCards.json();
+                if (jsonCards.ok && Array.isArray(jsonCards.cards)) {
+                    setCards(jsonCards.cards);
+                }
+            }
+        } else {
+            alert("Error: " + json.error);
+        }
+    } catch {
+        alert("Failed to activate card");
     }
   }
 
@@ -80,6 +126,71 @@ export default function AdminPage() {
   function requestUpdate(id: string, status: "completed" | "rejected") {
     setConfirmingAction({ id, status });
   }
+
+  function CardRow({ card, onActivate }: { card: any; onActivate: any }) {
+    const [last4, setLast4] = useState("");
+    const [expMonth, setExpMonth] = useState("12");
+    const [expYear, setExpYear] = useState(new Date().getFullYear() + 3);
+
+    return (
+        <tr className="hover:bg-gray-50/50 dark:hover:bg-white/5">
+            <td className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                    {card.users?.telegram_photo_url && (
+                        <Image
+                            src={card.users.telegram_photo_url}
+                            alt=""
+                            width={32}
+                            height={32}
+                            className="h-8 w-8 rounded-full bg-gray-200 object-cover"
+                        />
+                    )}
+                    <div>
+                        <div className="font-semibold">
+                            {card.users?.telegram_first_name} {card.users?.telegram_last_name}
+                        </div>
+                        <div className="text-xs text-gray-500">@{card.users?.telegram_username}</div>
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-4 font-mono">{card.metadata?.cardholder_name}</td>
+            <td className="px-6 py-4">
+                <div className="flex gap-2">
+                    <input
+                        placeholder="Last 4"
+                        className="w-20 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={last4}
+                        onChange={(e) => setLast4(e.target.value)}
+                        maxLength={4}
+                    />
+                    <input
+                        placeholder="MM"
+                        className="w-12 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={expMonth}
+                        onChange={(e) => setExpMonth(e.target.value)}
+                        maxLength={2}
+                    />
+                    <input
+                        placeholder="YYYY"
+                        className="w-16 rounded border px-2 py-1 text-xs dark:bg-black dark:border-zinc-700"
+                        value={expYear}
+                        onChange={(e) => setExpYear(Number(e.target.value))}
+                        maxLength={4}
+                    />
+                </div>
+            </td>
+            <td className="px-6 py-4">
+                <button
+                    onClick={() => onActivate(card.id, last4, expMonth, expYear)}
+                    className="rounded-lg bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600"
+                >
+                    Activate
+                </button>
+            </td>
+        </tr>
+    );
+}
+
 
   async function performUpdate() {
     if (!confirmingAction) return;
@@ -149,6 +260,34 @@ export default function AdminPage() {
             Withdrawals
           </button>
         </div>
+
+        {/* Pending Cards Section */}
+        {cards.length > 0 && (
+            <div className="mb-8 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
+                <div className="bg-yellow-50 px-6 py-4 dark:bg-yellow-900/20">
+                    <h2 className="text-lg font-bold text-yellow-800 dark:text-yellow-200">
+                        Pending Virtual Cards ({cards.length})
+                    </h2>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-zinc-800/50 dark:text-gray-400">
+                            <tr>
+                                <th className="px-6 py-4">User</th>
+                                <th className="px-6 py-4">Cardholder</th>
+                                <th className="px-6 py-4">Details</th>
+                                <th className="px-6 py-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                            {cards.map((card) => (
+                                <CardRow key={card.id} card={card} onActivate={activateCard} />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )}
 
         {error && (
           <div className="mb-4 rounded-xl bg-red-100 p-4 text-red-800 dark:bg-red-900/30 dark:text-red-300">
