@@ -11,7 +11,13 @@ export async function GET(req: Request) {
     // TODO: Verify if telegramId is actually an admin
     
     const { searchParams } = new URL(req.url);
-    const typeFilter = searchParams.get("type"); // 'withdrawal' | 'topup_manual' | null
+    const rawTypeFilter = searchParams.get("type");
+    const typeFilter =
+      rawTypeFilter === "withdrawal"
+        ? "withdraw"
+        : rawTypeFilter === "withdraw" || rawTypeFilter === "topup_manual"
+          ? rawTypeFilter
+          : null;
 
     const supabase = getSupabaseAdminClient();
 
@@ -24,7 +30,7 @@ export async function GET(req: Request) {
         status,
         type,
         metadata,
-        users (
+        users!user_id (
           telegram_id,
           telegram_username,
           telegram_first_name,
@@ -35,10 +41,10 @@ export async function GET(req: Request) {
       .order("created_at", { ascending: false })
       .limit(50);
 
-    if (typeFilter && ["withdrawal", "topup_manual"].includes(typeFilter)) {
+    if (typeFilter) {
       query = query.eq("type", typeFilter);
     } else {
-      query = query.in("type", ["withdrawal", "topup_manual"]);
+      query = query.in("type", ["withdraw", "topup_manual"]);
     }
 
     const { data: txs, error } = await query;

@@ -9,7 +9,7 @@ type Transaction = {
   created_at: string;
   amount_usdt: number;
   status: "pending" | "completed" | "rejected";
-  type: "withdrawal" | "topup_manual";
+  type: "withdraw" | "topup_manual";
   metadata: {
     address?: string;
     network?: string;
@@ -27,7 +27,7 @@ type Transaction = {
 
 export default function AdminPage() {
   const router = useRouter();
-  const [filter, setFilter] = useState<"all" | "withdrawal" | "topup_manual">("all");
+  const [filter, setFilter] = useState<"all" | "withdraw" | "topup_manual">("all");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [cards, setCards] = useState<any[]>([]); // New state for cards
   const [loading, setLoading] = useState(true);
@@ -265,9 +265,9 @@ export default function AdminPage() {
             Deposits
           </button>
           <button
-            onClick={() => setFilter("withdrawal")}
+            onClick={() => setFilter("withdraw")}
             className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
-              filter === "withdrawal"
+              filter === "withdraw"
                 ? "bg-black text-white dark:bg-white dark:text-black"
                 : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-zinc-700"
             }`}
@@ -370,7 +370,7 @@ export default function AdminPage() {
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 font-mono font-medium">
-                        {t.type === "withdrawal" ? "-" : "+"}
+                        {t.type === "withdraw" ? "-" : "+"}
                         {Math.abs(t.amount_usdt).toFixed(2)} USDT
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-gray-500">

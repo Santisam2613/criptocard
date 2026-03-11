@@ -10,14 +10,17 @@ export async function GET(req: Request) {
     // TODO: Verify admin
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status") || "frozen";
+    const rawStatus = searchParams.get("status");
+    const status = rawStatus === "active" || rawStatus === "frozen" || rawStatus === "blocked"
+      ? rawStatus
+      : "frozen";
 
     const supabase = getSupabaseAdminClient();
     const { data: cards, error } = await supabase
       .from("cards")
       .select(`
         *,
-        users (
+        users!user_id (
           telegram_id,
           telegram_first_name,
           telegram_last_name,
