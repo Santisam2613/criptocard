@@ -3,6 +3,7 @@ import { useBackendUser } from "@/miniapp/hooks/useBackendUser";
 
 export type TransactionType =
   | "topup"
+  | "topup_manual"
   | "transfer"
   | "withdraw"
   | "referral_conversion"
