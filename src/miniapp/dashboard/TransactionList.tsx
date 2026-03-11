@@ -11,6 +11,7 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
 
   switch (type) {
     case "topup":
+    case "topup_manual":
       return (
         <div className={baseClass}>
           <svg
@@ -19,6 +20,8 @@ function TransactionIcon({ type }: { type: Transaction["type"] }) {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -143,6 +146,7 @@ function getTransactionTitle(tx: Transaction, t: (path: string) => string) {
   // 2. Prioridad: Tipos específicos
   switch (tx.type) {
     case "topup":
+    case "topup_manual":
       return t("tx.title.topup");
     case "transfer":
       // Si hay un nombre de contraparte en metadata, usarlo
@@ -232,7 +236,9 @@ export default function TransactionList() {
         {pageItems.map((tx) => {
         const isPositive = tx.amount_usdt > 0;
         const formattedDate = format(new Date(tx.created_at), "dd MMM, HH:mm");
-        const statusLabel = tx.type === "withdraw" ? getStatusLabel(tx.status, t) : null;
+        // Show status for withdrawals and manual topups, or if pending
+        const showStatus = tx.type === "withdraw" || tx.type === "topup_manual" || tx.status === "pending";
+        const statusLabel = showStatus ? getStatusLabel(tx.status, t) : null;
         
         return (
           <div

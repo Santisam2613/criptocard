@@ -48,6 +48,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, error: "DB Error" }, { status: 500 });
     }
 
+    // Add logging to debug
+    console.log(`Fetched ${txs?.length} transactions. Filter: ${typeFilter || "all"}`);
+    
     return NextResponse.json({ ok: true, transactions: txs });
   } catch (e) {
     if (e instanceof UnauthorizedError) {
