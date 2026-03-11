@@ -4,14 +4,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-type Withdrawal = {
+type Transaction = {
   id: string;
   created_at: string;
   amount_usdt: number;
   status: "pending" | "completed" | "rejected";
+  type: "withdrawal" | "topup_manual";
   metadata: {
     address?: string;
     network?: string;
+    currency?: string;
+    description?: string;
   };
   users: {
     telegram_id: string;
@@ -24,7 +27,8 @@ type Withdrawal = {
 
 export default function AdminPage() {
   const router = useRouter();
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+  const [filter, setFilter] = useState<"all" | "withdrawal" | "topup_manual">("all");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<{
@@ -33,16 +37,27 @@ export default function AdminPage() {
   } | null>(null);
 
   useEffect(() => {
-    fetchWithdrawals();
-  }, []);
+    fetchTransactions();
+  }, [filter]);
 
-  async function fetchWithdrawals() {
+  async function fetchTransactions() {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/withdrawals", { cache: "no-store" });
+      setError(null);
+      const url = filter === "all" 
+        ? "/api/admin/transactions" 
+        : `/api/admin/transactions?type=${filter}`;
+        
+      const res = await fetch(url, { cache: "no-store" });
+      
+      if (res.status === 401) {
+        setError("Unauthorized: Please access via Telegram or check your credentials.");
+        return;
+      }
+
       const json = await res.json();
       if (json.ok) {
-        setWithdrawals(json.withdrawals);
+        setTransactions(json.transactions);
       } else {
         setError(json.error || "Failed to fetch");
       }
@@ -57,7 +72,6 @@ export default function AdminPage() {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      // Optional: show a small toast or tooltip
     } catch (err) {
       console.error("Failed to copy", err);
     }
@@ -72,14 +86,14 @@ export default function AdminPage() {
     const { id, status } = confirmingAction;
 
     try {
-      const res = await fetch("/api/admin/withdrawals", {
+      const res = await fetch("/api/admin/transactions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
       });
       const json = await res.json();
       if (json.ok) {
-        await fetchWithdrawals(); // Refresh list
+        await fetchTransactions(); // Refresh list
       } else {
         alert(json.error || "Failed to update");
       }
@@ -92,14 +106,47 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-4 text-zinc-900 dark:bg-black dark:text-white">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Admin Panel - Withdrawals</h1>
+          <h1 className="text-3xl font-bold">Admin Panel - Transactions</h1>
           <button
             onClick={() => router.push("/miniapp")}
             className="rounded-xl bg-gray-200 px-4 py-2 text-sm font-semibold hover:bg-gray-300 dark:bg-zinc-800 dark:hover:bg-zinc-700"
           >
             Exit Admin
+          </button>
+        </div>
+
+        <div className="mb-6 flex gap-2">
+          <button
+            onClick={() => setFilter("all")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+              filter === "all"
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-zinc-700"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter("topup_manual")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+              filter === "topup_manual"
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-zinc-700"
+            }`}
+          >
+            Deposits
+          </button>
+          <button
+            onClick={() => setFilter("withdrawal")}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+              filter === "withdrawal"
+                ? "bg-black text-white dark:bg-white dark:text-black"
+                : "bg-white text-gray-600 hover:bg-gray-50 dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-zinc-700"
+            }`}
+          >
+            Withdrawals
           </button>
         </div>
 
@@ -117,26 +164,37 @@ export default function AdminPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-zinc-800/50 dark:text-gray-400">
                   <tr>
+                    <th className="px-6 py-4 font-semibold">Type</th>
                     <th className="px-6 py-4 font-semibold">Date</th>
                     <th className="px-6 py-4 font-semibold">User</th>
                     <th className="px-6 py-4 font-semibold">Amount</th>
-                    <th className="px-6 py-4 font-semibold">Network</th>
-                    <th className="px-6 py-4 font-semibold">Address</th>
+                    <th className="px-6 py-4 font-semibold">Details</th>
                     <th className="px-6 py-4 font-semibold">Status</th>
                     <th className="px-6 py-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                  {withdrawals.map((w) => (
-                    <tr key={w.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5">
+                  {transactions.map((t) => (
+                    <tr key={t.id} className="hover:bg-gray-50/50 dark:hover:bg-white/5">
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                            t.type === "topup_manual"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                              : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
+                          }`}
+                        >
+                          {t.type === "topup_manual" ? "DEPOSIT" : "WITHDRAWAL"}
+                        </span>
+                      </td>
                       <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-gray-400">
-                        {new Date(w.created_at).toLocaleString()}
+                        {new Date(t.created_at).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {w.users.telegram_photo_url ? (
+                          {t.users.telegram_photo_url ? (
                             <Image
-                              src={w.users.telegram_photo_url}
+                              src={t.users.telegram_photo_url}
                               alt=""
                               width={32}
                               height={32}
@@ -144,78 +202,69 @@ export default function AdminPage() {
                             />
                           ) : (
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-500 dark:bg-zinc-800">
-                              {w.users.telegram_first_name?.[0]}
+                              {t.users.telegram_first_name?.[0]}
                             </div>
                           )}
                           <div>
                             <div className="font-semibold">
-                              {w.users.telegram_first_name} {w.users.telegram_last_name}
+                              {t.users.telegram_first_name} {t.users.telegram_last_name}
                             </div>
                             <div className="text-xs text-gray-500">
-                              @{w.users.telegram_username || "N/A"} (ID: {w.users.telegram_id})
+                              @{t.users.telegram_username || "N/A"}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 font-mono font-medium">
-                        {Math.abs(w.amount_usdt).toFixed(2)} USDT
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4">
-                        <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium dark:bg-zinc-800">
-                          {w.metadata?.network || "Unknown"}
-                        </span>
+                        {t.type === "withdrawal" ? "-" : "+"}
+                        {Math.abs(t.amount_usdt).toFixed(2)} USDT
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-gray-500">
-                        <div className="flex items-center gap-2">
-                          <div className="max-w-[150px] truncate" title={w.metadata?.address}>
-                            {w.metadata?.address || "Unknown"}
-                          </div>
-                          <button
-                            onClick={() => copyToClipboard(w.metadata?.address || "")}
-                            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                            title="Copy Address"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                            </svg>
-                          </button>
+                        <div className="flex flex-col gap-1">
+                          {t.metadata?.network && (
+                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                              {t.metadata.currency} ({t.metadata.network})
+                            </span>
+                          )}
+                          {t.metadata?.address && (
+                            <div className="flex items-center gap-2">
+                              <span className="max-w-[120px] truncate" title={t.metadata.address}>
+                                {t.metadata.address}
+                              </span>
+                              <button
+                                onClick={() => copyToClipboard(t.metadata.address || "")}
+                                className="text-gray-400 hover:text-gray-600"
+                              >
+                                📋
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            w.status === "completed"
+                            t.status === "completed"
                               ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                              : w.status === "rejected"
+                              : t.status === "rejected"
                                 ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
                                 : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                           }`}
                         >
-                          {w.status}
+                          {t.status}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        {w.status === "pending" && (
+                        {t.status === "pending" && (
                           <div className="flex gap-2">
                             <button
-                              onClick={() => requestUpdate(w.id, "completed")}
+                              onClick={() => requestUpdate(t.id, "completed")}
                               className="rounded-lg bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600"
                             >
                               Approve
                             </button>
                             <button
-                              onClick={() => requestUpdate(w.id, "rejected")}
+                              onClick={() => requestUpdate(t.id, "rejected")}
                               className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600"
                             >
                               Reject
@@ -225,10 +274,10 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
-                  {withdrawals.length === 0 && (
+                  {transactions.length === 0 && (
                     <tr>
                       <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                        No withdrawals found.
+                        No transactions found.
                       </td>
                     </tr>
                   )}
@@ -244,8 +293,8 @@ export default function AdminPage() {
               <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Confirm Action</h3>
               <p className="mt-2 text-sm text-zinc-600 dark:text-gray-300">
                 {confirmingAction.status === "completed"
-                  ? "Are you sure you want to APPROVE this withdrawal? This action cannot be undone."
-                  : "Are you sure you want to REJECT this withdrawal? The funds will not be returned automatically."}
+                  ? "Are you sure you want to APPROVE this transaction? Balance will be updated."
+                  : "Are you sure you want to REJECT this transaction?"}
               </p>
               <div className="mt-6 flex justify-end gap-3">
                 <button

@@ -22,6 +22,8 @@ export type BackendUser = {
   verified_at: string | null;
   balance_usdt: number;
   role: "client" | "admin";
+  has_topup: boolean;
+  has_virtual_card: boolean;
 };
 
 type BackendUserState =

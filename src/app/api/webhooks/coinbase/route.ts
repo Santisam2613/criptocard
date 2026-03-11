@@ -7,6 +7,8 @@ export const runtime = "nodejs";
 
 const WEBHOOK_SECRET = process.env.COINBASE_COMMERCE_WEBHOOK_SECRET;
 
+import { processFirstTopup } from "@/lib/transactions/processFirstTopup";
+
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
@@ -94,6 +96,10 @@ export async function POST(req: Request) {
       console.log(
         `Topup processed successfully for user ${userId}, amount ${amount}`,
       );
+      
+      // Auto-purchase virtual card if first topup
+      // Run in background (fire and forget for webhook response speed)
+      processFirstTopup(supabase, userId, amount).catch(console.error);
     }
 
     return NextResponse.json({ ok: true });

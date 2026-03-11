@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import BottomSheet from "@/components/ui/BottomSheet";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import NoticeDialog from "@/components/ui/NoticeDialog";
+import PromotionalSheet from "@/components/ui/PromotionalSheet";
 import Skeleton from "@/components/ui/Skeleton";
 import SettingsSheetContent from "@/miniapp/dashboard/SettingsSheetContent";
 import SendSheetContent from "@/miniapp/dashboard/SendSheetContent";
@@ -81,6 +82,36 @@ export default function DashboardView() {
   const isVirtualAccountsComingSoon = true;
   const isCashbackComingSoon = true;
   const isApproved = state.status === "ready" && user?.verification_status === "approved";
+
+  // Promotional Popups
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoType, setPromoType] = useState<"topup" | "card" | null>(null);
+  const promoShownRef = useRef(false);
+
+  useEffect(() => {
+    if (state.status !== "ready" || !user) return;
+    if (promoShownRef.current) return;
+    
+    // Si no está verificado, no mostramos nada
+    if (user.verification_status !== "approved") return;
+
+    const t = setTimeout(() => {
+      // Prioridad 1: Recarga (si no tiene topup)
+      if (!user.has_topup) {
+        setPromoType("topup");
+        setPromoOpen(true);
+        promoShownRef.current = true;
+      } 
+      // Prioridad 2: Tarjeta (si tiene topup pero no tarjeta)
+      else if (!user.has_virtual_card) {
+        setPromoType("card");
+        setPromoOpen(true);
+        promoShownRef.current = true;
+      }
+    }, 1500); // 1.5 segundos de delay
+
+    return () => clearTimeout(t);
+  }, [state.status, user]);
 
   useEffect(() => {
     if (state.status !== "ready") return;
@@ -346,6 +377,48 @@ export default function DashboardView() {
           confirmLabel={noticeLabel}
           onClose={() => setNoticeOpen(false)}
         />
+        
+        {/* Promotional Sheet */}
+        <PromotionalSheet
+          isOpen={promoOpen}
+          onClose={() => setPromoOpen(false)}
+          title={
+            promoType === "topup"
+              ? "¡Activa tu cuenta!"
+              : "¡Tu Tarjeta te espera!"
+          }
+          description={
+            promoType === "topup"
+              ? "Realiza tu primera recarga para desbloquear todas las funciones y empezar a usar tus criptos."
+              : "Ya tienes saldo. Ahora obtén tu Tarjeta Virtual Visa y gasta en cualquier lugar del mundo."
+          }
+          buttonText={
+            promoType === "topup"
+              ? "Recargar Ahora"
+              : "Obtener Tarjeta"
+          }
+          onAction={() => {
+            setPromoOpen(false);
+            if (promoType === "topup") {
+              setSheet("topup");
+            } else {
+              setSheet("virtual");
+            }
+          }}
+          icon={
+            promoType === "topup" ? (
+              <svg className="h-10 w-10 text-yellow-600 dark:text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20M2 12h20" />
+              </svg>
+            ) : (
+              <svg className="h-10 w-10 text-yellow-600 dark:text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+            )
+          }
+        />
+
         <SumsubWebSdkModal
           open={kycOpen}
           onClose={() => setKycOpen(false)}
@@ -774,6 +847,14 @@ export default function DashboardView() {
               }
               if (virtualCardLoading) return;
               const price = Number(virtualCardPrice ?? 30);
+              const balance = user?.balance_usdt ?? 0;
+
+              if (balance < price) {
+                setSheet(null);
+                router.push("/miniapp/topup");
+                return;
+              }
+
               openConfirm({
                 title: t("visaCard.buy.confirmTitle"),
                 message: `${t("visaCard.buy.confirmMessagePrefix")} ${formatUsdt(price)} USDT?`,
