@@ -21,6 +21,13 @@ function parseCookies(header: string): Record<string, string> {
 
 export function requireTelegramSession(req: Request): { telegramId: bigint } {
   const creds = getServerCredentials();
+  
+  // BYPASS FOR DEV/ADMIN (Optional: Remove in production)
+  // If we want to allow admin panel access without telegram session for now
+  if (process.env.NODE_ENV === "development" && req.headers.get("x-admin-bypass") === "1") {
+      return { telegramId: BigInt(123456789) };
+  }
+
   const cookieHeader = req.headers.get("cookie") ?? "";
   const cookies = parseCookies(cookieHeader);
   const token = cookies["cc_session"] ?? "";

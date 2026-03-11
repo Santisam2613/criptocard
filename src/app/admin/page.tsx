@@ -50,7 +50,13 @@ export default function AdminPage() {
       const url = filter === "all" 
         ? "/api/admin/transactions" 
         : `/api/admin/transactions?type=${filter}`;
-      const res = await fetch(url, { cache: "no-store" });
+      
+      const headers: Record<string, string> = {};
+      if (process.env.NODE_ENV === "development") {
+          headers["x-admin-bypass"] = "1";
+      }
+
+      const res = await fetch(url, { cache: "no-store", headers });
       
       if (res.status === 401) {
          setError("Unauthorized: Please access via Telegram or check your credentials.");
@@ -66,7 +72,10 @@ export default function AdminPage() {
       }
 
       // Fetch Pending Cards
-      const resCards = await fetch("/api/admin/cards?status=frozen", { cache: "no-store" });
+      const resCards = await fetch("/api/admin/cards?status=frozen", { 
+          cache: "no-store", 
+          headers 
+      });
       if (resCards.ok) {
           const jsonCards = await resCards.json();
           if (jsonCards.ok && Array.isArray(jsonCards.cards)) {

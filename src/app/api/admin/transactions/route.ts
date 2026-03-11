@@ -51,6 +51,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, transactions: txs });
   } catch (e) {
     if (e instanceof UnauthorizedError) {
+      // In development, allow bypass if needed, or just return 401
+      // return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+      
+      // TEMPORARY FIX: If we are in admin panel via browser, we might not have initData.
+      // For now, let's log and return 401, but the frontend should handle it.
+      console.warn("Unauthorized admin access attempt:", e);
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     console.error("Admin API error:", e);
