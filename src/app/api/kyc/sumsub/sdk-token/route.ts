@@ -34,14 +34,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 
-  const levelName = creds.sumsub.levelName;
-  if (!levelName) {
-    return NextResponse.json(
-      { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },
-      { status: 500 },
-    );
-  }
-
   let supabase: ReturnType<typeof getSupabaseAdminClient>;
   try {
     supabase = getSupabaseAdminClient();
@@ -61,6 +53,37 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { ok: false, error: "Usuario no encontrado" },
       { status: 404 },
+    );
+  }
+
+  if (!creds.sumsub.live) {
+    const { error: approveError } = await supabase
+      .from("users")
+      .update({
+        verification_status: "approved",
+        verification_completed: true,
+        verified_at: new Date().toISOString(),
+      })
+      .eq("id", userRow.id);
+
+    if (approveError) {
+      return NextResponse.json(
+        { ok: false, error: "No se pudo aprobar KYC localmente" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(
+      { ok: true, bypass: true },
+      { status: 200 },
+    );
+  }
+
+  const levelName = creds.sumsub.levelName;
+  if (!levelName) {
+    return NextResponse.json(
+      { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },
+      { status: 500 },
     );
   }
 

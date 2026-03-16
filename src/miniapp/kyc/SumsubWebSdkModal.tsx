@@ -32,19 +32,25 @@ function loadSumsubWebSdkScript(): Promise<void> {
   return webSdkScriptPromise;
 }
 
-async function fetchSdkToken(): Promise<{ token: string; userId: string }> {
+async function fetchSdkToken(): Promise<
+  | { mode: "sumsub"; token: { token: string; userId: string } }
+  | { mode: "bypass" }
+> {
   const res = await fetch("/api/kyc/sumsub/sdk-token", {
     method: "POST",
     credentials: "include",
   });
   const json = (await res.json().catch(() => null)) as
-    | { ok: boolean; error?: string; token?: { token: string; userId: string } }
+    | { ok: boolean; error?: string; bypass?: boolean; token?: { token: string; userId: string } }
     | null;
+  if (json?.ok && json.bypass) {
+    return { mode: "bypass" };
+  }
   if (!json?.ok || !json.token) {
     const msg = json?.error ?? "KYC_TOKEN_FAILED";
     throw new Error(msg);
   }
-  return json.token;
+  return { mode: "sumsub", token: json.token };
 }
 
 export default function SumsubWebSdkModal(props: {
@@ -102,7 +108,17 @@ export default function SumsubWebSdkModal(props: {
 
     const start = async () => {
       try {
-        const [token] = await Promise.all([fetchSdkToken(), loadSumsubWebSdkScript()]);
+        const tokenResult = await fetchSdkToken();
+        if (cancelled) return;
+
+        if (tokenResult.mode === "bypass") {
+          onCompletedRef.current?.();
+          props.onClose();
+          return;
+        }
+
+        const token = tokenResult.token;
+        await loadSumsubWebSdkScript();
         if (cancelled) return;
 
         type SnsWebSdkInstance = { launch: (selector: string) => void };
@@ -135,7 +151,8 @@ export default function SumsubWebSdkModal(props: {
         const instance = sdk
           .init(token.token, async () => {
             const refreshed = await fetchSdkToken();
-            return refreshed.token;
+            if (refreshed.mode === "bypass") throw new Error("KYC_TOKEN_FAILED");
+            return refreshed.token.token;
           })
           .withConf({
             lang: locale,

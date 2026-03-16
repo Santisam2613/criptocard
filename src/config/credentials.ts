@@ -16,6 +16,7 @@ export type ServerCredentials = {
     serviceRoleKey?: string;
   };
   sumsub: {
+    live: boolean;
     appToken?: string;
     secretKey?: string;
     baseUrl: string;
@@ -58,6 +59,15 @@ function readNumber(name: string, fallback: number): number {
   return n;
 }
 
+function readBoolean(name: string, fallback: boolean): boolean {
+  const raw = readString(name);
+  if (!raw) return fallback;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "1" || normalized === "true") return true;
+  if (normalized === "0" || normalized === "false") return false;
+  throw new Error(`Variable booleana inválida ${name}`);
+}
+
 function readCsv(name: string): string[] | undefined {
   const raw = readString(name);
   if (!raw) return undefined;
@@ -93,6 +103,7 @@ export function getServerCredentials(): ServerCredentials {
       serviceRoleKey: readString("SUPABASE_SERVICE_ROLE_KEY"),
     },
     sumsub: {
+      live: readBoolean("KYC_LIVE", true),
       appToken: readString("SUMSUB_APP_TOKEN"),
       secretKey: readString("SUMSUB_SECRET_KEY"),
       baseUrl: readString("SUMSUB_BASE_URL") ?? "https://api.sumsub.com",

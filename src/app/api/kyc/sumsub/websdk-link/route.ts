@@ -34,14 +34,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 
-  const levelName = creds.sumsub.levelName;
-  if (!levelName) {
-    return NextResponse.json(
-      { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },
-      { status: 500 },
-    );
-  }
-
   type UserRow = {
     id: string;
     telegram_first_name: string | null;
@@ -76,6 +68,52 @@ export async function POST(req: Request) {
     }
   } catch {
     userRow = null;
+  }
+
+  if (!creds.sumsub.live) {
+    if (!userRow) {
+      return NextResponse.json(
+        { ok: false, error: "Usuario no encontrado" },
+        { status: 404 },
+      );
+    }
+
+    try {
+      const supabase = getSupabaseAdminClient();
+      const { error: approveError } = await supabase
+        .from("users")
+        .update({
+          verification_status: "approved",
+          verification_completed: true,
+          verified_at: new Date().toISOString(),
+        })
+        .eq("id", userRow.id);
+
+      if (approveError) {
+        return NextResponse.json(
+          { ok: false, error: "No se pudo aprobar KYC localmente" },
+          { status: 500 },
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: "Supabase no configurado" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json(
+      { ok: true, bypass: true, url: new URL("/miniapp", req.url).toString() },
+      { status: 200 },
+    );
+  }
+
+  const levelName = creds.sumsub.levelName;
+  if (!levelName) {
+    return NextResponse.json(
+      { ok: false, error: "SUMSUB_LEVEL_NAME no configurado" },
+      { status: 500 },
+    );
   }
 
   let applicantId = (userRow?.sumsub_applicant_id as string | null) ?? null;

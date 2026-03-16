@@ -447,19 +447,6 @@ export default function TopUpPage() {
             
             <div className="space-y-3">
               <button 
-                onClick={() => handleSelectMethod("coinbase")}
-                className="flex w-full items-center gap-4 rounded-2xl bg-gray-50 p-4 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white">
-                  <span className="font-bold">C</span>
-                </div>
-                <div className="text-left">
-                  <div className="font-bold">Coinbase Commerce</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Automático, rápido y seguro.</div>
-                </div>
-              </button>
-
-              <button 
                 onClick={() => handleSelectMethod("manual")}
                 className="flex w-full items-center gap-4 rounded-2xl bg-gray-50 p-4 hover:bg-gray-100 dark:bg-zinc-800 dark:hover:bg-zinc-700"
               >
