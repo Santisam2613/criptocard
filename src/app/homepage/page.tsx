@@ -374,11 +374,9 @@ function HeroSection() {
             {t("hero.badge")}
           </div>
           <h1 className="mt-6 max-w-xl text-5xl font-extrabold leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">
-            {t("hero.title.0")}
+            Tarjeta Física y Virtual
             <br />
-            {t("hero.title.1")}
-            <br />
-            {t("hero.title.2")}
+            para usar a nivel global
           </h1>
           <p className="mt-5 max-w-md text-lg leading-relaxed text-zinc-700 dark:text-white/70 sm:text-xl">
             {t("hero.subtitle.0")}
@@ -391,7 +389,7 @@ function HeroSection() {
               <span className="inline-flex h-5 w-5 items-center justify-center">
                 <TelegramIcon />
               </span>
-              {t("hero.ctaTelegram")}
+              Obtener Tarjeta
             </CtaLink>
             <AnchorButton href="#benefits" variant="secondary">
               {t("home.hero.viewBenefits")}
