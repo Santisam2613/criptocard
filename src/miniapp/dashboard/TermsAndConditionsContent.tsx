@@ -1,150 +1,116 @@
-import { useI18n } from "@/i18n/i18n";
-
 export default function TermsAndConditionsContent() {
-  const { locale } = useI18n();
-
-  if (locale === "es") {
-    return (
-      <div className="space-y-4 px-6 pb-8 pt-4 text-left text-sm text-muted">
-        <h2 className="text-xl font-bold text-foreground">Términos de Servicio de CriptoCard</h2>
-        <p>Vigente a partir del 28 de febrero de 2026.</p>
-
-        <p>
-          Estos Términos de Servicio (los "Términos") constituyen un acuerdo vinculante entre tú ("tú" o "tu") y CriptoCard Finance Inc ("CriptoCard", "nosotros", "nos" o "nuestro"), que regula el uso de la plataforma CriptoCard, la billetera digital, los servicios de recarga y las tarjetas virtuales CriptoCard Spend (los "Servicios").
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">1. Descripción del Servicio</h3>
-        <p>
-          CriptoCard ofrece una plataforma que permite a los usuarios gestionar una billetera digital en USDT, recargar saldo mediante criptomonedas y acceder a una tarjeta virtual Visa prepagada para realizar gastos en comercios internacionales.
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">2. Elegibilidad y Registro</h3>
-        <p>
-          Para utilizar los Servicios, debes tener al menos 18 años y residir en una jurisdicción donde operamos. Debes registrarte a través de nuestra Mini App en Telegram y proporcionar información veraz, precisa y completa.
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">3. Verificación de Identidad (KYC)</h3>
-        <p>
-          Para acceder a ciertas funciones, como la emisión de la tarjeta virtual, debes completar un proceso de verificación de identidad (Know Your Customer o KYC). Utilizamos <strong>Sumsub</strong>, un proveedor externo líder, para recopilar y verificar tu documento de identidad y prueba de vida. Al utilizar nuestros servicios, aceptas someterte a este proceso y autorizas a Sumsub a procesar tus datos.
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">4. Recargas y Pagos</h3>
-        <p>
-          Las recargas de saldo en tu billetera CriptoCard se procesan a través de <strong>Coinbase Commerce</strong>.
-        </p>
-        <ul className="list-disc pl-5">
-          <li>Aceptamos depósitos en diversas criptomonedas soportadas por Coinbase Commerce.</li>
-          <li>El saldo se acredita en tu cuenta como USDT (Tether) una vez que la transacción es confirmada en la blockchain.</li>
-          <li>CriptoCard no se hace responsable por retrasos en la red blockchain o errores al enviar fondos a direcciones incorrectas.</li>
-        </ul>
-
-        <h3 className="text-base font-semibold text-foreground">5. Tarjeta Virtual CriptoCard Spend</h3>
-        <p>
-          La Tarjeta es emitida por nuestro socio bancario (vía Stripe Issuing) bajo licencia de Visa.
-        </p>
-        <ul className="list-disc pl-5">
-          <li><strong>Moneda:</strong> La tarjeta está denominada en Dólares Estadounidenses (USD). Al usar tu saldo de USDT para gastos con la tarjeta, se realiza una conversión automática.</li>
-          <li><strong>Límites:</strong> CriptoCard puede imponer límites de gasto diarios o mensuales, los cuales serán visibles en tu panel de control.</li>
-          <li><strong>Uso Prohibido:</strong> No puedes usar la tarjeta para actividades ilegales, juegos de azar, contenido para adultos o cualquier otra categoría prohibida por Visa o nuestros socios bancarios.</li>
-        </ul>
-
-        <h3 className="text-base font-semibold text-foreground">6. Tarifas y Comisiones</h3>
-        <p>
-          El uso de los Servicios está sujeto a las siguientes tarifas (sujetas a cambios con previo aviso):
-        </p>
-        <ul className="list-disc pl-5">
-          <li><strong>Emisión de Tarjeta:</strong> Gratis (o según promoción vigente).</li>
-          <li><strong>Mantenimiento Mensual:</strong> $0.</li>
-          <li><strong>Comisión por Recarga:</strong> 1% (estimado, puede variar según la red).</li>
-          <li><strong>Transacciones Internacionales (no USD):</strong> Hasta 3% por conversión de divisa.</li>
-        </ul>
-
-        <h3 className="text-base font-semibold text-foreground">7. Privacidad</h3>
-        <p>
-          Tu privacidad es importante. Consulta nuestra Política de Privacidad para entender cómo recopilamos, usamos y compartimos tus datos, incluyendo el intercambio con proveedores como Sumsub (KYC), Coinbase (Pagos) y Stripe (Emisión).
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">8. Terminación</h3>
-        <p>
-          Podemos suspender o cerrar tu cuenta en cualquier momento si violas estos Términos, si sospechamos actividad fraudulenta o si lo requieren las autoridades legales.
-        </p>
-
-        <h3 className="text-base font-semibold text-foreground">9. Contacto</h3>
-        <p>
-          Si tienes preguntas sobre estos términos, contáctanos en <a href="mailto:support@criptocard.io" className="text-brand hover:underline">support@criptocard.io</a>.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4 px-6 pb-8 pt-4 text-left text-sm text-muted">
-      <h2 className="text-xl font-bold text-foreground">CriptoCard Service Terms</h2>
-      <p>Effective Date: February 28, 2026.</p>
+      <h2 className="text-xl font-bold text-foreground">Términos de Servicio de Criptocard</h2>
+      <p>Vigente a partir del 28 de febrero de 2026.</p>
 
+      <h3 className="text-base font-semibold text-foreground">1. Identificación de la Entidad Operativa</h3>
       <p>
-        These Service Terms (the "Terms") constitute a binding agreement between you ("you" or "your") and CriptoCard Finance Inc ("CriptoCard", "we", "us", or "our"), governing your use of the CriptoCard platform, digital wallet, top-up services, and CriptoCard Spend virtual cards (the "Services").
-      </p>
-
-      <h3 className="text-base font-semibold text-foreground">1. Service Description</h3>
-      <p>
-        CriptoCard offers a platform that allows users to manage a digital wallet in USDT, top up balance using cryptocurrencies, and access a prepaid Visa virtual card for spending at international merchants.
-      </p>
-
-      <h3 className="text-base font-semibold text-foreground">2. Eligibility and Registration</h3>
-      <p>
-        To use the Services, you must be at least 18 years old and reside in a jurisdiction where we operate. You must register through our Telegram Mini App and provide true, accurate, and complete information.
-      </p>
-
-      <h3 className="text-base font-semibold text-foreground">3. Identity Verification (KYC)</h3>
-      <p>
-        To access certain features, such as virtual card issuance, you must complete an identity verification process (Know Your Customer or KYC). We use <strong>Sumsub</strong>, a leading third-party provider, to collect and verify your identity document and proof of life. By using our services, you agree to undergo this process and authorize Sumsub to process your data.
-      </p>
-
-      <h3 className="text-base font-semibold text-foreground">4. Top-ups and Payments</h3>
-      <p>
-        Balance top-ups to your CriptoCard wallet are processed through <strong>Coinbase Commerce</strong>.
+        Estos Términos de Servicio (los “Términos”) constituyen un acuerdo vinculante entre el usuario (“usted” o “usuario”) y <strong>Criptocard LLC</strong> (en adelante, “Criptocard”).
       </p>
       <ul className="list-disc pl-5">
-        <li>We accept deposits in various cryptocurrencies supported by Coinbase Commerce.</li>
-        <li>Balance is credited to your account as USDT (Tether) once the transaction is confirmed on the blockchain.</li>
-        <li>CriptoCard is not responsible for blockchain network delays or errors in sending funds to incorrect addresses.</li>
+        <li><strong>Nombre legal completo:</strong> Criptocard LLC.</li>
+        <li><strong>Número de registro:</strong>10512896.</li>
       </ul>
-
-      <h3 className="text-base font-semibold text-foreground">5. CriptoCard Spend Virtual Card</h3>
       <p>
-        The Card is issued by our banking partner (via Stripe Issuing) under license from Visa.
+        Criptocard LLC es la única entidad operativa responsable de la prestación de la interfaz tecnológica descrita en estos Términos.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">2. Naturaleza del Servicio y Alcance</h3>
+      <p>
+        Criptocard ofrece una plataforma tecnológica para facilitar la interacción del usuario con servicios financieros prestados por terceros regulados.
+      </p>
+      <p>
+        <strong>Criptocard LLC NO custodia fondos de usuarios.</strong>
+      </p>
+      <p>
+        <strong>Criptocard LLC NO es un banco, institución financiera ni emisor de dinero electrónico.</strong>
+      </p>
+      <p>
+        Criptocard actúa únicamente como proveedor tecnológico (technology provider) y capa de interfaz de usuario.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">3. Proveedores Externos y Responsabilidades Regulatorias</h3>
+      <p>
+        Los servicios financieros asociados a la plataforma son prestados por terceros especializados y regulados, incluyendo:
       </p>
       <ul className="list-disc pl-5">
-        <li><strong>Currency:</strong> The card is denominated in United States Dollars (USD). When using your USDT balance for card expenses, an automatic conversion is performed.</li>
-        <li><strong>Limits:</strong> CriptoCard may impose daily or monthly spending limits, which will be visible in your dashboard.</li>
-        <li><strong>Prohibited Use:</strong> You may not use the card for illegal activities, gambling, adult content, or any other category prohibited by Visa or our banking partners.</li>
+        <li><strong>Verificación de identidad (KYC):</strong> Sumsub.</li>
+        <li><strong>Procesamiento de pagos en criptoactivos:</strong> Coinbase Commerce.</li>
+        <li><strong>Emisión de tarjetas:</strong> Stripe Issuing (bajo licencia de Visa).</li>
       </ul>
-
-      <h3 className="text-base font-semibold text-foreground">6. Fees and Charges</h3>
       <p>
-        Use of the Services is subject to the following fees (subject to change with prior notice):
+        Los fondos y la ejecución de servicios financieros son gestionados por dichos terceros, quienes asumen la responsabilidad regulatoria aplicable conforme a sus licencias y jurisdicciones.
       </p>
+
+      <h3 className="text-base font-semibold text-foreground">4. KYC, AML y Debida Diligencia</h3>
+      <p>
+        Para acceder a funcionalidades específicas, incluyendo servicios relacionados con tarjetas y límites operativos, el usuario deberá completar procesos de verificación de identidad, prevención de lavado de activos (AML) y controles de debida diligencia.
+      </p>
+      <p>
+        El usuario autoriza la verificación y tratamiento de su información por parte de proveedores externos de cumplimiento, incluyendo Sumsub y cualquier otro proveedor que resulte necesario para fines regulatorios, antifraude, sanciones y monitoreo transaccional.
+      </p>
+      <p>
+        Criptocard podrá restringir o suspender funcionalidades cuando el usuario no complete satisfactoriamente los controles KYC/AML o cuando existan alertas de riesgo, fraude o cumplimiento.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">5. Descripción de Funcionalidades de la Plataforma</h3>
       <ul className="list-disc pl-5">
-        <li><strong>Card Issuance:</strong> Free (or per current promotion).</li>
-        <li><strong>Monthly Maintenance:</strong> $0.</li>
-        <li><strong>Top-up Fee:</strong> 1% (estimated, may vary by network).</li>
-        <li><strong>International Transactions (non-USD):</strong> Up to 3% for currency conversion.</li>
+        <li><strong>Wallet visual en USDT:</strong> representación de saldo y movimientos como interfaz; no constituye custodia directa por Criptocard.</li>
+        <li><strong>Recargas vía cripto:</strong> facilitadas a través de pasarelas de terceros (por ejemplo, Coinbase Commerce).</li>
+        <li><strong>Conversión y uso mediante tarjeta virtual:</strong> ejecutados por emisores/procesadores externos autorizados.</li>
       </ul>
 
-      <h3 className="text-base font-semibold text-foreground">7. Privacy</h3>
+      <h3 className="text-base font-semibold text-foreground">6. Tarjeta Virtual</h3>
       <p>
-        Your privacy is important. Please refer to our Privacy Policy to understand how we collect, use, and share your data, including sharing with providers like Sumsub (KYC), Coinbase (Payments), and Stripe (Issuance).
+        La tarjeta virtual disponible en la plataforma es emitida por un partner regulado, a través de Stripe Issuing, bajo licencia de Visa. Criptocard no emite la tarjeta ni actúa como emisor financiero.
+      </p>
+      <p>
+        Las condiciones de uso, aceptación de comercios, restricciones, contracargos y eventos de riesgo pueden depender de políticas del emisor, de la red Visa y de sus proveedores de procesamiento.
       </p>
 
-      <h3 className="text-base font-semibold text-foreground">8. Termination</h3>
+      <h3 className="text-base font-semibold text-foreground">7. Licencias y Descargo Regulatorio</h3>
       <p>
-        We may suspend or terminate your account at any time if you violate these Terms, if we suspect fraudulent activity, or if required by legal authorities.
+        Criptocard LLC no requiere licencia financiera para su actividad principal en la medida en que no custodia fondos de usuarios ni ejecuta directamente actividades financieras reguladas.
+      </p>
+      <p>
+        Todos los servicios regulados son realizados por entidades debidamente licenciadas y autorizadas para operar en sus respectivas jurisdicciones.
       </p>
 
-      <h3 className="text-base font-semibold text-foreground">9. Contact</h3>
+      <h3 className="text-base font-semibold text-foreground">8. Declaración Expresa del Usuario</h3>
       <p>
-        If you have questions about these terms, contact us at <a href="mailto:support@criptocard.io" className="text-brand hover:underline">support@criptocard.io</a>.
+        <strong>El usuario reconoce que Criptocard actúa únicamente como proveedor tecnológico y que los servicios financieros son ofrecidos por terceros regulados.</strong>
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">9. Obligaciones del Usuario</h3>
+      <ul className="list-disc pl-5">
+        <li>Proporcionar información completa, veraz y actualizada.</li>
+        <li>Utilizar la plataforma conforme a la ley y a estos Términos.</li>
+        <li>No utilizar los servicios para actividades ilícitas, fraude, evasión de sanciones o financiamiento indebido.</li>
+        <li>Acatar requerimientos de información adicional para cumplimiento regulatorio y prevención de riesgos.</li>
+      </ul>
+
+      <h3 className="text-base font-semibold text-foreground">10. Riesgos, Disponibilidad y Limitación de Responsabilidad</h3>
+      <p>
+        La disponibilidad de funcionalidades puede variar por jurisdicción, proveedor, red blockchain, mantenimiento técnico o requisitos regulatorios.
+      </p>
+      <p>
+        Criptocard no garantiza continuidad ininterrumpida ni tiempos de procesamiento atribuibles a terceros regulados, redes blockchain o proveedores de infraestructura.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">11. Suspensión o Terminación</h3>
+      <p>
+        Criptocard podrá limitar, suspender o terminar el acceso del usuario cuando exista incumplimiento de estos Términos, señales de riesgo regulatorio, requerimientos legales o decisiones de proveedores externos regulados.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">12. Modificaciones</h3>
+      <p>
+        Criptocard podrá actualizar estos Términos para reflejar cambios regulatorios, operativos o de proveedores externos. La versión vigente será publicada en la plataforma y su uso continuado implicará aceptación.
+      </p>
+
+      <h3 className="text-base font-semibold text-foreground">13. Contacto</h3>
+      <p>
+        Para consultas legales, de cumplimiento o soporte general, contáctenos en <a href="mailto:hola@criptocard.com.co" className="text-brand hover:underline">hola@criptocard.com.co</a>.
       </p>
     </div>
   );
